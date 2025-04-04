@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>保單登記</title>
+</head>
+<body>
+    <h2>更新保單</h2>
+    <form action="/policy/update" method="post">
+        <input type="number" id="updatePolicyNumber" placeholder="保單號碼" required>
+        <input type="number" id="updateInsuranceAmount" placeholder="新保額" required>
+        <input type="number" id="updatePremiumAmount" placeholder="新保費" required>
+        <input type="number" id="updateGrowthRate" placeholder="新成長率" required>
+        <input type="number" id="updateDeclaredInterestRate" placeholder="新公告利率" required>
+        <button type="submit">更新</button>
+    </form>
+
+    <p id="status"></p>
+
+    <script>
+
+    </script>
+</body>
+</html>

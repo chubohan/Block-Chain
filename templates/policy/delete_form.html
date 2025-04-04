@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>測試樣板</title>
+<!-- 連結思源中文及css -->
+<link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
+<link href="/static/imgs/icon.jpg" rel="shortcut icon">
+<link href="/static/css/menu.css" rel="stylesheet"/>  
+<link href="/static/css/main.css" rel="stylesheet"/>  
+<link href="/static/css/JS.css" rel="stylesheet">    
+<!------------------------->
+</head>
+   
+<body>
+    <!--**************************-->
+    <div class="container">    
+        <!--~~~~~~~~~~~~~~~~~-->
+        <div class="header">           
+        </div>        
+        
+        <!--~~~~~~~~~~~~~~~~~-->        
+        <ul id="navigation">        
+            <li><a href="/">返回主頁</a></li> 
+        </ul>
+        
+        <!--~~~~~~~~~~~~~~~~~--> 
+        <div class="content">
+            
+            <h2>刪除保單</h2>
+            
+            <label>保單編號:<input type="number" id="deletePolicyNumber" placeholder="輸入保單號碼"></label>
+            <button onclick="delete_Policy()">刪除</button>
+            <pre id="deleteResult"></pre>
+            <!--
+            <form action="/policy/delete" method="get">
+                <div class="form">
+                    <span class="name">客戶編號</span>
+                    <span class="value">
+                        <input type="text" name="cusno" required>
+                    </span>
+                    <br/>
+             
+                    
+                    <span class="name"></span>
+                    <span class="value"><input type="submit" value="刪除" style="width:80px"></span>
+                </div>
+            </form>
+            -->    
+        </div>   
+         
+        
+        <!--~~~~~~~~~~~~~~~~~--> 
+        <div class="footer">
+            NTUB imd, 2023.
+        </div>  
+    </div>
+    <!--**************************-->    
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+   
+    <script>
+async function delete_Policy() {
+    const policyNumber = document.getElementById("deletePolicyNumber").value;
+    const resultDisplay = document.getElementById("deleteResult");
+
+    if (!policyNumber) {
+        resultDisplay.textContent = "請輸入保單號碼";
+        resultDisplay.classList.add("error-message"); //添加css
+        return;
+    }
+
+    const apiUrl = `http://127.0.0.1:5000/delete_policy/${policyNumber}`;
+    
+    try {
+        resultDisplay.textContent = "處理中...";
+        
+        const response = await fetch(apiUrl, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" }
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+            resultDisplay.textContent = `成功刪除保單 #${policyNumber}\n交易 Hash: ${data.tx_hash}`;
+        } else {
+            throw new Error(data.error || "刪除失敗");
+        }
+    } catch (error) {
+        console.error("發生錯誤:", error);
+        resultDisplay.textContent = `刪除失敗，請確認保單是否存在或已被刪除`;
+        resultDisplay.className = "error-message";//css
+    }
+}
+    </script>    
+   <!--**************************-->       
+</body>
+   
+</html>

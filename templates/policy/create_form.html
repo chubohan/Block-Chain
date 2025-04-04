@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>測試樣板</title>
+<!-- 連結思源中文及css -->
+<link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
+<link href="/static/imgs/icon.jpg" rel="shortcut icon">
+<link href="/static/css/menu.css" rel="stylesheet"/>  
+<link href="/static/css/main.css" rel="stylesheet"/>
+</head>
+<body>
+    <div class="container">    
+        <!--~~~~~~~~~~~~~~~~~-->
+        <div class="header">           
+        </div>        
+        
+        <!--~~~~~~~~~~~~~~~~~-->        
+        <ul id="navigation">        
+            <li><a href="/">返回主頁</a></li> 
+        </ul>
+        
+        <!--~~~~~~~~~~~~~~~~~--> 
+    <h2>新增保單</h2>
+    <form id="policyForm">
+        <label>投保人姓名: <input type="text" id="policyHolder"></label><br>
+        <label>被保險人姓名: <input type="text" id="insuredPerson"></label><br>
+        <label>保險金額: <input type="number" id="insuranceAmount"></label><br>
+        <label>繳費期間(年): <input type="number" id="premiumPeriod"></label><br>
+        <label>保費金額: <input type="number" id="premiumAmount"></label><br>
+        <label>生效日期: <input type="date" id="startDate" value=""></label><br>
+        <label>受益人: <input type="text" id="beneficiary"></label><br>
+        <label>增額比例(%): <input type="number" id="growthRate"></label><br>
+        <label>宣告利率(%): <input type="number" id="declaredInterestRate"></label><br>
+        <button type="submit">提交</button>
+    </form>
+
+    <p id="status"></p>
+
+    <script>
+        document.getElementById("policyForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        let startDateInput = document.getElementById("startDate").value;
+        let startDate = startDateInput ? Math.floor(new Date(startDateInput).getTime() / 1000) : Math.floor(Date.now() / 1000);
+
+        let policyData = {
+            policyHolder: document.getElementById("policyHolder").value,
+            insuredPerson: document.getElementById("insuredPerson").value,
+            insuranceAmount: document.getElementById("insuranceAmount").value,
+            premiumPeriod: document.getElementById("premiumPeriod").value,
+            premiumAmount: document.getElementById("premiumAmount").value,
+            startDate: startDate,  // 轉換後的 Unix Timestamp
+            beneficiary: document.getElementById("beneficiary").value,
+            growthRate: document.getElementById("growthRate").value,
+            declaredInterestRate: document.getElementById("declaredInterestRate").value
+        };
+
+        fetch("http://127.0.0.1:5000/add_policy", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(policyData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("status").textContent = "交易哈希: " + data.tx_hash;
+        })
+        .catch(error => console.error("錯誤:", error));
+    });
+
+    // 預設 startDate 為當天日期
+    document.getElementById("startDate").valueAsDate = new Date();
+
+    </script>
+</body>
+</html>

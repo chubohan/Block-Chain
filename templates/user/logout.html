@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h1>歡迎 {{ user['name'] }}</h1>
+<img src="{{ user['picture'] }}" alt="用戶頭像" width="100">
+<p>Email: {{ user['email'] }}</p>
+<button id="logoutButton">登出</button>
+
+<script>
+// 確保 Google 庫已載入
+if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+    google.accounts.id.disableAutoSelect();
+}
+
+// 改用事件監聽器
+document.getElementById('logoutButton').addEventListener('click', async function() {
+    try {
+        const response = await fetch('/logout', { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include' // 如果需要傳送 cookies
+        });
+        
+        if (response.ok) {
+            window.location.href = '/';
+        } else {
+            console.error('登出失敗:', response.statusText);
+        }
+    } catch (error) {
+        console.error('登出時發生錯誤:', error);
+    }
+});
+</script>
+</body>
+</html>

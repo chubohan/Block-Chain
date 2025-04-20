@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>測試樣板</title>
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
+    <link href="/static/imgs/icon.jpg" rel="shortcut icon">
+    <link href="/static/css/menu.css" rel="stylesheet"/>  
+    <link href="/static/css/main.css" rel="stylesheet"/>      
+</head>
+    <body>
+    <div class="container">
+        <div class="header">           
+        </div>        
+        
+        <ul id="navigation">        
+            <li><a href="/">返回主頁</a></li> 
+        </ul>
+        
+        <div class="content">
+            <h2>樣板畫面</h2>
+
+        <h1>歡迎 {{ user['name'] }}</h1>
+    <img src="{{ user['picture'] }}" alt="用戶頭像" width="100">
+    <p>Email: {{ user['email'] }}</p>
+    <button id="logoutButton">登出</button>
+
+        <script>
+        // 確保 Google 庫已載入
+        if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+            google.accounts.id.disableAutoSelect();
+        }
+
+        // 改用事件監聽器
+        document.getElementById('logoutButton').addEventListener('click', async function() {
+            try {
+                const response = await fetch('/logout', { 
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include' // 如果需要傳送 cookies
+                });
+                
+                if (response.ok) {
+                    window.location.href = '/';
+                } else {
+                    console.error('登出失敗:', response.statusText);
+                }
+            } catch (error) {
+                console.error('登出時發生錯誤:', error);
+            }
+        });
+        </script>
+        </div>
+    </div>
+    </body>
+</html>

@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template,session
 from flask_sqlalchemy import SQLAlchemy
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import hashes
@@ -11,8 +11,16 @@ import json
 import time
 import base64
 import os
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+from flask_cors import CORS
 
 app = Flask(__name__)
+app.secret_key = os.urandom(24)# 設置 session 加密金鑰
+CORS(app)# 允許所有跨域請求
+
+# 從 Google Cloud Console 獲取的客戶端 ID
+GOOGLE_CLIENT_ID = '551019375208-ee9n8eg06kg6v7chg9k8h7p98luc4p63.apps.googleusercontent.com'
 
 # 设置数据库配置
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///keys.db'
@@ -576,6 +584,71 @@ def get_policy(policy_number):
         return jsonify({"error": str(e)}), 500
 
 #-------------------------------------------------
+#使用者介面
+@app.route('/user/customer')
+def user_index():
+    return render_template('user/customer.html') 
+@app.route('/user/admin')
+def admin_index():
+    return render_template('user/admin.html')
+@app.route('/user/login/form')
+def login_form_index():
+    return render_template('user/login_form.html') 
+
+#------------------------------------------------------
+#Google sign in
+@app.route('/auth/google', methods=['POST'])
+def auth_google():
+    print(request.json)
+    token = request.json.get('credential')
+    
+    try:
+        # 驗證 Google ID token
+        idinfo = id_token.verify_oauth2_token(
+            token, 
+            google_requests.Request(),
+            GOOGLE_CLIENT_ID
+        )
+
+        # 檢查 token 是否發給正確的客戶端
+        if idinfo['aud'] != GOOGLE_CLIENT_ID:
+            raise ValueError('Invalid client ID')
+
+        # 提取用戶資訊
+        user_data = {
+            'id': idinfo['sub'],
+            'name': idinfo.get('name'),
+            'email': idinfo.get('email'),
+            'picture': idinfo.get('picture')
+        }
+
+        # 在這裡可以將用戶資料存入資料庫或 session
+        session['user'] = user_data
+
+        return jsonify({
+            'success': True,
+            'user': user_data
+        })
+
+    except ValueError as e:
+        # 無效的 token
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 401
+
+@app.route('/profile')
+def profile():
+    if 'user' not in session:
+        return '請先登入', 401
+    
+    user = session['user']
+    return render_template("user/profile.html",user=user)
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.pop('user', None)
+    return jsonify({'success': True})
+#---------------
 
 #-----------------------
 # 啟動網站

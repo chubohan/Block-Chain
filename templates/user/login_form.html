@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-TW">
+<head>
+    <meta charset="utf-8">
+    <title>測試樣板</title>
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
+    <link href="/static/imgs/icon.jpg" rel="shortcut icon">
+    <link href="/static/css/menu.css" rel="stylesheet"/>  
+    <link href="/static/css/main.css" rel="stylesheet"/>      
+</head>
+   
+<body>
+    <div class="container">    
+        <div class="header">           
+        </div>        
+        
+        <ul id="navigation">        
+            <li><a href="/">返回主頁</a></li> 
+        </ul>
+        
+        <div class="content">
+            <h2>樣板畫面</h2>
+
+            <form action="/policy/update/form" method="get">
+                <div class="form">
+                    <span class="name">你媽編號</span>
+                    <span class="value">
+                        <input type="text" name="cusno" maxlength="4" required>
+                    </span>
+                    <br/>
+
+        <!-- 加載 Google 登入 API -->
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+        <!-- 登入按鈕容器 -->
+        <div id="g_id_onload"
+             data-client_id="551019375208-ee9n8eg06kg6v7chg9k8h7p98luc4p63.apps.googleusercontent.com"
+             data-callback="handleCredentialResponse">
+        </div>
+        <div class="g_id_signin" data-type="standard" data-size="large"></div>
+        
+        <script>
+        function handleCredentialResponse(response) {
+            fetch('/auth/google', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ credential: response.credential })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('登入成功:', data);
+                // 這裡可以重定向或更新UI
+                window.location.href = '/profile';
+            })
+            .catch(error => {
+                console.error('登入錯誤:', error);
+            });
+        }
+        </script>
+        </div>  
+    </div>
+</body>  
+</html>

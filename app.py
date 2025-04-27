@@ -1,23 +1,94 @@
-from flask import Flask, request, jsonify, render_template,session
+#-----------------------
+# 匯入必要模組
+#-----------------------
+from flask import Flask, request, jsonify, render_template,session,flash,redirect
 from flask_sqlalchemy import SQLAlchemy
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
-import db
+import utils.db as db
 from web3 import Web3
 import json
 import time
 import base64
 import os
+import bcrypt
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from flask_cors import CORS
+import hashlib
+from werkzeug.utils import secure_filename
+from threading import Lock
+import logging
+import pymysql
+# 正确导入路径（Web3.py ≥7.0）
+from web3 import AsyncWeb3
+from web3.providers import AsyncHTTPProvider  # 注意新的导入路径
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+#-----------------------
+# **匯入藍圖
+#-----------------------
+from myapp.user import user_bp
+from myapp.user import load_user as user_load_user
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)# 設置 session 加密金鑰
 CORS(app)# 允許所有跨域請求
+
+#-------------------------
+# **註冊藍圖的服務
+#-------------------------
+
+app.register_blueprint(user_bp, url_prefix='/user')
+
+# 初始化 Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)  # 綁定到應用
+login_manager.login_view = 'login'  # 指定登入路由
+#-----------------------
+# 載入使用者
+#-----------------------
+@login_manager.user_loader
+def load_user(user_id):
+    return user_load_user(user_id)
+
+# 配置日志
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+DB_CONFIG = {
+    'host': 'localhost',
+    'port': 3306,
+    'user': 'root',
+    'password': '123456789',
+    'database': 'project',
+    'charset': 'utf8mb4',
+    'cursorclass': pymysql.cursors.DictCursor
+}
+
+# 线程安全的数据库连接
+_db_lock = Lock()
+def get_connection():
+    with _db_lock:
+        try:
+            conn = pymysql.connect(**DB_CONFIG)
+            logger.debug("数据库连接成功")
+            return conn
+        except Exception as e:
+            logger.error(f"数据库连接失败: {e}")
+            raise
+print(get_connection())
+# Web3配置 (异步模式)
+try:
+    from web3 import AsyncWeb3
+    from web3.providers import AsyncHTTPProvider
+    w3 = AsyncWeb3(AsyncHTTPProvider("http://127.0.0.1:8545"))
+    logger.info("Web3异步连接成功")
+except ImportError:
+    logger.warning("未安装异步Web3，回退到同步模式")
+    w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))
 
 # 從 Google Cloud Console 獲取的客戶端 ID
 GOOGLE_CLIENT_ID = '551019375208-ee9n8eg06kg6v7chg9k8h7p98luc4p63.apps.googleusercontent.com'
@@ -591,10 +662,103 @@ def user_index():
 @app.route('/user/admin')
 def admin_index():
     return render_template('user/admin.html')
-@app.route('/user/login/form')
-def login_form_index():
-    return render_template('user/login_form.html') 
+ 
+#--------------------------------------------------
+'''
+#定義使用者類別
+class User(UserMixin):
+    def __init__(self, id, username, password):
+        self.id = id
+        self.username = username
+        self.password = password
 
+#產生登入管理物件
+login_manager = LoginManager()
+
+#載入使用者
+@login_manager.user_loader
+def load_user(user_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT userno, username, password FROM user WHERE userno = %s", (user_id,))
+    result = cursor.fetchone()  # 字典形式
+    conn.close()
+
+    if result:
+        return User(
+            id=result['userno'],      # 使用字段名
+            username=result['username'],
+            password=result['password']
+        )
+    return None
+
+#使用者註冊
+#宣告註冊畫面
+@app.route('/user/signup/form')
+def user_signup_form():
+    return render_template('user/signup_form.html')
+
+
+#使用者註冊
+@app.route('/user/signup', methods=['POST'])
+def signup():
+    try:
+        # 取得使用者的輸入值
+        userno = request.form.get('userno')
+        username = request.form.get('username')
+        gmail=request.form.get('gmail')
+        password = request.form.get('password1')
+        
+        
+        # 加密密碼
+        hashed_bytes = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        hashed_str = hashed_bytes.decode('utf-8')  # 轉為字串
+
+        # 寫入資料庫
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO user (userno, username, password,gmail) VALUES (%s, %s, %s ,%s)",
+                       (userno, username, hashed_str,gmail))
+        conn.commit()
+        conn.close()
+        
+        return render_template('user/signup.html', success=True)
+    except Exception as e:
+        # 打印詳細錯誤訊息到控制台
+        print(f"Database connection error: {str(e)}")
+        return render_template('user/signup.html', success=False, message="資料庫連接失敗")
+# 使用者登入
+@app.route('/user/login', methods=['POST'])
+def login():
+    try:
+        userno = request.form.get('userno')
+        password = request.form.get('password')
+
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT userno, username, password FROM user WHERE userno = %s", (userno,))
+        result = cursor.fetchone()  # 返回字典，例如 {'userno': '123', 'username': 'test', 'password': 'hashed_str'}
+        conn.close()
+
+        if not result:
+            return render_template('user/login.html', success=False, message="帳號不存在")
+
+        # 使用字段名訪問（注意大小寫需與資料庫完全一致）
+        stored_hash_str = result['password']  # 正確訪問方式
+        userno_from_db = result['userno']
+        username_from_db = result['username']
+
+        if bcrypt.checkpw(password.encode('utf-8'), stored_hash_str.encode('utf-8')):
+            user = User(id=userno_from_db, username=username_from_db, password=stored_hash_str)
+            login_user(user)
+            return redirect('/')
+        else:
+            return render_template('user/login.html', success=False, message="密碼錯誤")
+
+    except Exception as e:
+        app.logger.error(f"登入錯誤詳細訊息: {repr(e)}")
+        return render_template('user/login.html', success=False, message=f"發生錯誤: {str(e)}")
+'''
 #------------------------------------------------------
 #Google sign in
 @app.route('/auth/google', methods=['POST'])
@@ -649,6 +813,53 @@ def logout():
     session.pop('user', None)
     return jsonify({'success': True})
 #---------------
+#PDF雜湊
+# 在創建 Flask app 後添加配置
+app.config['UPLOAD_FOLDER'] = 'uploads'  # 確保這個文件夾存在
+app.config['ALLOWED_EXTENSIONS'] = {'pdf'}  # 只允許 PDF 文件
+os.makedirs(app.config['UPLOAD_FOLDER'],exist_ok=True)
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
+@app.route('/policy/creat_PDF', methods=['GET', 'POST'])
+def create_PDF():
+    if request.method == 'POST':
+        # 檢查是否有文件上傳
+        if 'file' not in request.files:
+            flash('沒有選擇文件')
+            return redirect(request.url)
+        
+        file = request.files['file']
+        
+        if file.filename == '':
+            flash('沒有選擇文件')
+            return redirect(request.url)
+        
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(filepath)
+            
+            # 處理PDF文件
+            try:
+                pdf_hash = hash_pdf_file(filepath)
+                
+                return render_template('policy/create_PDF.html', 
+                                     pdf_hash=pdf_hash,
+                                     filename=filename)
+            except Exception as e:
+                flash(f'處理PDF時出錯: {str(e)}')
+                return redirect(request.url)
+    
+    return render_template('policy/create_PDF.html')
+
+def hash_pdf_file(pdf_path):
+    """計算PDF文件的雜湊值"""
+    with open(pdf_path, 'rb') as file:
+        pdf_hash = hashlib.sha256(file.read()).hexdigest()
+    return pdf_hash
+
 
 #-----------------------
 # 啟動網站

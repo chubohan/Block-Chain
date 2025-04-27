@@ -21,13 +21,26 @@
         <div class="content">
             <h2>樣板畫面</h2>
 
-            <form action="/policy/update/form" method="get">
-                <div class="form">
-                    <span class="name">你媽編號</span>
-                    <span class="value">
-                        <input type="text" name="cusno" maxlength="4" required>
-                    </span>
-                    <br/>
+            
+                <form action="/user/login" method="post">
+                    <div class="form">
+                        <span class="name">帳號</span>
+                        <span class="value">
+                            <input type="text" name="userno" maxlength="20" required>
+                        </span>
+                        <br/>
+    
+                        <span class="name">密碼</span>
+                        <span class="value">
+                            <input type="password" name="password" size="15" maxlength="15" required>
+                        </span>
+                        <br/>   
+        
+                        <span class="name"></span>
+                        <span class="value"><input type="submit" value="登入" style="width:80px"></span>
+                    </div>
+                </form>
+            <h2>沒有帳號?<a href="/user/signup/form">註冊</a></h2>
 
         <!-- 加載 Google 登入 API -->
         <script src="https://accounts.google.com/gsi/client" async defer></script>

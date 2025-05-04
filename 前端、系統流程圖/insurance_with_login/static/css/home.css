@@ -1,0 +1,31 @@
+/* 画廊样式   margin-bottom: 40px;*/
+
+.gallery {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 100px;
+    
+    width: 60%;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.carousel-item {
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+.carousel-item img {
+    object-fit: cover;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    border-radius: 10px;
+}
+
+.carousel-indicators button {
+    background-color: rgba(255, 255, 255, 0.5);
+}
+

@@ -226,6 +226,16 @@ contract_abi = json.loads("""[
 		"inputs": [
 			{
 				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_insuranceCompany",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
 				"name": "_policyHolder",
 				"type": "string"
 			},
@@ -278,9 +288,9 @@ contract_abi = json.loads("""[
 	{
 		"inputs": [
 			{
-				"internalType": "uint256",
+				"internalType": "string",
 				"name": "_policyNumber",
-				"type": "uint256"
+				"type": "string"
 			}
 		],
 		"name": "deletePolicy",
@@ -289,11 +299,65 @@ contract_abi = json.loads("""[
 		"type": "function"
 	},
 	{
+		"anonymous": false,
 		"inputs": [
 			{
-				"internalType": "uint256",
+				"indexed": true,
+				"internalType": "string",
+				"name": "policyNumber",
+				"type": "string"
+			}
+		],
+		"name": "PolicyAdded",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "string",
+				"name": "policyNumber",
+				"type": "string"
+			}
+		],
+		"name": "PolicyRemoved",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "string",
+				"name": "policyNumber",
+				"type": "string"
+			}
+		],
+		"name": "PolicyUpdated",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
 				"name": "_policyNumber",
-				"type": "uint256"
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_insuranceCompany",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_policyHolder",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_insuredPerson",
+				"type": "string"
 			},
 			{
 				"internalType": "uint256",
@@ -302,8 +366,23 @@ contract_abi = json.loads("""[
 			},
 			{
 				"internalType": "uint256",
+				"name": "_premiumPeriod",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
 				"name": "_premiumAmount",
 				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_startDate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "_beneficiary",
+				"type": "string"
 			},
 			{
 				"internalType": "uint256",
@@ -324,9 +403,9 @@ contract_abi = json.loads("""[
 	{
 		"inputs": [
 			{
-				"internalType": "uint256",
+				"internalType": "string",
 				"name": "_policyNumber",
-				"type": "uint256"
+				"type": "string"
 			}
 		],
 		"name": "getPolicy",
@@ -342,6 +421,16 @@ contract_abi = json.loads("""[
 				"type": "string"
 			},
 			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
 				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
@@ -371,19 +460,6 @@ contract_abi = json.loads("""[
 				"name": "",
 				"type": "uint256"
 			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getPolicyCount",
-		"outputs": [
 			{
 				"internalType": "uint256",
 				"name": "",
@@ -396,80 +472,17 @@ contract_abi = json.loads("""[
 	{
 		"inputs": [
 			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
 			}
 		],
-		"name": "policies",
+		"name": "getPolicyOwner",
 		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "policyNumber",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "policyHolder",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "insuredPerson",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "insuranceAmount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "premiumPeriod",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "premiumAmount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "startDate",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "beneficiary",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "growthRate",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "declaredInterestRate",
-				"type": "uint256"
-			},
 			{
 				"internalType": "address",
-				"name": "owner",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "policyCount",
-		"outputs": [
-			{
-				"internalType": "uint256",
 				"name": "",
-				"type": "uint256"
+				"type": "address"
 			}
 		],
 		"stateMutability": "view",
@@ -488,11 +501,46 @@ private_key = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff8
 @app.route('/')
 def index():
     return render_template('index.html')
+#-----------------------------------
+#連接錢包
+@app.route('/policy/connect_wallet')
+def policy_connect_wallet():
+    return render_template('policy/connect_wallet.html')
+
+def validate_address(address):
+    try:
+        return Web3.to_checksum_address(address)
+    except ValueError:
+        return None
+
+@app.route('/balance', methods=['POST'])
+def get_balance():
+    try:
+        address = request.json.get('address')
+        if not address:
+            return jsonify({'error': '未提供地址'}), 400
+        
+        checksum_address = validate_address(address)
+        if not checksum_address:
+            return jsonify({'error': '无效的地址格式'}), 400
+        
+        if not w3.is_connected():
+            return jsonify({'error': '区块链节点未连接'}), 500
+            
+        balance = w3.eth.get_balance(checksum_address)
+        return jsonify({
+            'balance': str(Web3.from_wei(balance, 'ether')),
+            'address': checksum_address
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+#------------------------------------------------
 
 @app.route('/policy/create/form')
 def policy_addpolicy_form():
     return render_template('policy/create_form.html')
-
+'''
 @app.route("/add_policy", methods=["POST"])
 def add_policy():
     try:
@@ -501,12 +549,14 @@ def add_policy():
         print(f"收到請求數據: {data}")
 
         # 提取資料
+        policyNumber=data["policyNumber"]
         policyHolder = data["policyHolder"]
+        insuranceCompany=data["insuranceCompany"]
         insuredPerson = data["insuredPerson"]
         insuranceAmount = int(data["insuranceAmount"])  # 轉換為整數
         premiumPeriod = int(data["premiumPeriod"])  # 轉換為整數
         premiumAmount = int(data["premiumAmount"])  # 轉換為整數
-        startDate = int(time.time())  # 使用當前時間
+        startDate = int(data["startDate"])  # 使用當前時間
         beneficiary = data["beneficiary"]
         growthRate = int(data["growthRate"])  # 轉換為整數
         declaredInterestRate = int(data["declaredInterestRate"])  # 轉換為整數
@@ -524,7 +574,7 @@ def add_policy():
         # 設定交易資訊
         nonce = w3.eth.get_transaction_count(wallet_address)
         transaction = contract.functions.addPolicy(
-            encoded_policyHolder, encoded_insuredPerson, insuranceAmount, premiumPeriod,
+            policyNumber,encoded_policyHolder, encoded_insuredPerson, insuranceCompany,insuranceAmount, premiumPeriod,
             premiumAmount, startDate, encoded_beneficiary, growthRate, declaredInterestRate
         ).build_transaction({
             "gas": 8000000,
@@ -604,11 +654,12 @@ def delete_policy(policy_number):
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 #-------------------------
+'''
 #客戶查詢表單
 @app.route('/policy/read/form')
 def policy_read_form():
     return render_template('policy/read_form.html') 
-
+'''
 #查詢保單(區塊鏈)
 @app.route("/get_policy/<int:policy_number>", methods=["GET"])
 def get_policy(policy_number):
@@ -653,7 +704,7 @@ def get_policy(policy_number):
     except Exception as e:
         print(f"發生錯誤: {str(e)}")
         return jsonify({"error": str(e)}), 500
-
+'''
 #-------------------------------------------------
 #使用者介面
 @app.route('/user/customer')
@@ -760,7 +811,9 @@ def login():
         return render_template('user/login.html', success=False, message=f"發生錯誤: {str(e)}")
 '''
 #------------------------------------------------------
+
 #Google sign in
+
 @app.route('/auth/google', methods=['POST'])
 def auth_google():
     print(request.json)
@@ -788,7 +841,7 @@ def auth_google():
 
         # 在這裡可以將用戶資料存入資料庫或 session
         session['user'] = user_data
-
+        
         return jsonify({
             'success': True,
             'user': user_data
@@ -800,6 +853,8 @@ def auth_google():
             'success': False,
             'error': str(e)
         }), 401
+
+
 
 @app.route('/profile')
 def profile():
@@ -822,37 +877,27 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
-@app.route('/policy/creat_PDF', methods=['GET', 'POST'])
+@app.route('/policy/creat_PDF', methods=['POST'])
 def create_PDF():
-    if request.method == 'POST':
-        # 檢查是否有文件上傳
-        if 'file' not in request.files:
-            flash('沒有選擇文件')
-            return redirect(request.url)
-        
-        file = request.files['file']
-        
-        if file.filename == '':
-            flash('沒有選擇文件')
-            return redirect(request.url)
-        
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(filepath)
-            
-            # 處理PDF文件
-            try:
-                pdf_hash = hash_pdf_file(filepath)
-                
-                return render_template('policy/create_PDF.html', 
-                                     pdf_hash=pdf_hash,
-                                     filename=filename)
-            except Exception as e:
-                flash(f'處理PDF時出錯: {str(e)}')
-                return redirect(request.url)
+    if 'file' not in request.files:
+        return jsonify(success=False, error='未选择文件')
     
-    return render_template('policy/create_PDF.html')
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify(success=False, error='文件名无效')
+
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+        
+        try:
+            pdf_hash = hash_pdf_file(filepath)
+            return jsonify(success=True, pdf_hash=pdf_hash, filename=filename)
+        except Exception as e:
+            return jsonify(success=False, error=f'处理失败: {str(e)}')
+    
+    return jsonify(success=False, error='文件类型不支持')
 
 def hash_pdf_file(pdf_path):
     """計算PDF文件的雜湊值"""

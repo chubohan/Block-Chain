@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>測試樣板</title>
+    <!-- 連結思源中文及css -->
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
+    <link href="/static/imgs/icon.jpg" rel="shortcut icon">
+    <link href="/static/css/menu.css" rel="stylesheet"/>  
+    <link href="/static/css/main.css" rel="stylesheet"/>      
+    <!------------------------->
+    </head>
+<script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+<body>
+    
+    <ul id="navigation">        
+        <li><a href="/">返回主頁</a></li> 
+    </ul>
+    <div class="container">
+        <div class="content">
+            <h2>樣板畫面</h2>
+    <button onclick="connectMetaMask()">连接/切换账户</button>
+    <div>
+        <select id="accountSelector" onchange="updateSelectedAccount(this)"></select>
+    </div>
+    <button onclick="getBalance()">获取余额</button>
+    <div id="result"></div>
+        </div>
+    </div>
+
+    <script>
+        let selectedAccount;
+        let accounts = [];
+
+        // 监听账户变化
+        ethereum.on('accountsChanged', (newAccounts) => {
+            accounts = newAccounts;
+            populateAccountSelector();
+            selectedAccount = accounts[0];
+        });
+
+        async function connectMetaMask() {
+            if (window.ethereum) {
+                try {
+                    accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+                    populateAccountSelector();
+                    selectedAccount = accounts[0];
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+        }
+
+        function populateAccountSelector() {
+            const selector = document.getElementById('accountSelector');
+            selector.innerHTML = accounts.map(acc => 
+                `<option value="${acc}">${acc.slice(0,6)}...${acc.slice(-4)}</option>`
+            ).join('');
+        }
+
+        function updateSelectedAccount(select) {
+            selectedAccount = select.value;
+            document.getElementById('result').innerHTML = `已切换至账户：${selectedAccount}`;
+        }
+
+        async function getBalance() {
+            if (!selectedAccount) return alert("请先连接钱包");
+            
+            try {
+                const response = await fetch('http://localhost:5000/balance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ address: selectedAccount })
+                });
+                
+                if (!response.ok) throw new Error('获取余额失败');
+                const data = await response.json();
+                document.getElementById('result').innerHTML = `余额：${data.balance} ETH`;
+            } catch (error) {
+                console.error(error);
+                document.getElementById('result').innerHTML = `错误：${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

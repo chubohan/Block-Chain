@@ -31,7 +31,7 @@
                 <div class="form">
                     
 
-                    <span class="name">姓名</span>
+                    <span class="name">真實姓名</span>
                     <span class="value">
                         <input type="text" name="username" size="30" maxlength="30" required>
                     </span>
@@ -57,28 +57,7 @@
                     </select>
                     </span>
                     <br/>
-
-                    <span class="name">gmail</span>
-                    <span class="value">
-                        <input type="email" name="gmail" size="30"  required>
-                    </span>
-                    <br/>
-
-                    <span class="name">密碼</span>
-                    <span class="value">
-                        <input type="password" id="password1" name="password1" size="15" maxlength="15" required>
-                    </span>
-                    <br/>     
                     
-                    <span class="name">再輸入密碼</span>
-                    <span class="value">
-                        <input type="password" id="password2" name="password2" size="15" maxlength="15" required>
-                    </span>
-                    <br/>                    
-                    
-                    <span class="name"></span>
-                    <span class="value"><input type="submit" value="註冊" style="width:80px"></span>
-                </div>
             </form>
                
         </div>       
@@ -103,22 +82,7 @@
                 return true;	
             }
         }
-        // 即時年齡驗證函式
-function validateAge(value) {
-    const errorElement = document.getElementById('ageError');
-    const inputElement = document.getElementById('ageInput');
-
-    if (value < 0) {
-        errorElement.textContent = "年齡不能小於0！";
-        errorElement.style.display = 'inline';
-        inputElement.style.borderColor = 'red';
-        return false;
-    } else {
-        errorElement.style.display = 'none';
-        inputElement.style.borderColor = '';
-        return true;
-    }
-}
+       
         
     </script>    
     <!--**************************-->  

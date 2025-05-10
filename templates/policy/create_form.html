@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <title>測試樣板</title>
 <!-- 連結思源中文及css -->
+<script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/eth-crypto@2.3.0/dist/eth-crypto-browser.min.js"></script>
 <link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
 <link href="/static/imgs/icon.jpg" rel="shortcut icon">
 <link href="/static/css/menu.css" rel="stylesheet"/>  
@@ -21,56 +23,551 @@
         </ul>
         
         <!--~~~~~~~~~~~~~~~~~--> 
-    <h2>新增保單</h2>
-    <form id="policyForm">
-        <label>投保人姓名: <input type="text" id="policyHolder"></label><br>
-        <label>被保險人姓名: <input type="text" id="insuredPerson"></label><br>
-        <label>保險金額: <input type="number" id="insuranceAmount"></label><br>
-        <label>繳費期間(年): <input type="number" id="premiumPeriod"></label><br>
-        <label>保費金額: <input type="number" id="premiumAmount"></label><br>
-        <label>生效日期: <input type="date" id="startDate" value=""></label><br>
-        <label>受益人: <input type="text" id="beneficiary"></label><br>
-        <label>增額比例(%): <input type="number" id="growthRate"></label><br>
-        <label>宣告利率(%): <input type="number" id="declaredInterestRate"></label><br>
-        <button type="submit">提交</button>
-    </form>
+        <button onclick="connectWallet()">連接錢包</button>
+        <h2>新增保單</h2>
+        <form id="policyForm">
+            <label>保單編號: <input type="text" id="policyNumber" required></label><br>
+            <label>保險公司名稱: <input type="text" id="insuranceCompany" required></label><br>
+            <label>投保人姓名: <input type="text" id="policyHolder" required></label><br>
+            <label>被保險人姓名: <input type="text" id="insuredPerson" required></label><br>
+            <label>保險金額(ETH): <input type="number" id="insuranceAmount" step="0.01" required></label><br>
+            <label>繳費期間(年): <input type="number" id="premiumPeriod" required></label><br>
+            <label>保費金額(ETH): <input type="number" id="premiumAmount" step="0.01" required></label><br>
+            <label>生效日期: <input type="date" id="startDate" required></label><br>
+            <label>受益人: <input type="text" id="beneficiary" required></label><br>
+            <label>增額比例(%): <input type="number" id="growthRate" required></label><br>
+            <label>宣告利率(%): <input type="number" id="declaredInterestRate" required></label><br>
+            <label>上传PDF文件:
+                <input type="file" id="pdfUpload" accept=".pdf" required>
+              </label>
+              <button type="button" onclick="uploadPDF()">上传并生成哈希</button><br>
+              <label>PDF哈希值:
+                <input type="text" id="pdfHash" readonly>
+              </label><br>
+            <button type="submit">提交</button>
+        </form>
+        <div id="status"></div>
 
-    <p id="status"></p>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+        <script>
+// 对称加密配置
+const ENCRYPTION_KEY = CryptoJS.enc.Utf8.parse("your-32-byte-secret-key"); // 替换为实际密钥
+const IV = CryptoJS.enc.Utf8.parse("your-16-byte-iv"); // 初始化向量
 
-    <script>
-        document.getElementById("policyForm").addEventListener("submit", function(event) {
-        event.preventDefault();
+// AES加密函数
+function encryptField(plainText) {
+  const encrypted = CryptoJS.AES.encrypt(
+    CryptoJS.enc.Utf8.parse(plainText),
+    ENCRYPTION_KEY,
+    { 
+      iv: IV,
+      mode: CryptoJS.mode.CBC,
+      padding: CryptoJS.pad.Pkcs7
+    }
+  );
+  return encrypted.toString();
+}
 
-        let startDateInput = document.getElementById("startDate").value;
-        let startDate = startDateInput ? Math.floor(new Date(startDateInput).getTime() / 1000) : Math.floor(Date.now() / 1000);
+// 解密函数（示例）
+function decryptField(cipherText) {
+  const decrypted = CryptoJS.AES.decrypt(
+    cipherText,
+    ENCRYPTION_KEY,
+    { 
+      iv: IV,
+      mode: CryptoJS.mode.CBC,
+      padding: CryptoJS.pad.Pkcs7
+    }
+  );
+  return decrypted.toString(CryptoJS.enc.Utf8);
+}
 
-        let policyData = {
-            policyHolder: document.getElementById("policyHolder").value,
-            insuredPerson: document.getElementById("insuredPerson").value,
-            insuranceAmount: document.getElementById("insuranceAmount").value,
-            premiumPeriod: document.getElementById("premiumPeriod").value,
-            premiumAmount: document.getElementById("premiumAmount").value,
-            startDate: startDate,  // 轉換後的 Unix Timestamp
-            beneficiary: document.getElementById("beneficiary").value,
-            growthRate: document.getElementById("growthRate").value,
-            declaredInterestRate: document.getElementById("declaredInterestRate").value
-        };
+            //連接後端PDF
+            async function uploadPDF() {
+  const fileInput = document.getElementById('pdfUpload');
+  if (fileInput.files.length === 0) return;
 
-        fetch("http://127.0.0.1:5000/add_policy", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(policyData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById("status").textContent = "交易哈希: " + data.tx_hash;
-        })
-        .catch(error => console.error("錯誤:", error));
+  const formData = new FormData();
+  formData.append('file', fileInput.files[0]);
+
+  try {
+    const response = await fetch('/policy/creat_PDF', {
+      method: 'POST',
+      body: formData
+    });
+    
+    const result = await response.json();
+    if (result.success) {
+      document.getElementById('pdfHash').value = result.pdf_hash;
+    } else {
+      alert('上传失败: ' + result.error);
+    }
+  } catch (error) {
+    console.error('上传错误:', error);
+  }
+}
+            //------------------------
+            // 全局声明 (必须!)
+let web3 = null;
+let contract = null;
+let account = null; // 明确初始化为 null
+            
+            // 合约地址和 ABI（需与后端一致）
+            const contractAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+            const contractABI = [
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_policyHolder",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_insuredPerson",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_insuranceAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_premiumPeriod",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_premiumAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_startDate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "_beneficiary",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_growthRate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_declaredInterestRate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "_pdfHash",
+				"type": "string"
+			}
+		],
+		"name": "addPolicy",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			}
+		],
+		"name": "deletePolicy",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_insuranceAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_premiumAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_growthRate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_declaredInterestRate",
+				"type": "uint256"
+			}
+		],
+		"name": "updatePolicy",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_pdfHash",
+				"type": "string"
+			}
+		],
+		"name": "updatePolicyPDF",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			}
+		],
+		"name": "getPolicy",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getPolicyCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"name": "policies",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "policyHolder",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "insuredPerson",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "insuranceAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "premiumPeriod",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "premiumAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "startDate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "beneficiary",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "growthRate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "declaredInterestRate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "pdfHash",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "policyNumbers",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+];
+            
+           // 钱包连接功能
+           async function connectWallet() {
+  try {
+    if (!window.ethereum) throw new Error("请安装MetaMask");
+
+    // 强制重新连接
+    web3 = new Web3(window.ethereum);
+    
+    // 请求账户访问权限
+    const accounts = await window.ethereum.request({ 
+      method: "eth_requestAccounts" 
+    });
+    
+    // 更新全局变量
+    account = accounts[0]; 
+    
+    // 初始化合约实例
+    contract = new web3.eth.Contract(contractABI, contractAddress);
+    
+    console.log("当前连接账户:", account);
+    alert("钱包连接成功: " + account);
+    
+  } catch (error) {
+    console.error("钱包连接失败:", error);
+    alert("连接失败: " + error.message);
+  }
+}
+
+// 表单提交处理
+document.getElementById("policyForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const statusDiv = document.getElementById("status");
+    statusDiv.innerHTML = "<p>处理中...</p>";
+
+     // ======== 新增检查 ========
+  if (!account) {
+    alert("请先点击「連接錢包」按钮连接账户");
+    return;
+  }
+  
+  if (!contract) {
+    alert("合约未初始化，请重新连接钱包");
+    return;
+  }
+
+  try {
+    // 参数验证
+    if (!account) throw new Error("请先连接钱包");
+    if (!contract) throw new Error("合约未初始化");
+
+    // ========== 新增加密配置 ==========
+    const ENCRYPTION_KEY = CryptoJS.enc.Utf8.parse("32-ByteSecretKey-123456789012"); // 32字节密钥
+    const IV = CryptoJS.enc.Utf8.parse("16-ByteInitVector"); // 16字节初始化向量
+
+    // AES加密函数
+    const encryptField = (plainText) => {
+        if (!plainText) return "";
+        try {
+            return CryptoJS.AES.encrypt(
+                CryptoJS.enc.Utf8.parse(plainText),
+                ENCRYPTION_KEY,
+                { 
+                    iv: IV,
+                    mode: CryptoJS.mode.CBC,
+                    padding: CryptoJS.pad.Pkcs7
+                }
+            ).toString();
+        } catch (error) {
+            console.error("加密失败:", error);
+            throw new Error("字段加密处理失败");
+        }
+    };
+    // ========== 加密结束 ==========
+
+    // 收集并加密表单数据
+    const params = {
+        _policyNumber: document.getElementById("policyNumber").value,
+        // 加密敏感字段
+        _policyHolder: encryptField(document.getElementById("policyHolder").value),
+        _insuredPerson: encryptField(document.getElementById("insuredPerson").value),
+        _insuranceAmount: web3.utils.toWei(
+            document.getElementById("insuranceAmount").value, 
+            "ether"
+        ),
+        _premiumPeriod: parseInt(document.getElementById("premiumPeriod").value),
+        _premiumAmount: web3.utils.toWei(
+            document.getElementById("premiumAmount").value,
+            "ether"
+        ),
+        _startDate: Math.floor(new Date(document.getElementById("startDate").value).getTime() / 1000),
+        // 加密受益人信息
+        _beneficiary: encryptField(document.getElementById("beneficiary").value),
+        _growthRate: parseInt(document.getElementById("growthRate").value),
+        _declaredInterestRate: parseInt(document.getElementById("declaredInterestRate").value),
+        _pdfHash: document.getElementById("pdfHash").value
+    };
+
+    console.log("加密后参数:", {
+        ...params,
+        _policyHolder: "<加密数据>",
+        _insuredPerson: "<加密数据>",
+        _beneficiary: "<加密数据>"
     });
 
-    // 預設 startDate 為當天日期
-    document.getElementById("startDate").valueAsDate = new Date();
+    // 构建交易（参数顺序需与合约严格一致）
+    const tx = contract.methods.addPolicy(
+        params._policyNumber,
+        params._policyHolder,    // 加密后的投保人
+        params._insuredPerson,   // 加密后的被保险人
+        params._insuranceAmount,
+        params._premiumPeriod,
+        params._premiumAmount,
+        params._startDate,
+        params._beneficiary,     // 加密后的受益人
+        params._growthRate,
+        params._declaredInterestRate,
+        params._pdfHash
+    );
 
-    </script>
+        // 估算Gas
+        const gas = await tx.estimateGas({ from: account })
+            .catch(err => {
+                console.error("Gas估算失败:", err);
+                throw new Error(`交易预检失败: ${err.message}`);
+            });
+
+        // 发送交易
+        const receipt = await tx.send({
+            from: account,
+            gas: Math.floor(gas * 1.2),  // 增加20%缓冲
+            gasPrice: await web3.eth.getGasPrice()
+        })
+        .on('transactionHash', hash => {
+            statusDiv.innerHTML = `<p>交易已广播，等待确认...<br>交易哈希: ${hash}</p>`;
+        });
+
+        console.log("交易成功:", receipt);
+        statusDiv.innerHTML = `
+            <p style="color:green">✅ 交易成功！</p>
+            <p>区块高度: ${receipt.blockNumber}</p>
+            <p>交易哈希: ${receipt.transactionHash}</p>
+        `;
+
+    } catch (error) {
+        console.error("交易失败:", error);
+        statusDiv.innerHTML = `
+            <p style="color:red">❌ 交易失败</p>
+            <p>错误信息: ${error.message}</p>
+            ${error.stack ? `<pre>${error.stack}</pre>` : ''}
+        `;
+    }
+});
+            
+            
+            </script>
 </body>
 </html>

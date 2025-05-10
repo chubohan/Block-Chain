@@ -1,0 +1,58 @@
+/* 全局樣式 */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    text-align: center;
+}
+
+/* 容器 */
+.admin-container, .difficulty-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px;
+}
+
+/* 卡片樣式 */
+.admin-box, .difficulty-box {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 400px;
+    margin: 20px;
+}
+
+/* 標題 */
+h1, h2 {
+    color: #0056b3;
+}
+
+/* 按鈕 */
+.button, .change-button {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: #0056b3;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.3s;
+}
+
+.button:hover, .change-button:hover {
+    background-color: #004494;
+}
+
+/* 輸入框 */
+input {
+    width: 90%;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-top: 10px;
+}

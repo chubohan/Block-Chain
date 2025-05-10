@@ -1,0 +1,94 @@
+/* 整體背景 */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+/* 登入框容器 */
+.login-container {
+    background: white;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 350px;
+    text-align: center;
+}
+
+/* 標題區域 */
+.login-header {
+    margin-bottom: 20px;
+}
+
+/* Logo */
+.logo {
+    width: 120px;
+    margin-bottom: 10px;
+}
+
+/* 標題 */
+h2 {
+    font-size: 1.5rem;
+    color: #333;
+}
+
+/* 表單組 */
+.form-group {
+    text-align: left;
+    margin-bottom: 15px;
+}
+
+/* 標籤 */
+label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* 輸入框 */
+input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+/* 登入按鈕 */
+.login-btn-main {
+    width: 100%;
+    padding: 12px;
+    background-color: #0071bc; /* 南山人壽風格的藍色 */
+    color: white;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.3s;
+}
+
+/* 按鈕 Hover 效果 */
+.login-btn:hover {
+    background-color: #005a94;
+}
+
+/* 忘記密碼 & 註冊 */
+.options {
+    margin-top: 15px;
+    font-size: 0.9rem;
+}
+
+.options a {
+    color: #0071bc;
+    text-decoration: none;
+    margin: 0 10px;
+}
+
+.options a:hover {
+    text-decoration: underline;
+}

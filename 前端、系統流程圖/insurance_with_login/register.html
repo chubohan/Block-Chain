@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChainSure - 智慧保險管理</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> 
+    <link rel="stylesheet" href="static/css/skye.css">
+    <link rel="stylesheet" href="static/css/register.css">
+    <script src="static/js/include.js" defer></script> <!-- 載入 header & footer -->
+
+    <style>
+
+
+    </style>
+</head>
+<body>
+
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">ChainSure</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="切換導航">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                        <ul class="dropdown-menu" aria-labelledby="loginDropdown">
+                            <li><a class="dropdown-item" href="#">投保人登入</a></li>
+                            <li><a class="dropdown-item" href="#">被保人登入</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#">業務員登入</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="register-box">
+        <h2>註冊帳號</h2>
+        <form action="#" method="POST">
+            <input type="text" class="input-field" placeholder="姓名" required>
+            <input type="number" class="input-field" placeholder="年齡" required>
+            <select class="input-field" required>
+                <option value="" disabled selected>性別</option>
+                <option value="male">男</option>
+                <option value="female">女</option>
+            </select>
+            <input type="text" class="input-field" placeholder="帳號" required>
+            <input type="password" class="input-field" placeholder="密碼" required>
+            <input type="password" class="input-field" placeholder="確認密碼" required>
+            <button type="submit" class="submit-btn">註冊</button>
+            <button type="button" class="login-btn">登入</button> <!-- 登入按鈕 -->
+        </form>
+    </div>
+
+    <script>
+        // 创建小星星动画
+        function createStars() {
+            const numStars = 200;
+            for (let i = 0; i < numStars; i++) {
+                let star = document.createElement("div");
+                star.classList.add("star");
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                const duration = Math.random() * 2 + 1;
+                const delay = Math.random() * 5;
+                star.style.top = `${y}vh`;
+                star.style.left = `${x}vw`;
+                star.style.animationDuration = `${duration}s`;
+                star.style.animationDelay = `${delay}s`;
+                document.body.appendChild(star);
+            }
+        }
+
+        createStars();
+    <div id="footer-container"></div>
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="static/js/script.js"></script>
+</body>
+</html>

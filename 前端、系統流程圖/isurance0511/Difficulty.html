@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>挖礦難度設定</title>
+
+    <link rel="stylesheet" href="static/css/styles.css">
+    <script src="static/js/include.js" defer></script>
+</head>
+<body>
+
+    <!-- 頂部導航欄 -->
+    <div id="header-container"></div>
+
+    <div class="container">
+     
+        <h1>挖礦難度設定</h1>
+
+        <!-- 模式切換 -->
+        <div class="mode-toggle">
+            <label>
+                <input type="radio" name="mode" value="auto" checked>
+                自動模式
+            </label>
+            <label>
+                <input type="radio" name="mode" value="manual">
+                手動模式
+            </label>
+        </div>
+
+        <!-- 自動模式顯示 -->
+        <div id="autoMode">
+            <p>目前 Gas 單價：<span id="gasPrice">20</span> Gwei</p>
+            <p>對應難度：<span id="autoDifficulty">3</span></p>
+        </div>
+
+        <!-- 手動模式設置 -->
+        <div id="manualMode" style="display: none;">
+            <label for="manualDifficulty">手動設定難度：</label>
+            <input type="range" id="manualDifficulty" min="1" max="5" value="3">
+            <span id="manualDifficultyDisplay">3</span>
+        </div>
+
+        <h2>生成 Hash 值</h2>
+        <div id="hashDisplay">
+            <p>當前哈希值將顯示在此處。</p>
+        </div>
+
+        <button id="generateHashButton">生成新 Hash 值</button>
+  
+
+
+    </div>
+
+    <button id="generateHashButton">生成新 Hash 值</button>
+</div>
+
+<script>
+    // 模式切換功能
+    const autoMode = document.getElementById('autoMode');
+    const manualMode = document.getElementById('manualMode');
+    document.querySelectorAll('input[name="mode"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (e.target.value === 'auto') {
+                autoMode.style.display = 'block';
+                manualMode.style.display = 'none';
+            } else {
+                autoMode.style.display = 'none';
+                manualMode.style.display = 'block';
+            }
+        });
+    });
+
+    // 模擬 Gas 單價更新
+    const gasPriceElement = document.getElementById('gasPrice');
+    const autoDifficultyElement = document.getElementById('autoDifficulty');
+    setInterval(() => {
+        const gasPrice = Math.floor(Math.random() * 50) + 10; // 模擬 Gas 單價（10-60 Gwei）
+        gasPriceElement.textContent = gasPrice;
+        autoDifficultyElement.textContent = Math.min(Math.max(Math.floor(gasPrice / 10), 1), 5); // 對應難度
+    }, 5000);
+
+    // 更新手動模式難度顯示
+    const manualDifficultyInput = document.getElementById('manualDifficulty');
+    const manualDifficultyDisplay = document.getElementById('manualDifficultyDisplay');
+    manualDifficultyInput.addEventListener('input', () => {
+        manualDifficultyDisplay.textContent = manualDifficultyInput.value;
+    });
+
+    // 生成 Hash 值
+    document.getElementById('generateHashButton').addEventListener('click', () => {
+        const mode = document.querySelector('input[name="mode"]:checked').value;
+        const difficulty = mode === 'auto' ? parseInt(autoDifficultyElement.textContent, 10) : parseInt(manualDifficultyInput.value, 10);
+
+        // 根據難度生成符合條件的哈希值
+        let hash;
+        do {
+            hash = Array(64).fill(null).map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+        } while (!hash.startsWith('0'.repeat(difficulty)));
+
+        document.getElementById('hashDisplay').innerHTML = `<p>${hash}</p>`;
+    });
+    </script>
+    <script src="static/js/difficulty.js"></script>
+</body>
+</html>

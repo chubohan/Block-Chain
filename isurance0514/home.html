@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>保險平台主頁</title>
+        <link rel="stylesheet" href="static/css/styles.css">
+        <link rel="stylesheet" href="static/css/skye.css">
+        <link rel="stylesheet" href="static/css/home.css">
+        <script src="static/js/include.js" defer></script> <!-- 載入 header & footer -->
+        <!-- 還沒用好<script src="static/js/sidebar.js" defer></script> -->     
+    </head>
+<body>
+    <!-- 還沒用好<button class="toggle-btn" onclick="toggleSidebar()">☰</button> -->
+    <!-- <div id="sidebar-container"></div> -->
+    <div id="header-container"></div>
+    <div class="container">
+        <!-- 画廊 -->
+        <div id="gallery" class="carousel slide gallery" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <img src="static/images/image-32.webp" class="d-block w-100" alt="Image 1">
+                </div>
+                <div class="carousel-item">
+                    <img src="static/images/dog3.jpg" class="d-block w-100" alt="Image 2">
+                </div>
+                <div class="carousel-item">
+                    <img src="static/images/dog4.jpg" class="d-block w-100"alt="Image 3">
+                </div>
+            </div>
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#gallery" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                <button type="button" data-bs-target="#gallery" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                <button type="button" data-bs-target="#gallery" data-bs-slide-to="2" aria-label="Slide 3"></button>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#gallery" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#gallery" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    
+        
+        
+        
+
+
+        <!-- 功能區塊 -->
+
+
+        <div class="features">
+            <div class="feature">
+                <h2>產品保單</h2>
+                <p>選擇並管理您的保單。</p>
+                <a href="policy.html" class="button">選擇</a>
+            </div>
+            <div class="feature">
+                <h2>我的保單</h2>
+                <p>調整區塊鍊參數</p>
+                <a href="myInsurance.html" class="button">選擇</a>
+            </div>
+            <div class="feature">
+                <h2>保單授權設定</h2>
+                <p>調整區塊鍊參數</p>
+                <a href="admin.html" class="button">選擇</a>
+            </div>
+            <div class="feature">
+                <h2>保單審理進度</h2>
+                <p>調整區塊鍊參數</p>
+                <a href="admin.html" class="button">選擇</a>
+            </div>
+            <div class="feature">
+                <h2>系統通知</h2>
+                <p>選擇並管理您的保單。</p>
+                <a href="policy.html" class="button">選擇</a>
+            </div>
+            <div class="feature">
+                <h2>聯繫業務員</h2>
+                <p>選擇並管理您的保單。</p>
+                <a href="policy.html" class="button">選擇</a>
+            </div>
+            <div class="feature">
+                <h2>會員點數</h2>
+                <p>選擇並管理您的保單。</p>
+                <a href="policy.html" class="button">選擇</a>
+            </div>
+            <div class="feature">
+                <h2>家屬查詢</h2>
+                <p>查詢並查看被保人的保單信息。</p>
+                <a href="family.html" class="button">選擇</a>
+            </div>
+            <div class="feature">
+                <h2>管理員功能</h2>
+                <p>調整區塊鍊參數</p>
+                <a href="admin.html" class="button">選擇</a>
+            </div>
+        </div>
+
+        <!-- 背景圖 -->
+        <img src="static/images/blockchain.png" alt="區塊鏈圖片" width="500" height="300" style="display:block; margin:auto;">
+        </div>
+        </div>
+        <!-- 星空背景 -->
+        <script>
+            // 创建小星星动画
+            function createStars() {
+                const numStars = 200;
+                for (let i = 0; i < numStars; i++) {
+                    let star = document.createElement("div");
+                    star.classList.add("star");
+                    const x = Math.random() * 100;
+                    const y = Math.random() * 100;
+                    const duration = Math.random() * 2 + 1;
+                    const delay = Math.random() * 5;
+                    star.style.top = `${y}vh`;
+                    star.style.left = `${x}vw`;
+                    star.style.animationDuration = `${duration}s`;
+                    star.style.animationDelay = `${delay}s`;
+                    document.body.appendChild(star);
+                }
+            }
+
+            createStars();
+        </script>
+    </div>
+    <!-- 頁腳 -->
+    <div id="footer-container"></div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

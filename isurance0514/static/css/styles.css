@@ -1,0 +1,254 @@
+/* 星空背景效果 */
+
+/* 允許頁面正常滾動 */
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: #1a1a2e;
+    color: white;
+    font-family: Arial, sans-serif;
+    overflow-x: hidden;
+    overflow-y: visible;
+    position: relative;
+    padding-top: 80px;
+}
+
+
+/* 星星动画效果 */
+.stars {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('https://cdn.pixabay.com/photo/2017/08/30/02/18/starry-night-2695563_960_720.jpg') no-repeat center center fixed;
+    background-size: cover;
+    z-index: -1;
+}
+
+/* 小星星动画 */
+.star {
+    position: absolute;
+    border-radius: 50%;
+    width: 2px;
+    height: 2px;
+    background-color: white;
+    animation: twinkle 1.5s infinite alternate;
+}
+/* 導航欄樣式 */
+
+
+
+
+
+/* Dropdown Menu */
+.dropdown-menu {
+    min-width: 200px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background-color: #333;
+    display: none; /* Default: hide dropdown */
+}
+
+.nav-item:hover .dropdown-menu {
+    display: block; /* Show on hover */
+}
+
+.dropdown-item {
+    padding: 12px 16px;
+    color: #ffffff;
+    font-size: 1.1rem;
+}
+
+.dropdown-item:hover {
+    background-color: #f39c12;
+    color: white;
+}
+
+.dropdown-divider {
+    border-top: 1px solid #444;
+}
+
+/* 画廊样式   margin-bottom: 40px;*/
+.gallery {
+    margin-top: 100px;
+    width: 80%;
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-bottom: 20px;
+}
+
+.carousel-item {
+    overflow: hidden;
+    border-radius: 10px;
+    
+}
+
+.carousel-item img {
+    object-fit: cover;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    border-radius: 10px;
+    
+}
+
+.carousel-indicators button {
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+
+/* 響應式選單 (手機版) */
+.menu-toggle {
+    display: none;
+    font-size: 28px;
+    color: white;
+    cursor: pointer;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        background: rgba(0, 0, 0, 0.9);
+        width: 100%;
+        padding: 10px;
+        transition: 0.3s ease-in-out;
+    }
+
+    .nav-links.active {
+        display: flex;
+    }
+
+    .menu-toggle {
+        display: block;
+    }
+}
+
+
+.login-btn a:hover {
+    background-color: #004494; /* 深藍色 */
+} */
+
+
+
+
+
+/* 主要容器 */
+.container {
+    width: 100%;
+    padding: 60px 20px;
+    gap: 40px;
+    text-align: center;
+    /* margin: 80px auto 0 auto;  */
+}
+
+h1 {
+    font-size: 3rem;
+    margin-bottom: 10px;
+    color: #FFF;
+    text-shadow: 0 0 10px 
+}
+
+
+p {
+    font-size: 1.2rem;
+    margin-bottom: 40px;
+}
+
+
+
+
+/* 版權資訊 */
+.footer-left {
+    flex: 1;
+
+}
+
+/* 網絡狀態 */
+
+/* 頁腳設計 */
+.footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #1a1a2e;
+    color: #ffffff;
+    padding: 20px;
+    width: 100%;
+    position: relative;
+    z-index: 5;
+    text-align: center;
+    font-size: 14px;
+    border-top: 1px solid #333;
+    margin-top: 40px;
+}
+
+/* 版權資訊 */
+.footer-left {
+    flex: 1;
+    color: #888;
+}
+
+/* 網絡狀態 */
+.footer-center a {
+    color: #f7931a; /* Bitcoin 標誌色 */
+    text-decoration: none;
+    margin-right: 20px;
+}
+
+.footer-center a:hover {
+    text-decoration: underline;
+}
+
+/* 語言選擇 */
+.footer-right select {
+    background: #333;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin-right: 20px;
+}
+
+/* RWD */
+@media (max-width: 768px) {
+    .footer {
+        flex-direction: column;
+        padding: 20px 10px;
+    }
+
+    .footer-left,
+    .footer-center,
+    .footer-right {
+        margin-bottom: 10px;
+    }
+}
+
+.center-img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#左列選單
+.sidebar.collapsed {
+    width: 60px;
+  }
+  .sidebar.collapsed ul li a span {
+    display: none;
+  }
+  .container.expanded {
+    margin-left: 60px;
+  }
+  
+
+
+
+

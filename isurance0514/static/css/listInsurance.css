@@ -34,5 +34,18 @@ tr:nth-child(odd) {
     background-color: #ffffff;
 }
 
+h2 {
+    margin-left: 120px !important; 
+    margin-top: 60px !important;
+}
+
+button-group{
+      margin-top: 60px !important;
+      margin-left:150px;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
 
 

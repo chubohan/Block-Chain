@@ -1,122 +1,71 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>保險平台主頁</title>
-        <link rel="stylesheet" href="static/css/styles.css">
-        <link rel="stylesheet" href="static/css/insurance_summary_card.css"> 
-        <script src="static/js/include.js" defer></script> <!-- 載入 header & footer -->
-    </head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>保險平台主頁</title>
+  <link rel="stylesheet" href="static/css/styles.css" />
+  <link rel="stylesheet" href="static/css/insurance_summary_card.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap" rel="stylesheet">
+  <script src="static/js/include.js" defer></script> <!-- 載入 header & footer -->
+
+
+
+</head>
 
 <body>
-<div class="wrapper">
-<div id="header-container"></div>
-<div id="container">
-<article class="insurance-card-container">
-  <section class="insurance-card">
-    <div stackColumnsAt="tablet" data-el="div-1">
-      <div class="policy-details-container">
-        <div class="policy-labels">
-          <div class="policy-details-content">
-            <p class="policy-label">1.我的報單數量</p>
-            <p class="policy-label">2. 總報障金額</p>
-            <p class="policy-label">3.理賠進度概況</p>
-            <p class="policy-label">3.保費繳納狀況</p>
-          </div>
+  <div id="header-container"></div>
+  <div class="wrapper">
+    <!-- 保單摘要區 -->
+    <section class="insurance-card">
+      <h2>保單摘要資訊</h2>
+      <div class="policy-info-pairs">
+        <div class="info-row">
+          <span class="label">1. 我的報單數量</span>
+          <span class="value">四張</span>
         </div>
-        <div class="policy-values">
-          <div class="policy-values-wrapper">
-            <div class="policy-values-content">
-              <p class="policy-value">四張</p>
-              <p class="policy-value">1500萬新台幣</p>
-              <p class="policy-value">一件核賠中</p>
-              <p class="policy-value">未欠繳</p>
-            </div>
-          </div>
+        <div class="info-row">
+          <span class="label">2. 總報障金額</span>
+          <span class="value">1500萬新台幣</span>
+        </div>
+        <div class="info-row">
+          <span class="label">3. 理賠進度概況</span>
+          <span class="value">一件核賠中</span>
+        </div>
+        <div class="info-row">
+          <span class="label">4. 保費繳納狀況</span>
+          <span class="value">未欠繳</span>
         </div>
       </div>
-    </div>
-    <section class="expiration-notice">
-      <p class="expiration-warning">注意! 即將到期保單提醒</p>
-      <p class="expiration-details">254545保單有效期間剩餘兩天</p>
     </section>
-    <section class="action-container">
-      <button class="print-button">列印副本</button>
+
+    <!-- 保單列表區 -->
+    <section class="insurance-card">
+      <h2>我的保單列表</h2>
+      <div class="policy-list">
+        <div class="policy-item-row">
+          <span class="policy-title">1. 146545保單：定期壽險</span>
+          <span class="policy-period">合約有效期間：2026 ~ 2050年1月1日</span>     
+          <a href="listInsurance.html" class="policy-title">查詢</a>
+        </div>
+        <div class="policy-item-row">
+          <span class="policy-title">2. 254545保單：XXXXX險</span>
+          <span class="policy-period">合約有效期間：2026 ~ 2050年1月1日</span>
+          <a href="listInsurance.html" class="policy-title">查詢</a>
+        </div>
+        <div class="policy-item-row">
+          <span class="policy-title">3. 254545保單：XXXXX險</span>
+          <span class="policy-period">合約有效期間：2026 ~ 2050年1月1日</span>
+          <a href="listInsurance.html" class="policy-title">查詢</a>
+        </div>
+        <div class="policy-item-row">
+          <span class="policy-title">4. 254545保單：XXXXX險</span>
+          <span class="policy-period">合約有效期間：2026 ~ 2050年1月1日</span>
+          <a href="listInsurance.html" class="policy-title">查詢</a>
+        </div>
+      </div>
     </section>
-  </section>
-
-  <section class="policy-container">
-    <div class="policy-wrapper">
-      <div class="policy-names">
-        <p class="policy-item">1. 146545保單:定期壽險</p>
-        <p class="policy-item policy-item-spaced">2. 254545保單:XXXXX險</p>
-        <p class="policy-item policy-item-spaced">3. 254545保單:XXXXX險</p>
-        <p class="policy-item policy-item-spaced">4. 254545保單:XXXXX險</p>
-      </div>
-      <div class="vertical-divider"></div>
-      <div class="contract-periods">
-        <p class="contract-period">合約有效期間:2026~2050年1月1日</p>
-        <p class="contract-period contract-period-spaced">合約有效期間:2026~2050年1月1日</p>
-        <p class="contract-period contract-period-spaced">合約有效期間:2026~2050年1月1日</p>
-        <p class="contract-period contract-period-spaced">合約有效期間:2026~2050年1月1日</p>
-      </div>
-      <div class="query-buttons">
-        <a href="listInsurance.html" class="query-button">查詢</a>
-        <a href="myInsurance.html" class="query-button">查詢</a>
-        <a href="myInsurance.html" class="query-button">查詢</a>
-      </div>
-    </div>
-  </section>
-  
-  
-         
-
-</article>
-</div>
-
-<script>
-  (() => {
-    const state = {};
-
-    let context = null;
-    let nodesToDestroy = [];
-    let pendingUpdate = false;
-
-    function destroyAnyNodes() {
-      // destroy current view template refs before rendering again
-      nodesToDestroy.forEach((el) => el.remove());
-      nodesToDestroy = [];
-    }
-
-    // Function to update data bindings and loops
-    // call update() when you mutate state and need the updates to reflect
-    // in the dom
-    function update() {
-      if (pendingUpdate === true) {
-        return;
-      }
-      pendingUpdate = true;
-
-      document.querySelectorAll("[data-el='div-1']").forEach((el) => {
-        el.setAttribute("space", 30);
-      });
-
-      destroyAnyNodes();
-
-      pendingUpdate = false;
-    }
-
-    // Update with initial state on first load
-    update();
-  })();
-</script>
-</body>
-
-
-</div>
-<!-- 頁腳 -->
-<div id="footer-container"></div>
-<script src="static/js/script.js"></script>
+  </div>
+  <div id="footer-container"></div>
 </body>
 </html>

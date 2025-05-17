@@ -18,11 +18,32 @@
             <h1>家屬保單查詢</h1>
             <p>請輸入被保人的身份證號碼，以查詢保單資訊。</p>
 
-            <form id="familyForm">
-                <label for="idNumber">身份證號碼</label>
-                <input type="text" id="idNumber" name="idNumber" placeholder="請輸入身份證字號" required>
-                <button type="submit" class="search-btn">查詢保單</button>
+            <form id="familyForm" onsubmit="return validateForm()">
+            <label for="policyNumber">保單編號</label>
+            <input type="text" id="policyNumber" name="policyNumber" placeholder="請輸入保單編號" required>
+
+            <label for="idNumber">身份證字號</label>
+            <input type="text" id="idNumber" name="idNumber" placeholder="請輸入身份證字號" required pattern="[A-Z][0-9]{9}">
+
+            <label for="relationship">被保人關係</label>
+            <select id="relationship" name="relationship" required>
+                <option value="">請選擇關係</option>
+                <option value="self">本人</option>
+                <option value="spouse">配偶</option>
+                <option value="parent">父母</option>
+                <option value="child">子女</option>
+                <option value="other">其他</option>
+            </select>
+
+            <label for="phone">電話</label>
+            <input type="tel" id="phone" name="phone" placeholder="請輸入電話" required pattern="[0-9]{10}">
+
+            <label for="captcha">驗證碼</label>
+            <input type="text" id="captcha" name="captcha" placeholder="請輸入驗證碼" required>
+
+            <button type="submit" class="search-btn">查詢保單</button>
             </form>
+
 
             <div id="familyPolicyList" class="policy-list" style="display: none;">
                 <h2>保單選項</h2>

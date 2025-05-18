@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>家屬保單查詢 | 壽山保險</title>
+    <link rel="stylesheet" href="static/css/styles.css">
+    <link rel="stylesheet" href="static/css/family.css">
+    <script src="static/js/include.js" defer></script>
+</head>
+<body>
+    <!-- 頁首 -->
+    <div id="header-container"></div>
+
+    <!-- 主容器 -->
+    <div class="family-container">
+        <div class="form-box">
+            <h1>客戶保單查詢</h1>
+            <p>請輸入被保人姓名</p>
+
+            <form id="familyForm" onsubmit="return validateForm()">
+            <label for="policyNumber">客戶名字</label>
+            <input type="text" id="policyNumber" name="policyNumber" placeholder="請輸入客戶姓名" required>
+            <a href="cusIn.html" class="search-btn">查詢保單</a>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- 頁腳 -->
+    <div id="footer-container"></div>
+
+    <script src="static/js/family.js"></script>
+</body>
+</html>
+

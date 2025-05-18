@@ -4,6 +4,8 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>保險平台主頁</title>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
         <link rel="stylesheet" href="static/css/styles.css">
         <link rel="stylesheet" href="static/css/skye.css">
         <link rel="stylesheet" href="static/css/home.css">
@@ -11,6 +13,7 @@
         <!-- 還沒用好<script src="static/js/sidebar.js" defer></script> -->     
     </head>
 <body>
+<div class="wrapper">
     <!-- 還沒用好<button class="toggle-btn" onclick="toggleSidebar()">☰</button> -->
     <!-- <div id="sidebar-container"></div> -->
     <div id="header-container"></div>
@@ -43,61 +46,90 @@
             </button>
         </div>
     
-        
-        
-        
-
-
         <!-- 功能區塊 -->
-
-
-        <div class="features">
-            <div class="feature">
-                <h2>產品保單</h2>
-                <p>選擇並管理您的保單。</p>
-                <a href="policy.html" class="button">選擇</a>
-            </div>
-            <div class="feature">
-                <h2>我的保單</h2>
-                <p>調整區塊鍊參數</p>
-                <a href="myInsurance.html" class="button">選擇</a>
-            </div>
-            <div class="feature">
-                <h2>保單授權設定</h2>
-                <p>調整區塊鍊參數</p>
-                <a href="admin.html" class="button">選擇</a>
-            </div>
-            <div class="feature">
-                <h2>保單審理進度</h2>
-                <p>調整區塊鍊參數</p>
-                <a href="admin.html" class="button">選擇</a>
-            </div>
-            <div class="feature">
-                <h2>系統通知</h2>
-                <p>選擇並管理您的保單。</p>
-                <a href="policy.html" class="button">選擇</a>
-            </div>
-            <div class="feature">
-                <h2>聯繫業務員</h2>
-                <p>選擇並管理您的保單。</p>
-                <a href="policy.html" class="button">選擇</a>
-            </div>
-            <div class="feature">
-                <h2>會員點數</h2>
-                <p>選擇並管理您的保單。</p>
-                <a href="policy.html" class="button">選擇</a>
-            </div>
-            <div class="feature">
-                <h2>家屬查詢</h2>
-                <p>查詢並查看被保人的保單信息。</p>
-                <a href="family.html" class="button">選擇</a>
-            </div>
-            <div class="feature">
-                <h2>管理員功能</h2>
-                <p>調整區塊鍊參數</p>
-                <a href="admin.html" class="button">選擇</a>
+        <div class="product-category-grid">
+        <div class="category-card">
+            <div class="icon"><i class="fas fa-file-alt"></i></div>
+            <div>
+            <h3>產品保單</h3>
+            <p>可簽署保單</p>
+            <a href="policy.html" class="arrow-link">➜</a>
             </div>
         </div>
+
+        <div class="category-card">
+            <div class="icon"><i class="fas fa-id-card-alt"></i></div>
+            <div>
+            <h3>我的保單</h3>
+            <p>查看已有保單</p>
+            <a href="myInsurance.html" class="arrow-link">➜</a>
+            </div>
+        </div>
+
+        <div class="category-card">
+            <div class="icon"><i class="fas fa-key"></i></div>
+            <div>
+            <h3>保單授權設定</h3>
+            <p>設定保單授權權限。</p>
+            <a href="insSet.html" class="arrow-link">➜</a>
+            </div>
+        </div>
+
+        <div class="category-card">
+            <div class="icon"><i class="fas fa-tasks"></i></div>
+            <div>
+            <h3>保單審理進度(未開始)</h3>
+            <p>追蹤理賠或審核狀態。</p>
+            <a href="progress.html" class="arrow-link">➜</a>
+            </div>
+        </div>
+
+        <div class="category-card">
+            <div class="icon"><i class="fas fa-bell"></i></div>
+            <div>
+            <h3>系統通知</h3>
+            <p>查看最新系統與政策消息。</p>
+            <a href="systemCall.html" class="arrow-link">➜</a>
+            </div>
+        </div>
+
+        <div class="category-card">
+            <div class="icon"><i class="fas fa-user-friends"></i></div>
+            <div>
+            <h3>聯繫業務員</h3>
+            <p>立即與您的專屬顧問聯繫。</p>
+            <a href="connect.html" class="arrow-link">➜</a>
+            </div>
+        </div>
+
+        <div class="category-card">
+            <div class="icon"><i class="fas fa-coins"></i></div>
+            <div>
+            <h3>會員點數(未開始)</h3>
+            <p>查詢與使用您的積點回饋。</p>
+            <a href="policy.html" class="arrow-link">➜</a>
+            </div>
+        </div>
+
+        <div class="category-card">
+            <div class="icon"><i class="fas fa-users"></i></div>
+            <div>
+            <h3>家屬查詢</h3>
+            <p>查詢家屬的保障與保單。</p>
+            <a href="family.html" class="arrow-link">➜</a>
+            </div>
+        </div>
+
+        <div class="category-card">
+            <div class="icon"><i class="fas fa-cogs"></i></div>
+            <div>
+            <h3>上傳確認(未開始)</h3>
+            <p>區塊鏈上鏈最後確認</p>
+            <a href="admin.html" class="arrow-link">➜</a>
+            </div>
+        </div>
+        </div>
+
 
         <!-- 背景圖 -->
         <img src="static/images/blockchain.png" alt="區塊鏈圖片" width="500" height="300" style="display:block; margin:auto;">
@@ -106,29 +138,28 @@
         <!-- 星空背景 -->
         <script>
             // 创建小星星动画
-            function createStars() {
-                const numStars = 200;
-                for (let i = 0; i < numStars; i++) {
-                    let star = document.createElement("div");
-                    star.classList.add("star");
-                    const x = Math.random() * 100;
-                    const y = Math.random() * 100;
-                    const duration = Math.random() * 2 + 1;
-                    const delay = Math.random() * 5;
-                    star.style.top = `${y}vh`;
-                    star.style.left = `${x}vw`;
-                    star.style.animationDuration = `${duration}s`;
-                    star.style.animationDelay = `${delay}s`;
-                    document.body.appendChild(star);
-                }
-            }
+            // function createStars() {
+            //     const numStars = 200;
+            //     for (let i = 0; i < numStars; i++) {
+            //         let star = document.createElement("div");
+            //         star.classList.add("star");
+            //         const x = Math.random() * 100;
+            //         const y = Math.random() * 100;
+            //         const duration = Math.random() * 2 + 1;
+            //         const delay = Math.random() * 5;
+            //         star.style.top = `${y}vh`;
+            //         star.style.left = `${x}vw`;
+            //         star.style.animationDuration = `${duration}s`;
+            //         star.style.animationDelay = `${delay}s`;
+            //         document.body.appendChild(star);
+            //     }
+            // }
 
             createStars();
         </script>
     </div>
     <!-- 頁腳 -->
     <div id="footer-container"></div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+</div>    
 </body>
 </html>

@@ -1,67 +1,62 @@
-/* 功能區塊 */
-.features {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 60px;
-    margin-bottom: 60px;
-}
+.product-category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
 
-/* 功能區塊樣式 */
-.feature {
-    background: rgba(0, 0, 0, 0.5);
-    border: 1px solid #0d2e51;
-    border-radius: 10px;
-    padding: 20px;
-    width: 300px;
-    text-align: center;
-    background-color: #57565a;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-    transition: transform 0.3s, box-shadow 0.3s;
-}
+  padding: 40px 20px;
+  background: #f7fafd;
+  border-radius: 16px;
 
-.feature:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 2px 3px rgba(229, 230, 231, 0.8);
-}
-
-.feature h2 {
-    color: #ffffff;
-    font-size: 1.5rem;
-    margin-bottom: 10px;
-    text-shadow: 0 0 5px #ffffff;
-}
-
-.feature p {
-    color: #d4d4d4;
-    font-size: 1rem;
-    margin-bottom: 20px;
-}
-
-.button {
-    display: block;
-    padding: 10px 20px;
-    background: #fff;
-    color: #000000;
-    font-weight: bold;
-    text-decoration: none;
-    border-radius: 5px;
-    transition: background 0.3s;
-    position: relative;
-    z-index: 10;
-    pointer-events: auto !important;
-
-    
-}
-
-.button:hover {
-    background: #c3c4c5;
 }
 
 
 
+.category-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
 
+.category-card:hover {
+  transform: translateY(-3px);
+  border-color: #0b5ed7;
+}
 
+.icon {
+  background: #0b5ed7;
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
 
+.category-card h3 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  color: #003366;
+}
 
+.category-card p {
+  margin: 0;
+  font-size: 14px;
+  color: #555;
+}
 
+.arrow-link {
+  color: #0b5ed7;
+  font-weight: bold;
+  text-decoration: none;
+  margin-top: 8px;
+  display: inline-block;
+}

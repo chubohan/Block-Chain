@@ -1,4 +1,77 @@
-/* Base styles */
+.section-box {
+  border: 2px solid #bcd4f6;
+  border-radius: 12px;
+  padding: 20px;
+  max-width: 420px;
+  background-color: #fff;
+  margin: 180px auto;
+  transform: scale(1.5); /* 1.2 = 放大 120% */
+}
+
+.section-title {
+  font-weight: bold;
+  font-size: 20px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.card {
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.icon-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.icon {
+  width: 40px;
+  height: 40px;
+  background-color: #0b5ed7;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon.user::before {
+  content: "👤";
+  font-size: 20px;
+}
+
+.icon.card::before {
+  content: "💳";
+  font-size: 20px;
+}
+
+.icon.doc::before {
+  content: "📄";
+  font-size: 20px;
+}
+
+.title {
+  font-weight: bold;
+  font-size: 16px;
+  margin: 0;
+  color: #003366;
+}
+
+a {
+  font-size: 14px;
+  color: #0b5ed7;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* 第二*/
 .services-container {
     display: flex;
     flex-direction: column;
@@ -23,10 +96,9 @@
     font-size: 28px;
     margin-bottom: 40px;
     font-weight: bold;
-    color: #007aff;
+    color: #1f4874;
     text-align: center;
     letter-spacing: 1px;
-    text-shadow: 0 2px 8px rgba(0, 122, 255, 0.5);
 }
 
 .services-list {
@@ -63,7 +135,7 @@
 
 .category-label {
     font-size: 20px;
-    background: #007aff;
+    background: #1f4874;
     color: #ffffff;
     width: 180px;
     height: 58px;

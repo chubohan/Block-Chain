@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>保險平台主頁</title>
+        <link rel="stylesheet" href="static/css/styles.css">
+        <link rel="stylesheet" href="static/css/systemCall.css">
+        <script src="static/js/include.js" defer></script> <!-- 載入 header & footer -->
+    </head>
+<body>
+<div class="wrapper">
+    <div id="header-container"></div>
+    <div class="container">
+    <section class="notification-section">
+        <h2 class="notification-title">📣 系統通知</h2>
+
+        <div class="notification-list">
+            <div class="notification-item unread">
+            <div class="icon">📅</div>
+            <div class="text-content">
+                <p class="title">保單即將到期提醒</p>
+                <p class="desc">您的 123456 保單將於 2025/06/01 到期，請儘早續保。</p>
+                <span class="timestamp">2025/05/18 14:32</span>
+            </div>
+            </div>
+
+            <div class="notification-item">
+            <div class="icon">📄</div>
+            <div class="text-content">
+                <p class="title">理賠文件補件提醒</p>
+                <p class="desc">您申請的理賠案需補交診斷證明書，請於 7 日內完成。</p>
+                <span class="timestamp">2025/05/17 09:15</span>
+            </div>
+            </div>
+
+            <div class="notification-item">
+            <div class="icon">💳</div>
+            <div class="text-content">
+                <p class="title">扣款失敗通知</p>
+                <p class="desc">系統偵測到保費扣款失敗，請確認帳戶餘額或補繳。</p>
+                <span class="timestamp">2025/05/16 11:42</span>
+            </div>
+            </div>
+        </div>
+    </section>
+    </div>
+    </div>
+  
+</div>
+<!-- 頁腳 -->
+<div id="footer-container"></div>
+<script src="static/js/script.js"></script>
+</body>
+</html>
+
+<style>
+    .notification-section {
+  background-color: #f7fafd;
+  padding: 40px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  max-width: 900px;
+  margin: 0 auto 60px;
+}
+
+.notification-title {
+  font-size: 24px;
+  color: #003366;
+  margin-bottom: 24px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.notification-item {
+  display: flex;
+  gap: 16px;
+  background-color: #ffffff;
+  padding: 16px 20px;
+  border-radius: 10px;
+  border-left: 6px solid #dee2e6;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+}
+
+.notification-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.notification-item.unread {
+  border-left-color: #0b5ed7;
+  background-color: #eaf2ff;
+}
+
+.icon {
+  font-size: 28px;
+  flex-shrink: 0;
+  color: #0b5ed7;
+}
+
+.text-content {
+  flex-grow: 1;
+}
+
+.text-content .title {
+  font-weight: bold;
+  color: #003366;
+  margin: 0;
+}
+
+.text-content .desc {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.text-content .timestamp {
+  font-size: 12px;
+  color: #888;
+}
+
+</style>

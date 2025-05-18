@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>家屬保單查詢 | 壽山保險</title>
+        <link rel="stylesheet" href="static/css/styles.css">
+        <link rel="stylesheet" href="static/css/family.css">
+        <script src="static/js/include.js" defer></script>
+    </head> 
+<body>
+    <!-- 頁首 -->
+    <div id="header-container"></div>
+
+    <!-- 主容器 -->
+    <div class="family-container">
+        <div class="form-box">
+            <h1>親屬授權設定</h1>
+            <p>可查詢對象之個人資料</p>
+
+            <form id="familyForm" onsubmit="return validateForm()">
+ 
+            <label for="idNumber">身份證字號</label>
+            <input type="text" id="idNumber" name="idNumber" placeholder="請輸入身份證字號" required pattern="[A-Z][0-9]{9}">
+
+            <label for="relationship">關係</label>
+            <select id="relationship" name="relationship" required>
+                <option value="">請選擇關係</option>
+                <option value="self">本人</option>
+                <option value="spouse">配偶</option>
+                <option value="parent">父母</option>
+                <option value="child">子女</option>
+                <option value="other">其他</option>
+            </select>
+
+            <label for="phone">電話</label>
+            <input type="tel" id="phone" name="phone" placeholder="請輸入電話" > 
+
+            <a href="insSet4.html" class="search-btn">下一步</a>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- 頁腳 -->
+    <div id="footer-container"></div>
+
+    <script src="static/js/family.js"></script>
+</body>
+</html>
+
+<style>
+ /* ======= 家屬保單查詢頁面 ======= */
+
+.family-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 90vh;
+    background-color: #f4f4f4;
+}
+
+/* 表單盒子 */
+.form-box {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 400px;
+}
+
+/* 標題 */
+.form-box h1 {
+    font-size: 1.8rem;
+    color: #0056b3;
+    margin-bottom: 10px;
+}
+
+/* 提示文字 */
+.form-box p {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+/* 輸入框 */
+.form-box label {
+    display: block;
+    font-weight: bold;
+    text-align: left;
+    margin-bottom: 5px;
+}
+
+.form-box input {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+
+/* 查詢按鈕 */
+.search-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #0056b3;
+    color: white;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.search-btn:hover {
+    background-color: #004494;
+}
+
+/* 保單清單 */
+.policy-list {
+    margin-top: 20px;
+    text-align: left;
+}
+
+.policy-list h2 {
+    font-size: 1.5rem;
+    color: #0056b3;
+}
+
+.policy-list ul {
+    list-style: none;
+    padding: 0;
+}
+
+.policy-list li {
+    background: #f8f9fa;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+
+
+</style>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>保險平台主頁</title>
+        <link rel="stylesheet" href="static/css/styles.css">
+        <link rel="stylesheet" href="static/css/policy.css">
+        <script src="static/js/include.js" defer></script> <!-- 載入 header & footer -->
+        
+    </head>
+<body>
+    <div id="header-container"></div>
+    <div id="container">
+    <div class="product-list">
+        <div class="product-item">
+            <img src="product1.jpg" alt="商品1">
+            <h2>健康險</h2>
+            <p>提供全面的健康保障。</p>
+            <a href="product1-details.html" class="btn">了解更多</a>
+        </div>
+        <div class="product-item">
+            <img src="product2.jpg" alt="商品2">
+            <h2>利變型增額終身壽險</h2>
+            <p>提供穩定的增額收益，保障您的未來。</p>
+            <a href="product2-details.html" class="btn">了解更多</a>
+        </div>
+        <div class="product-item">
+            <img src="product2.jpg" alt="商品2">
+            <h2>利變型增額終身壽險</h2>
+            <p>提供穩定的增額收益，保障您的未來。</p>
+            <a href="product2-details.html" class="btn">了解更多</a>
+        </div>
+        <div class="product-item">
+            <img src="product2.jpg" alt="商品2">
+            <h2>美元利變型終身壽險</h2>
+            <p>提供外幣資產增值與保障。</p>
+            <a href="product2-details.html" class="btn">了解更多</a>
+        </div>
+        <div class="product-item">
+            <img src="product2.jpg" alt="商品2">
+            <h2>投資型保單（如變額年金）</h2>
+            <p>結合投資與保障的保險方案。</p>
+            <a href="product2-details.html" class="btn">了解更多</a>
+        </div>
+        <div class="product-item">
+            <img src="product2.jpg" alt="商品2">
+            <h2>旅遊綜合保險</h2>
+            <p>涵蓋旅遊期間的意外與醫療保障。</p>
+            <a href="product2-details.html" class="btn">了解更多</a>
+        </div>
+        <div class="product-item">
+            <img src="product2.jpg" alt="商品2">
+            <h2>機車保險</h2>
+            <p>提供機車駕駛的責任與意外保障。</p>
+            <a href="product2-details.html" class="btn">了解更多</a>
+        </div>
+    </div>
+    </div>  
+    <div id="footer-container"></div>
+</body>
+</html>
+
+<style>
+    /* 產品列表區域 */
+.product-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: 80px auto 0 auto;
+}
+
+.product-item {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+    width: 300px;
+}
+
+.product-item:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+}
+
+.product-item img {
+    width: 100%;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    height: 200px;
+    object-fit: cover;
+}
+
+.product-item h2 {
+    font-size: 1.5rem;
+    margin: 15px 0 10px;
+    color: #333;
+}
+
+.product-item p {
+    font-size: 1rem;
+    margin: 0 15px 15px;
+    color: #666;
+}
+
+.btn {
+    display: inline-block;
+    background-color: #007bff;
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    margin-bottom: 20px;
+    transition: background-color 0.3s;
+}
+
+.btn:hover {
+    background-color: #0056b3;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .product-list {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+</style>

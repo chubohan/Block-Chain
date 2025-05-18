@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>正式保單資訊表格</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@^3/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="static/css/listInsurance.css">
+    <link rel="stylesheet" href="static/css/insurance_summary_card.css">   
+    <link rel="stylesheet" href="static/css/styles.css">
+  
+    <script src="static/js/include.js" defer></script> <!-- 載入 header & footer -->
+</head>
+<body>
+    <div id="header-container"></div>
+    <container>
+    <h2>保單資訊</h2>
+    <table>
+        <tr>
+            <th>保單名稱</th>
+            <td>定期壽險 – T2021</td>
+        </tr>
+        <tr>
+            <th>保單類型</th>
+            <td>壽險</td>
+        </tr>
+        <tr>
+            <th>投保日期</th>
+            <td>2050年1月1日</td>
+        </tr>
+        <tr>
+            <th>投保總金額</th>
+            <td>500  萬</td>
+        </tr>
+    </table>
+
+    <h2>保單資訊</h2>
+    </table>
+        <table>
+        <tr>
+            <th>保單名稱</th>
+            <td>定期壽險 – T2021</td>
+        </tr>
+        <tr>
+            <th>保單類型</th>
+            <td>壽險</td>
+        </tr>
+        <tr>
+            <th>投保日期</th>
+            <td>2050年1月1日</td>
+        </tr>
+        <tr>
+            <th>投保總金額</th>
+            <td>500  萬</td>
+        </tr>
+    </table>
+
+    <h2>詳細內容</h2>
+    </table>
+        <table>
+        <tr>
+            <th>保單名稱</th>
+            <td>定期壽險 – T2021</td>
+        </tr>
+        <tr>
+            <th>保單類型</th>
+            <td>壽險</td>
+        </tr>
+        <tr>
+            <th>投保日期</th>
+            <td>2050年1月1日</td>
+        </tr>
+        <tr>
+            <th>投保總金額</th>
+            <td>500  萬</td>
+        </tr>
+    </table>
+
+    <h2>理賠進度</h2>
+    </table>
+        <table>
+        <tr>
+            <th>保單名稱</th>
+            <td>定期壽險 – T2021</td>
+        </tr>
+        <tr>
+            <th>保單類型</th>
+            <td>壽險</td>
+        </tr>
+        <tr>
+            <th>投保日期</th>
+            <td>2050年1月1日</td>
+        </tr>
+        <tr>
+            <th>投保總金額</th>
+            <td>500  萬</td>
+        </tr>
+    </table>
+
+    <h2>細項</h2>
+    </table>
+        <table>
+        <tr>
+            <th>保單名稱</th>
+            <td>定期壽險 – T2021</td>
+        </tr>
+        <tr>
+            <th>保單類型</th>
+            <td>壽險</td>
+        </tr>
+        <tr>
+            <th>投保日期</th>
+            <td>2050年1月1日</td>
+        </tr>
+        <tr>
+            <th>投保總金額</th>
+            <td>500  萬</td>
+        </tr>
+    </table>
+    <button-group>
+    <button class="print-button">續保通知</button>
+    <button class="print-button">設定授權</button>
+    <a href="2myInsurance.html" class="p1-button">下載副本</a>
+    </button-group>
+    </container>
+</body>
+
+    <!-- 頁腳 -->
+    <!-- <div id="footer-container"></div> -->
+    <script src="static/js/script.js"></script>
+</html>
+<!DOCTYPE html>
+
+
+<style>
+    
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f7fa;
+    padding: 20px;
+}
+table {
+    width: 50%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    margin-left: 60px;
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+th{
+    width: 120px;
+    padding: 16px 16px;
+    text-align: left;
+}
+td {
+    padding: 16px 24px;
+    text-align: left;
+}
+th {
+    background-color: #003366;
+    color: #ffffff;
+    font-weight: bold;
+}
+tr:nth-child(even) {
+    background-color: #f0f4f8;
+}
+tr:nth-child(odd) {
+    background-color: #ffffff;
+}
+
+h2 {
+    margin-left: 120px !important; 
+    margin-top: 60px !important;
+}
+
+button-group{
+      margin-top: 60px !important;
+      margin-left:150px;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
+
+
+
+
+
+    
+  .wrapper {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+
+  .insurance-card {
+    background-color: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0, 51, 102, 0.08);
+    padding: 32px;
+    margin-bottom: 40px;
+  }
+
+  .insurance-card h2 {
+    margin-top: 0;
+    color: #003366;
+    margin-bottom: 24px;
+  }
+
+  .policy-info-pairs {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    background-color: rgba(217, 217, 217, 0.44);
+    padding: 12px 16px;
+    border-radius: 8px;
+  }
+
+  .label {
+    font-weight: bold;
+    color: #003366;
+    font-size: 16px;
+  }
+
+  .value {
+    font-size: 16px;
+    color: #000;
+  }
+
+  .policy-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 40px;
+  }
+
+  .policy-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(230, 240, 255, 0.5);
+    padding: 12px 20px;
+    border-radius: 10px;
+  }
+
+  .policy-title {
+    font-weight: bold;
+    color: #003366;
+    font-size: 16px;
+  }
+
+  .policy-period {
+    font-size: 14px;
+    color: #444;
+  }
+
+  @media (max-width: 640px) {
+    .info-row, .policy-item-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .policy-title, .policy-period {
+      font-size: 15px;
+    }
+  }
+
+/* Action section */
+.action-container {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.print-button {
+  font-size: 24px;
+  font-family: "Roboto Mono", monospace;
+  color: #000;
+  background-color: #ffb7b7;
+  border-radius: 10px;
+  padding: 12px 24px;
+  border: none;
+  cursor: pointer;
+}
+
+</style>
+
+
+  

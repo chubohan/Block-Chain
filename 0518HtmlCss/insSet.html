@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>保險平台主頁</title>
+        <link rel="stylesheet" href="static/css/styles.css">
+        <link rel="stylesheet" href="static/css/inSet.css">
+        <script src="static/js/include.js" defer></script> <!-- 載入 header & footer -->
+    </head>
+<body>
+<div class="wrapper">
+    <div id="header-container"></div>
+    <div class="container">
+     <section class="policy-container">
+    <header class="policy-header">
+      <h3 class="header-item policy-number">保單編號</h3>
+      <h3 class="header-item policy-type">保單類型</h3>
+      <h3 class="header-item policy-status">有效狀態</h3>
+      <h3 class="header-item authorized-count">已授權人數</h3>
+    </header>
+    <div class="divider"></div>
+
+    <article class="policy-row">
+      <p class="policy-number-value">1236556</p>
+      <p class="policy-type-value">定期壽險</p>
+      <p class="policy-status-value">有效</p>
+      <p class="authorized-count-value">兩人</p>
+      <a href="insSet2.html" class="action-link">查看授權/新增授權</a>
+    </article>
+
+    <article class="policy-row">
+      <p class="policy-number-value">1231562</p>
+      <p class="policy-type-value">終身壽險</p>
+      <p class="policy-status-value">有效</p>
+      <p class="authorized-count-value">一人</p>
+      <a href="#" class="action-link">查看授權/新增授權</a>
+    </article>
+
+    <article class="policy-row">
+      <p class="policy-number-value">1891563</p>
+      <p class="policy-type-value">增額終身壽險</p>
+      <p class="policy-status-value">有效</p>
+      <p class="authorized-count-value">無</p>
+      <a href="#" class="action-link">查看授權/新增授權</a>
+    </article>
+
+    <article class="policy-row">
+      <p class="policy-number-value">1123123</p>
+      <p class="policy-type-value">利變型壽險</p>
+      <p class="policy-status-value">已到期</p>
+      <p class="authorized-count-value">兩人</p>
+      <a href="#" class="action-link">查看授權/新增授權</a>
+    </article>
+  </section>
+   
+
+
+</div>
+</div>
+</div>
+</body>
+</html>
+
+<style>
+  /* --- Main Container --- */
+.policy-container {
+  max-width: 860px;
+  margin: 60px auto;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  padding: 40px 32px;
+  font-family: 'Noto Sans TC', sans-serif;
+}
+
+/* --- Header Row --- */
+.policy-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  font-size: 16px;
+  color: #003366;
+  border-bottom: 2px solid #e0e6ed;
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+}
+
+.header-item {
+  flex: 1;
+  text-align: left;
+}
+
+/* --- Policy Row --- */
+.policy-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 15px;
+  padding: 14px 0;
+  border-bottom: 1px solid #e6ebf1;
+  color: #333;
+}
+
+.policy-row:last-child {
+  border-bottom: none;
+}
+
+.policy-number-value,
+.policy-type-value,
+.policy-status-value,
+.authorized-count-value {
+  flex: 1;
+}
+
+/* --- 狀態標籤色彩 --- */
+.policy-status-value {
+  font-weight: bold;
+}
+
+.policy-status-value::before {
+  content: "● ";
+  color: #28a745; /* 有效：綠色 */
+}
+
+.policy-row:has(.policy-status-value:contains("已到期")) .policy-status-value::before {
+  color: #dc3545; /* 已到期：紅色 */
+}
+
+/* --- 操作連結 --- */
+.action-link {
+  flex-shrink: 0;
+  font-size: 14px;
+  color: #0b5ed7;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s;
+}
+
+.action-link:hover {
+  color: #003366;
+  text-decoration: underline;
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  .policy-header,
+  .policy-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-item,
+  .policy-number-value,
+  .policy-type-value,
+  .policy-status-value,
+  .authorized-count-value,
+  .action-link {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .action-link {
+    margin-top: 10px;
+  }
+}
+
+</style>

@@ -3,9 +3,8 @@
 <head>
 <meta charset="utf-8">
 <title>測試樣板</title>
-<script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <!-- 連結思源中文及css -->
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.umd.min.js"></script><!--記得家這行-->
 <link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
 <link href="/static/imgs/icon.jpg" rel="shortcut icon">
 <link href="/static/css/menu.css" rel="stylesheet"/>  
@@ -28,35 +27,44 @@
         <!--~~~~~~~~~~~~~~~~~--> 
         <div class="content">
             
-            <h2>查询保单</h2>
-            <button onclick="connectWallet()">连接钱包</button>
-    <div id="walletStatus"></div>
-
-    <h2>保单查询</h2>
-    <form id="queryForm">
-        <label>保单编号：
-            <input type="text" id="queryPolicyNumber" required >
-        </label>
-        <button type="submit">查询</button>
-    </form>
-    <div id="result"></div> 
+            <h1>电子保单查询系统</h1>
+    
+            <div>
+                <input type="text" id="policyNumber" placeholder="请输入保单号码">
+                <button id="connectBtn">连接钱包</button>
+                <button id="queryBtn">查询保单</button>
+            </div>
+            <div class="wallet-status">
+                <span id="walletAddress">未连接钱包</span>
+            </div>
+            <div id="loading" class="loading" style="display: none;">查询中...</div>
+            <div id="result"></div>
+        
+            <!-- 授权管理界面 -->
+        <div id="authTab" class="tab-content">
+            <h2>保单授权管理</h2>
             
-            <!--
-            <form action="/policy/read" method="get">
-                <div class="form">
-                    <span class="name">客戶編號</span>
-                    <span class="value">
-                        <input type="text" name="cusno" required>
-                    </span>
-                    <br/>
-                   
-                    
-                    <span class="name"></span>
-                    <span class="value"><input type="submit" value="查詢" style="width:80px"></span>
+            <div class="auth-form">
+                <div class="form-group">
+                    <label>保单号码：</label>
+                    <input type="text" id="authPolicyNumber" placeholder="POL-001">
                 </div>
-            </form>-->
-               
-        </div>       
+                
+                <div class="form-group">
+                    <label>授权地址：</label>
+                    <input type="text" id="authAddress" placeholder="0x...">
+                </div>
+                
+                <div class="button-group">
+                    <button onclick="grantAuthorization()">授予权限</button>
+                    <button onclick="revokeAuthorization()">撤销权限</button>
+                </div>
+            </div>
+            
+            <div id="authStatus"></div>
+
+            
+        </div>
         
         <!--~~~~~~~~~~~~~~~~~--> 
         <div class="footer">
@@ -65,12 +73,10 @@
     </div>
     <!--**************************-->    
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-   
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
-        let web3 = null;
-        let contract = null;
-        let account = null; 
-const contractABI = [
+        const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // 替换为实际合约地址
+        const contractABI = [
 	{
 		"inputs": [
 			{
@@ -140,60 +146,27 @@ const contractABI = [
 				"internalType": "string",
 				"name": "_policyNumber",
 				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "_wallet",
+				"type": "address"
+			}
+		],
+		"name": "authorizePolicyAccess",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
 			}
 		],
 		"name": "deletePolicy",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_policyNumber",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_insuranceAmount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_premiumAmount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_growthRate",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_declaredInterestRate",
-				"type": "uint256"
-			}
-		],
-		"name": "updatePolicy",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_policyNumber",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "_pdfHash",
-				"type": "string"
-			}
-		],
-		"name": "updatePolicyPDF",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -270,6 +243,30 @@ const contractABI = [
 				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "_wallet",
+				"type": "address"
+			}
+		],
+		"name": "isAuthorized",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
 			}
 		],
 		"stateMutability": "view",
@@ -367,234 +364,368 @@ const contractABI = [
 		],
 		"stateMutability": "view",
 		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "_wallet",
+				"type": "address"
+			}
+		],
+		"name": "revokePolicyAccess",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_insuranceAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_premiumAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_growthRate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_declaredInterestRate",
+				"type": "uint256"
+			}
+		],
+		"name": "updatePolicy",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_pdfHash",
+				"type": "string"
+			}
+		],
+		"name": "updatePolicyPDF",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
 	}
-];  // 完整合约ABI
-const contractAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"; // 已部署合约地址
- // ========== 钱包连接 ==========
-// 钱包连接功能
+]; // 保持与之前提供的ABI一致
+
+    let insuranceContract = null;
+
+        // 连接钱包函数（改造后）
 async function connectWallet() {
-            try {
-                if (!window.ethereum) throw new Error("请安装MetaMask");
-                
-                web3 = new Web3(window.ethereum);
-                await window.ethereum.request({ method: "eth_requestAccounts" });
-                
-                const accounts = await web3.eth.getAccounts();
-                account = accounts[0];
-                contract = new web3.eth.Contract(contractABI, contractAddress);
-                
-                document.getElementById("walletStatus").innerHTML = 
-                    `已连接钱包：${account.slice(0,6)}...${account.slice(-4)}`;
-            } catch (error) {
-                alert(`连接失败：${error.message}`);
-            }
-        }
-
-// 安全初始化函数
-function initApp() {
-  const resultDiv = document.getElementById("result");
-  const queryForm = document.getElementById("queryForm");
-  
-  if (!resultDiv || !queryForm) {
-    console.error("关键元素未找到");
-    return;
-  }
-
-  queryForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    
     try {
-      resultDiv.innerHTML = "查询中...";
-      
-      // 异步操作...
-      const data = await fetchData();
-      
-      // 安全更新内容
-      resultDiv.innerHTML = `
-        <div class="success">${data}</div>
-      `;
-    } catch (error) {
-      console.error(error);
-      resultDiv.innerHTML = `
-        <div class="error">${error.message}</div>
-      `;
-    }
-  });
-}
-
-// 定义数据获取函数
-async function fetchData(policyNumber) {
-  // 验证合约和账户状态
-  if (!contract || !account) {
-    throw new Error("请先连接钱包");
-  }
-
-  // 调用智能合约方法
-  try {
-    const policy = await contract.methods.getPolicy(policyNumber)
-      .call({ from: account });
-    return policy;
-  } catch (error) {
-    console.error("数据获取失败:", error);
-    throw new Error("无法从区块链获取保单数据");
-  }
-}
-
-function updateWalletStatus() {
-                    const statusEl = document.getElementById("statusText");
-                    statusEl.textContent = contract ? "已连接" : "未连接";
-                    statusEl.style.color = contract ? "green" : "red";
-                    
-                    // 更新网络状态
-                    web3.eth.getChainId().then(chainId => {
-                        document.getElementById("networkStatus").innerHTML = 
-                            `（网络ID: ${chainId} ${chainId === 31337 ? 'Hardhat' : '未知网络'}）`;
-                    });
-                }
-                
-                // 在connectWallet最后调用
-                updateWalletStatus();
-
-// 启动应用
-document.addEventListener("DOMContentLoaded", initApp);
-function updateWalletStatus() {
-  const statusEl = document.getElementById("walletStatus");
-  
-  // 添加合约实例检查
-  const contractReady = !!contract?.options?.address;
-  
-  statusEl.innerHTML = `
-    ${account ? `已连接：${account.slice(0,6)}...${account.slice(-4)}` : '未连接'}
-    <br>
-    合约状态：${contractReady ? '已初始化' : '未就绪'}
-  `;
-}
-// 在查询结果处理中添加
-const validatePolicyData = (result) => {
-    const requiredFields = {
-        policyHolder: result[0],  // 索引0对应getPolicy返回的第一个参数
-        insuredPerson: result[1], // 索引1
-        beneficiary: result[6]    // 索引6
-    };
-
-    Object.entries(requiredFields).forEach(([field, value]) => {
-        if (typeof value !== 'string') {
-            throw new Error(`字段 ${field} 数据异常，请检查合约存储`);
-        }
-    });
-};
-
-// 在解密前调用
-validatePolicyData(result);
-// 修改后的解密函数
-function decryptField(cipherText) {
-    // 空值防御
-    if (typeof cipherText !== 'string' || cipherText.trim() === '') {
-        console.warn('解密内容为空或非字符串:', cipherText);
-        return '未知';
-    }
-
-    try {
-        const decryptedBytes = CryptoJS.AES.decrypt(
-            cipherText,
-            ENCRYPTION_KEY,
-            { iv: IV, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }
+        if (!window.ethereum) throw new Error("请安装MetaMask");
+        
+        // 初始化Provider
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        
+        // 获取Signer
+        const signer = await provider.getSigner();
+        // 初始化合约实例
+        insuranceContract = new ethers.Contract(
+            "0x5FbDB2315678afecb367f032d93F642f64180aa3", // 替换实际地址
+            contractABI,
+            signer
         );
         
-        // 添加UTF-8编码验证
-        const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
-        return decryptedText || '（空值）';
-    } catch (error) {
-        console.error('解密失败:', {
+// 验证合约连接
+console.log("合约实例:", insuranceContract);
+        console.log("合约地址:", await insuranceContract.getAddress());
+        // 更新钱包状态
+        const address = await signer.getAddress();
+        document.getElementById("walletAddress").textContent = 
+            `你的錢包:${address.slice(0,6)}...${address.slice(-4)}`;
+    }
+     catch (error) {
+        console.error("连接错误:", error);
+        alert(`连接失败: ${error.message}`);
+     }
+}
+// UI状态更新函数
+function updateUI() {
+    const btn = document.getElementById('connectBtn');
+    if (walletState.isConnected) {
+        btn.innerHTML = "✔️ 已连接";
+        btn.style.backgroundColor = "#4CAF50";
+    } else {
+        btn.innerHTML = "🔗 连接钱包";
+        btn.style.backgroundColor = "#f44336";
+    }
+}
+// ========== 加密解密配置 ==========
+const ENCRYPTION_CONFIG = {
+    key: CryptoJS.enc.Utf8.parse("32-ByteSecretKey-123456789012"), // 必须与加密时一致
+    iv: CryptoJS.enc.Utf8.parse("16-ByteInitVector"), // 必须与加密时一致
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7
+};
+
+// 解密函数（安全增强版）
+function decryptField(cipherText) {
+    if (!cipherText || typeof cipherText !== 'string') {
+        console.warn("无效的密文输入");
+        return "N/A";
+    }
+    
+    try {
+        // 验证是否为合法Base64格式
+        if (!/^[A-Za-z0-9+/=]+$/.test(cipherText)) {
+            throw new Error("密文格式无效");
+        }
+
+        const bytes = CryptoJS.AES.decrypt(
             cipherText,
-            error: error.message,
-            stack: error.stack
-        });
-        return '解密失败';
+            ENCRYPTION_CONFIG.key,
+            { 
+                iv: ENCRYPTION_CONFIG.iv,
+                mode: ENCRYPTION_CONFIG.mode,
+                padding: ENCRYPTION_CONFIG.padding
+            }
+        );
+        
+        const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+        
+        // 验证解密结果
+        if (!decrypted) {
+            throw new Error("解密结果为空");
+        }
+        
+        return decrypted;
+    } catch (error) {
+        console.error(`解密失败 (${cipherText.slice(0,10)}...):`, error);
+        return "⚠️ 解密错误";
     }
 }
 
-async function queryPolicy() {
-    const policyNumber = document.getElementById("queryPolicyNumber").value;
-    const resultDiv = document.getElementById("queryResult");
-    resultDiv.innerHTML = "<div class='loading'>查询中...</div>";
+        // 查询保单
+        async function queryPolicy() {
+            const policyNumber = document.getElementById("policyNumber").value;
+            const resultDiv = document.getElementById("result");
+            const loading = document.getElementById("loading");
+            
+            try {
+                if (!policyNumber) throw new Error("请输入保单号码");
+                
 
-    try {
-        // ========== 前置验证 ==========
-        // 1. 输入验证
-        
+                loading.style.display = "block";
+                resultDiv.innerHTML = "";
 
-        // 2. 网络验证
-        const chainId = await web3.eth.getChainId();
-        if (chainId !== 31337) {
-            await window.ethereum.request({
-                method: "wallet_switchEthereumChain",
-                params: [{ chainId: "0x7a69" }]
-            });
-            // 等待网络切换
-            await new Promise(resolve => setTimeout(resolve, 1000));
+                 // === 核心权限验证开始 ===
+        // 并行获取必要数据提升性能
+        const [currentAddress, policyInfo, isAuthorized] = await Promise.all([
+            insuranceContract.runner.address,  // 获取当前连接地址
+            insuranceContract.policies(policyNumber), // 获取保单基本信息
+            insuranceContract.isAuthorized(policyNumber, await insuranceContract.runner.address) // 检查授权状态
+        ]);
+
+        // 解析保单所有者地址（根据ABI结构，owner在第10位）
+        const policyOwner = policyInfo[10]; 
+
+        // 权限验证逻辑
+        const isOwner = currentAddress.toLowerCase() === policyOwner.toLowerCase();
+        if (!isOwner && !isAuthorized) {
+            throw new Error("⚠️ 无访问权限：您不是保单所有者且未被授权查看此保单");
         }
+        // === 核心权限验证结束 ===
+    
 
-        // 3. 合约状态验证
-        if (!contract?.methods?.getPolicy) {
-            await connectWallet();
-            if (!contract?.methods?.getPolicy) {
-                throw new Error("合约初始化失败");
+
+                // 获取保单数据
+                const policyData = await insuranceContract.getPolicy(policyNumber);
+        console.log("原始保单数据:", policyData);
+                
+                // 数值格式化工具函数
+const formatters = {
+  weiToEth: (wei) => ethers.formatEther(wei),
+  timestampToDate: (timestamp) => {
+    if (!timestamp) return '未设置';
+    try {
+      return new Date(Number(timestamp) * 1000).toLocaleDateString();
+    } catch {
+      return '无效日期';
+    }
+  },
+  bigIntToString: (value) => value.toString(),
+  parsePolicyData: (rawData) => ({
+    
+    policyHolder: rawData[0],
+    insuredPerson: rawData[1],
+    insuranceAmount: rawData[2],
+    premiumPeriod: Number(rawData[3]),
+    premiumAmount: rawData[4],
+    startDate: formatters.timestampToDate(rawData[5]),
+    beneficiary: rawData[6],
+    growthRate: Number(rawData[7]),
+    declaredInterestRate: Number(rawData[8]),
+    pdfHash: rawData[9]
+    
+  })
+};
+
+               // 获取并格式化数据
+    const rawData = await insuranceContract.getPolicy(policyNumber);
+    const formattedData = formatters.parsePolicyData(rawData);
+// 渲染数据
+renderPolicy(formattedData);     
+            } catch (error) {
+                loading.style.display = "none";
+                showError(`查询失败: ${error.message}`);
             }
         }
-
-        // ========== 数据获取 ==========
-        const result = await contract.methods.getPolicy(policyNumber)
-            .call({ from: account })
-            .catch(err => {
-                console.error("合约调用原始错误:", err);
-                throw new Error("区块链查询失败，请检查保单是否存在");
-            });
-
-        // ========== 数据验证 ==========
-        if (!Array.isArray(result) || result.length < 10) {
-            console.error("合约返回异常数据:", result);
-            throw new Error("保单数据结构异常");
+        function renderPolicy(data) {
+  const html = `
+    <div class="policy-info">
+      
+      <p>投保人: ${data.policyHolder}</p>
+      <p>被保人: ${data.insuredPerson}</p>
+      <p>保额: ${data.insuranceAmount} </p>
+      <p>缴费年限: ${data.premiumPeriod} 年</p>
+      <p>每期保费: ${data.premiumAmount} </p>
+      <p>生效日期: ${data.startDate}</p>
+      <p>受益人: ${data.beneficiary}</p>
+      <p>增额比例: ${data.growthRate}%</p>
+      <p>宣告利率: ${data.declaredInterestRate}%</p>
+      <p>保单文件: <a href="https://ipfs.io/ipfs/${data.pdfHash}" target="_blank">查看PDF</a></p>
+    </div>
+  `;
+  document.getElementById("result").innerHTML = html;
+}
+        function showError(msg) {
+            document.getElementById("result").innerHTML = `
+                <div class="error">
+                    ⚠️ ${msg}
+                    ${msg.includes("权限") ? '<button onclick="connectWallet()">重新连接钱包</button>' : ''}
+                </div>
+            `;
         }
 
-        // ========== 数据解密 ==========
-        const decryptedData = {
-            policyHolder: decryptField(result[0]),
-            insuredPerson: decryptField(result[1]),
-            beneficiary: decryptField(result[6])
-        };
+        // 事件绑定
+        document.getElementById("connectBtn").addEventListener("click", connectWallet);
+        document.getElementById("queryBtn").addEventListener("click", queryPolicy);
+		
+		
+		
+		/*以下是授權--------------------------------------------------------------------------*/
+		// 切换选项卡
+function switchTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    document.getElementById(`${tabName}Tab`).classList.add('active');
+    document.querySelector(`button[onclick="switchTab('${tabName}')"]`).classList.add('active');
+}
 
-        // ========== 结果显示 ==========
-        resultDiv.innerHTML = `
-            <div class="result-item">保单持有人：${decryptedData.policyHolder}</div>
-            <div class="result-item">被保险人：${decryptedData.insuredPerson}</div>
-            <div class="result-item">保险金额：${web3.utils.fromWei(result[2], 'ether')} ETH</div>
-            <div class="result-item">缴费期：${result[3]} 年</div>
-            <div class="result-item">保费金额：${web3.utils.fromWei(result[4], 'ether')} ETH/期</div>
-            <div class="result-item">生效日期：${new Date(result[5] * 1000).toLocaleDateString()}</div>
-            <div class="result-item">受益人：${decryptedData.beneficiary}</div>
-            <div class="result-item">增额比例：${result[7]}%</div>
-            <div class="result-item">宣告利率：${result[8]}%</div>
-            <div class="result-item">PDF哈希：<a href="#" onclick="viewPDF('${result[9]}')">查看文件</a></div>
-        `;
+// 授予权限
+async function grantAuthorization() {
+    try {
+        const policyNumber = document.getElementById('authPolicyNumber').value;
+        const address = document.getElementById('authAddress').value;
+        
+        // 验证输入
+        if (!policyNumber || !address) {
+            throw new Error("请填写完整信息");
+        }
+        if (!ethers.isAddress(address)) {
+            throw new Error("请输入有效的钱包地址");
+        }
 
+        // 验证调用者权限
+        const policyOwner = await insuranceContract.policies(policyNumber).then(r => r[10]);
+        const currentAddress = await insuranceContract.runner.address;
+        
+        if (currentAddress.toLowerCase() !== policyOwner.toLowerCase()) {
+            throw new Error("只有保单所有者可以授权");
+        }
+
+        // 发送授权交易
+        showAuthStatus("⏳ 正在提交授权交易...", "processing");
+        const tx = await insuranceContract.authorizePolicyAccess(policyNumber, address);
+        await tx.wait();
+        
+        showAuthStatus("✅ 授权成功！", "success");
     } catch (error) {
-        console.error("完整错误堆栈:", error);
-        resultDiv.innerHTML = `
-            <div class="error">
-                <p>❌ 查询失败</p>
-                <p>${error.message}</p>
-                ${error.code ? `<p>错误码：${error.code}</p>` : ''}
-            </div>
-        `;
+        console.error("授权失败:", error);
+        showAuthStatus(`❌ 错误: ${error.message}`, "error");
     }
 }
-// PDF查看功能（示例）
-async function viewPDF(pdfHash) {
-    // 这里需要实现根据哈希获取PDF文件
-    alert("正在获取文件：" + pdfHash);
+
+// 撤销权限
+async function revokeAuthorization() {
+    try {
+        const policyNumber = document.getElementById('authPolicyNumber').value;
+        const address = document.getElementById('authAddress').value;
+        
+        // 输入验证
+        if (!policyNumber || !address) {
+            throw new Error("请填写完整信息");
+        }
+        if (!ethers.isAddress(address)) {
+            throw new Error("无效的钱包地址格式");
+        }
+        
+        showAuthStatus("⏳ 正在提交撤销交易...", "processing");
+        const tx = await insuranceContract.revokePolicyAccess(policyNumber, address);
+        await tx.wait();
+        
+        showAuthStatus("✅ 权限撤销成功！", "success");
+    } catch (error) {
+        console.error("撤销权限失败:", error);
+        // 友好错误提示
+        let errorMsg = error.message;
+        if (error.info?.error?.message.includes("caller is not the owner")) {
+            errorMsg = "操作被拒绝：您不是该保单的所有者";
+        }
+        showAuthStatus(`❌ 错误: ${error.message}`, "error");
+    }
 }
-    </script>    
+
+// 状态显示函数
+function showAuthStatus(message, type) {
+    const statusDiv = document.getElementById('authStatus');
+    statusDiv.innerHTML = message;
+    statusDiv.className = `auth-status ${type}`;
+    
+    // 自动清除状态
+    if (type !== 'processing') {
+        setTimeout(() => {
+            statusDiv.innerHTML = '';
+            statusDiv.className = 'auth-status';
+        }, 5000);
+    }
+}
+    </script>   
    <!--**************************-->       
 </body>
    

@@ -6,24 +6,24 @@
 <!-- 連結思源中文及css -->
 <link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
 <link href="/static/imgs/icon.jpg" rel="shortcut icon">
-<link href="/static/css/menu.css" rel="stylesheet"/>  
-<link href="/static/css/main.css" rel="stylesheet"/>      
+<link href="/static/css/menu.css" rel="stylesheet"/>
+<link href="/static/css/main.css" rel="stylesheet"/>
 <!------------------------->
 </head>
-   
+
 <body>
-    <!--**************************-->
-    <div class="container">    
-        <!--~~~~~~~~~~~~~~~~~-->
-        <div class="header">           
-        </div>        
-        
-        <!--~~~~~~~~~~~~~~~~~-->        
-        <ul id="navigation">        
+    <!--**-->
+    <div class="container">
+        <!--~~~-->
+        <div class="header">
+        </div>
+
+        <!--~~~-->
+        <ul id="navigation">
             <li><a href="/">返回主頁</a></li> 
         </ul>
-        
-        <!--~~~~~~~~~~~~~~~~~--> 
+
+        <!--~~~--> 
         <div class="content">
             <h2>樣板畫面</h2>
 
@@ -34,17 +34,17 @@
             {% if pdf_hash %}
             <h2>處理結果</h2>
             <p><strong>PDF雜湊值:</strong> {{ pdf_hash }}</p>
-            
-            
+
+
             {% endif %}
-        </div>       
-        
-        <!--~~~~~~~~~~~~~~~~~--> 
+        </div>
+
+        <!--~~~--> 
         <div class="footer">
-            NTUB imd, 2023.    
-        </div>  
+            NTUB imd, 2023.
+        </div>
     </div>
-    <!--**************************-->    
+    <!--**-->
 </body>
-   
+
 </html>

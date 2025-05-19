@@ -113,7 +113,7 @@ let contract = null;
 let account = null; // 明确初始化为 null
             
             // 合约地址和 ABI（需与后端一致）
-            const contractAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+            const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
             const contractABI = [
 	{
 		"inputs": [
@@ -184,60 +184,27 @@ let account = null; // 明确初始化为 null
 				"internalType": "string",
 				"name": "_policyNumber",
 				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "_wallet",
+				"type": "address"
+			}
+		],
+		"name": "authorizePolicyAccess",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
 			}
 		],
 		"name": "deletePolicy",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_policyNumber",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_insuranceAmount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_premiumAmount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_growthRate",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_declaredInterestRate",
-				"type": "uint256"
-			}
-		],
-		"name": "updatePolicy",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_policyNumber",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "_pdfHash",
-				"type": "string"
-			}
-		],
-		"name": "updatePolicyPDF",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -314,6 +281,30 @@ let account = null; // 明确初始化为 null
 				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "_wallet",
+				"type": "address"
+			}
+		],
+		"name": "isAuthorized",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
 			}
 		],
 		"stateMutability": "view",
@@ -411,6 +402,75 @@ let account = null; // 明确初始化为 null
 		],
 		"stateMutability": "view",
 		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "_wallet",
+				"type": "address"
+			}
+		],
+		"name": "revokePolicyAccess",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_insuranceAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_premiumAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_growthRate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_declaredInterestRate",
+				"type": "uint256"
+			}
+		],
+		"name": "updatePolicy",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_pdfHash",
+				"type": "string"
+			}
+		],
+		"name": "updatePolicyPDF",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
 	}
 ];
             
@@ -492,17 +552,11 @@ document.getElementById("policyForm").addEventListener("submit", async (e) => {
     const params = {
         _policyNumber: document.getElementById("policyNumber").value,
         // 加密敏感字段
-        _policyHolder: encryptField(document.getElementById("policyHolder").value),
-        _insuredPerson: encryptField(document.getElementById("insuredPerson").value),
-        _insuranceAmount: web3.utils.toWei(
-            document.getElementById("insuranceAmount").value, 
-            "ether"
-        ),
+        _policyHolder: document.getElementById("policyHolder").value,
+        _insuredPerson: document.getElementById("insuredPerson").value,
+        _insuranceAmount: document.getElementById("insuranceAmount").value, 
         _premiumPeriod: parseInt(document.getElementById("premiumPeriod").value),
-        _premiumAmount: web3.utils.toWei(
-            document.getElementById("premiumAmount").value,
-            "ether"
-        ),
+        _premiumAmount: document.getElementById("premiumAmount").value,
         _startDate: Math.floor(new Date(document.getElementById("startDate").value).getTime() / 1000),
         // 加密受益人信息
         _beneficiary: encryptField(document.getElementById("beneficiary").value),

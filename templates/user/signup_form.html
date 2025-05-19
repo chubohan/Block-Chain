@@ -1,126 +1,108 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="zh-TW">
 <head>
-<meta charset="utf-8">
-<title>北風公司管理系統</title>
-<!-- 連結思源中文及css -->
-<link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
-<link href="/static/imgs/icon.jpg" rel="shortcut icon">
-<link href="/static/css/menu.css" rel="stylesheet"/>  
-<link href="/static/css/main.css" rel="stylesheet"/>      
-<!------------------------->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChainSure - 智慧保險管理</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/signup.css" rel="stylesheet">
 </head>
-   
+
 <body>
-    <!--**************************-->
-    <div class="container">    
-        <!--~~~~~~~~~~~~~~~~~-->
-        <div class="header">           
-        </div>        
-        
-        <!--~~~~~~~~~~~~~~~~~-->        
-        <ul id="navigation">        
-            <li><a href="/">返回主頁</a></li> 
-        </ul>
-        
-        <!--~~~~~~~~~~~~~~~~~--> 
-        <div class="content">
-            <h2>使用者註冊</h2>
+    <div class="stars"></div>
 
-            <form onsubmit="return checkPW()" action="/user/signup" method="post">
-                <div class="form">
-                    
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">ChainSure</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="切換導航">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="customerDropdown" role="button" aria-expanded="false">
+                            客戶服務
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="customerDropdown">
+                            <li><a class="dropdown-item" href="#">會員中心</a></li>
+                            <li><a class="dropdown-item" href="#">聯繫業務員</a></li>
+                            <li><a class="dropdown-item" href="#">點數查詢</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="policyDropdown" role="button" aria-expanded="false">
+                            保單服務
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="policyDropdown">
+                            <li><a class="dropdown-item" href="#">保單查詢</a></li>
+                            <li><a class="dropdown-item" href="#">保單內容問題</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="claimDropdown" role="button" aria-expanded="false">
+                            理賠服務
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="claimDropdown">
+                            <li><a class="dropdown-item" href="#">終身壽險</a></li>
+                            <li><a class="dropdown-item" href="#">失能照護險</a></li>
+                            <li><a class="dropdown-item" href="#">投資型報單</a></li>
+                            <li><a class="dropdown-item" href="#">旅遊綜合保險</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="activityDropdown" role="button" aria-expanded="false">
+                            熱門活動
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="activityDropdown">
+                            <li><a class="dropdown-item" href="#">贈品查詢</a></li>
+                            <li><a class="dropdown-item" href="#">理賠成功申請案例</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
+                            登入
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="loginDropdown">
+                            <li><a class="dropdown-item" href="/user/login/form">保人登入</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/user/login/form">業務員登入</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
+                            身分證驗證
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="loginDropdown">
+                            <li><a class="dropdown-item" href="/policy/create_ID_image">身分證驗證</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-                    <span class="name">姓名</span>
-                    <span class="value">
-                        <input type="text" name="username" size="30" maxlength="30" required>
-                    </span>
-                    <br/>
-                    
-                    <span class="name">年齡</span>
-                    <span class="value">
-                        <input type="number" name="age" id="ageInput" 
-                            size="30" maxlength="30" 
-                            min="0" 
-                            required
-                            oninput="validateAge(this.value)">
-                        <span id="ageError" style="color:red; display:none"></span>
-                    </span>
-                    <br/>
+<div class="register-box">
+    <h2>註冊帳號</h2>
+    <form action="/user/signup" method="post">
+        <div class="form">
+            <input type="text" name="username" class="input-field" placeholder="姓名" required>
+            <input type="number" name="age" class="input-field" placeholder="年齡" required>
+            <select name="gender" class="input-field" required>
+                <option value="" disabled selected>性別</option>
+                <option value="male">男</option>
+                <option value="female">女</option>
+            </select>
+            <input type="email" name="gmail" class="input-field" placeholder="Gmail" required>
+            <input type="password" name="password1" class="input-field" placeholder="密碼" required>
+            <input type="password" name="password2" class="input-field" placeholder="確認密碼" required>
+            <button type="submit" class="submit-btn">註冊</button>
+            <button type="button" class="login-btn">登入</button>
+        </div>
+    </form>
+</div>
 
-                    <span class="name">性別</span>
-                    <span class="value">
-                    <select name="gender" id="gender">
-                        <option value="男">男</option>
-                        <option value="女">女</option>
-                        
-                    </select>
-                    </span>
-                    <br/>
-
-                    <span class="name">gmail</span>
-                    <span class="value">
-                        <input type="email" name="gmail" size="30"  required>
-                    </span>
-                    <br/>
-
-                    <span class="name">密碼</span>
-                    <span class="value">
-                        <input type="password" id="password1" name="password1" size="15" maxlength="15" required>
-                    </span>
-                    <br/>     
-                    
-                    <span class="name">再輸入密碼</span>
-                    <span class="value">
-                        <input type="password" id="password2" name="password2" size="15" maxlength="15" required>
-                    </span>
-                    <br/>                    
-                    
-                    <span class="name"></span>
-                    <span class="value"><input type="submit" value="註冊" style="width:80px"></span>
-                </div>
-            </form>
-               
-        </div>       
-        
-        <!--~~~~~~~~~~~~~~~~~--> 
-        <div class="footer">
-            NTUB imd, 2024.
-        </div>  
-    </div>
-    <!--**************************-->         
-    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-
-    <script>
-        function checkPW(){
-            var pw1 = document.getElementById("password1").value;
-            var pw2 = document.getElementById("password2").value;
-            
-            if (pw1!=pw2) {
-                swal('輸入錯誤', '二次輸入的密碼不同!', 'error');
-                return false;
-            }else{
-                return true;	
-            }
-        }
-        // 即時年齡驗證函式
-function validateAge(value) {
-    const errorElement = document.getElementById('ageError');
-    const inputElement = document.getElementById('ageInput');
-
-    if (value < 0) {
-        errorElement.textContent = "年齡不能小於0！";
-        errorElement.style.display = 'inline';
-        inputElement.style.borderColor = 'red';
-        return false;
-    } else {
-        errorElement.style.display = 'none';
-        inputElement.style.borderColor = '';
-        return true;
-    }
-}
-        
-    </script>    
-    <!--**************************-->  
-</body>  
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/signup.js"></script>
+</body>
 </html>

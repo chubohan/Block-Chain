@@ -1,0 +1,30 @@
+<!-- templates/user/verify_code_form.html -->
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>輸入驗證碼</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>請輸入您收到的驗證碼</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <ul class="flashes">
+              {% for category, message in messages %}
+                <li class="flash-{{ category }}">{{ message }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('user.verify_code') }}" method="POST">
+            <label for="code">驗證碼：</label>
+            <input type="text" id="code" name="code" required pattern="\d{6}" placeholder="請輸入6位數驗證碼">
+            <button type="submit">驗證</button>
+        </form>
+    </div>
+</body>
+</html>

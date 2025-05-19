@@ -1,13 +1,16 @@
 #-----------------------
 # 匯入必要模組
 #-----------------------
-from flask import Flask, request, jsonify, render_template,session,flash,redirect
+from flask import Flask, request, jsonify, render_template,session,flash,redirect,url_for
 from flask_sqlalchemy import SQLAlchemy
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
+from pdf2image import convert_from_path
+from PIL import Image
+import pytesseract
 import utils.db as db
 from web3 import Web3
 import json
@@ -27,6 +30,18 @@ import pymysql
 from web3 import AsyncWeb3
 from web3.providers import AsyncHTTPProvider  # 注意新的导入路径
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired
+from werkzeug.security import generate_password_hash, check_password_hash
+import random
+import string
+from paddleocr import PaddleOCR, draw_ocr
+from PIL import Image
+from opencc import OpenCC
+import os
+import re
+import cv2
+import numpy as np
 #-----------------------
 # **匯入藍圖
 #-----------------------
@@ -34,6 +49,23 @@ from myapp.user import user_bp
 from myapp.user import load_user as user_load_user
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'your_secret_key'
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # 或其他郵件伺服器
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = '11056028@ntub.edu.tw'  # 你的郵箱
+app.config['MAIL_PASSWORD'] = 'illu pozd sgco nfxl'  # 你的郵箱密碼
+app.config['MAIL_DEFAULT_SENDER'] = '11056028@ntub.edu.tw'
+
+mail = Mail(app)
+login_manager = LoginManager(app)
+
+# 用戶資料模擬（你應該將它連接到你的數據庫）
+users = {}  # 假設這是你的用戶資料
+
+# 用於生成重設密碼的令牌
+s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+
 app.secret_key = os.urandom(24)# 設置 session 加密金鑰
 CORS(app)# 允許所有跨域請求
 
@@ -166,7 +198,6 @@ def decrypt_data(private_key_cry, encrypted_data):
             )
         )
         decrypted_str = decrypted.decode('utf-8')
-        print(f"成功解密，解密後的數據: {decrypted_str}")  # 打印解密後的數據
         return decrypted_str  # 解密後返回字符串
     except ValueError as e:
         # 捕獲解密時可能出現的具體錯誤
@@ -178,12 +209,8 @@ def decrypt_data(private_key_cry, encrypted_data):
         raise  # 重新拋出異常
     
 encrypted = encrypt_data(public_key, "policyHolder")
-print(f"加密數據類型: {type(encrypted)}")
-print(f"加密數據: {encrypted}")
 
 decrypted = decrypt_data(private_key_cry, encrypted)
-print(f"解密後的數據類型: {type(decrypted)}")
-print(f"解密後的數據: {decrypted}")
 
 def store_keys(private_key_cry, public_key):
     # 确保在应用程序上下文中执行
@@ -205,8 +232,6 @@ def store_keys(private_key_cry, public_key):
         key_entry = Key(private_key=private_pem.decode('utf-8'), public_key=public_pem.decode('utf-8'))
         db.session.add(key_entry)
         db.session.commit()
-
-        print(f"密钥已存储到数据库，公钥: {public_pem.decode('utf-8')}")
         
 # 在程序启动时调用 store_keys
 with app.app_context():
@@ -215,8 +240,30 @@ with app.app_context():
 # 存储当前生成的密钥
 store_keys(private_key_cry, public_key)
 
+app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')  # 設定上傳資料夾路徑
+app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'pdf'}
 
+def hash_pdf_file(pdf_path):
+    """計算PDF文件的雜湊值"""
+    with open(pdf_path, 'rb') as file:
+        pdf_hash = hashlib.sha256(file.read()).hexdigest()
+    return pdf_hash
 
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
+UPLOAD_FOLDER = 'uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+# 初始化 PaddleOCR 與簡轉繁
+ocr = PaddleOCR(
+    use_angle_cls=True,
+    lang='ch',
+    use_gpu=False,
+    det_model_dir='C:/paddleocr_models/ch_PP-OCRv4_det_infer',
+    rec_model_dir='C:/paddleocr_models/ch_PP-OCRv4_rec_infer',
+    cls_model_dir='C:/paddleocr_models/ch_ppocr_mobile_v2.0_cls_infer'
+)
+cc = OpenCC('s2t')
 
 # 設定智能合約地址 & ABI (需替換為你自己的合約資訊)
 contract_address = "0x5FbDB2315678afecb367f032d93F642f64180aa3"
@@ -224,16 +271,6 @@ contract_address=w3.to_checksum_address(contract_address)
 contract_abi = json.loads("""[
 	{
 		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_policyNumber",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "_insuranceCompany",
-				"type": "string"
-			},
 			{
 				"internalType": "string",
 				"name": "_policyHolder",
@@ -288,9 +325,9 @@ contract_abi = json.loads("""[
 	{
 		"inputs": [
 			{
-				"internalType": "string",
+				"internalType": "uint256",
 				"name": "_policyNumber",
-				"type": "string"
+				"type": "uint256"
 			}
 		],
 		"name": "deletePolicy",
@@ -299,65 +336,11 @@ contract_abi = json.loads("""[
 		"type": "function"
 	},
 	{
-		"anonymous": false,
 		"inputs": [
 			{
-				"indexed": true,
-				"internalType": "string",
-				"name": "policyNumber",
-				"type": "string"
-			}
-		],
-		"name": "PolicyAdded",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "string",
-				"name": "policyNumber",
-				"type": "string"
-			}
-		],
-		"name": "PolicyRemoved",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "string",
-				"name": "policyNumber",
-				"type": "string"
-			}
-		],
-		"name": "PolicyUpdated",
-		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
+				"internalType": "uint256",
 				"name": "_policyNumber",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "_insuranceCompany",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "_policyHolder",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "_insuredPerson",
-				"type": "string"
+				"type": "uint256"
 			},
 			{
 				"internalType": "uint256",
@@ -366,23 +349,8 @@ contract_abi = json.loads("""[
 			},
 			{
 				"internalType": "uint256",
-				"name": "_premiumPeriod",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
 				"name": "_premiumAmount",
 				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_startDate",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "_beneficiary",
-				"type": "string"
 			},
 			{
 				"internalType": "uint256",
@@ -403,23 +371,13 @@ contract_abi = json.loads("""[
 	{
 		"inputs": [
 			{
-				"internalType": "string",
+				"internalType": "uint256",
 				"name": "_policyNumber",
-				"type": "string"
+				"type": "uint256"
 			}
 		],
 		"name": "getPolicy",
 		"outputs": [
-			{
-				"internalType": "string",
-				"name": "",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "",
-				"type": "string"
-			},
 			{
 				"internalType": "string",
 				"name": "",
@@ -470,19 +428,95 @@ contract_abi = json.loads("""[
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_policyNumber",
-				"type": "string"
-			}
-		],
-		"name": "getPolicyOwner",
+		"inputs": [],
+		"name": "getPolicyCount",
 		"outputs": [
 			{
-				"internalType": "address",
+				"internalType": "uint256",
 				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "policies",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "policyNumber",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "policyHolder",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "insuredPerson",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "insuranceAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "premiumPeriod",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "premiumAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "startDate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "beneficiary",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "growthRate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "declaredInterestRate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "owner",
 				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "policyCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -501,41 +535,6 @@ private_key = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff8
 @app.route('/')
 def index():
     return render_template('index.html')
-#-----------------------------------
-#連接錢包
-@app.route('/policy/connect_wallet')
-def policy_connect_wallet():
-    return render_template('policy/connect_wallet.html')
-
-def validate_address(address):
-    try:
-        return Web3.to_checksum_address(address)
-    except ValueError:
-        return None
-
-@app.route('/balance', methods=['POST'])
-def get_balance():
-    try:
-        address = request.json.get('address')
-        if not address:
-            return jsonify({'error': '未提供地址'}), 400
-        
-        checksum_address = validate_address(address)
-        if not checksum_address:
-            return jsonify({'error': '无效的地址格式'}), 400
-        
-        if not w3.is_connected():
-            return jsonify({'error': '区块链节点未连接'}), 500
-            
-        balance = w3.eth.get_balance(checksum_address)
-        return jsonify({
-            'balance': str(Web3.from_wei(balance, 'ether')),
-            'address': checksum_address
-        })
-        
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-#------------------------------------------------
 
 @app.route('/policy/create/form')
 def policy_addpolicy_form():
@@ -549,14 +548,12 @@ def add_policy():
         print(f"收到請求數據: {data}")
 
         # 提取資料
-        policyNumber=data["policyNumber"]
         policyHolder = data["policyHolder"]
-        insuranceCompany=data["insuranceCompany"]
         insuredPerson = data["insuredPerson"]
         insuranceAmount = int(data["insuranceAmount"])  # 轉換為整數
         premiumPeriod = int(data["premiumPeriod"])  # 轉換為整數
         premiumAmount = int(data["premiumAmount"])  # 轉換為整數
-        startDate = int(data["startDate"])  # 使用當前時間
+        startDate = int(time.time())  # 使用當前時間
         beneficiary = data["beneficiary"]
         growthRate = int(data["growthRate"])  # 轉換為整數
         declaredInterestRate = int(data["declaredInterestRate"])  # 轉換為整數
@@ -574,7 +571,7 @@ def add_policy():
         # 設定交易資訊
         nonce = w3.eth.get_transaction_count(wallet_address)
         transaction = contract.functions.addPolicy(
-            policyNumber,encoded_policyHolder, encoded_insuredPerson, insuranceCompany,insuranceAmount, premiumPeriod,
+            encoded_policyHolder, encoded_insuredPerson, insuranceAmount, premiumPeriod,
             premiumAmount, startDate, encoded_beneficiary, growthRate, declaredInterestRate
         ).build_transaction({
             "gas": 8000000,
@@ -623,14 +620,14 @@ def update_policy(policy_number, insurance_amount, premium_amount, growth_rate, 
     tx_hash = w3.eth.send_raw_transaction(signed_txn.raw_transaction)
 
     return w3.to_hex(tx_hash)
-
+'''
 #----------------
 
 #客戶刪除表單
 @app.route('/policy/delete/form')
 def policy_delete_form():
     return render_template('policy/delete_form.html') 
-
+'''
 #刪除保單(區塊鏈)
 @app.route("/delete_policy/<int:policy_number>", methods=["DELETE"])
 def delete_policy(policy_number):
@@ -653,8 +650,9 @@ def delete_policy(policy_number):
         }), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 400
-#-------------------------
 '''
+#-------------------------
+
 #客戶查詢表單
 @app.route('/policy/read/form')
 def policy_read_form():
@@ -713,107 +711,9 @@ def user_index():
 @app.route('/user/admin')
 def admin_index():
     return render_template('user/admin.html')
- 
-#--------------------------------------------------
-'''
-#定義使用者類別
-class User(UserMixin):
-    def __init__(self, id, username, password):
-        self.id = id
-        self.username = username
-        self.password = password
 
-#產生登入管理物件
-login_manager = LoginManager()
-
-#載入使用者
-@login_manager.user_loader
-def load_user(user_id):
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT userno, username, password FROM user WHERE userno = %s", (user_id,))
-    result = cursor.fetchone()  # 字典形式
-    conn.close()
-
-    if result:
-        return User(
-            id=result['userno'],      # 使用字段名
-            username=result['username'],
-            password=result['password']
-        )
-    return None
-
-#使用者註冊
-#宣告註冊畫面
-@app.route('/user/signup/form')
-def user_signup_form():
-    return render_template('user/signup_form.html')
-
-
-#使用者註冊
-@app.route('/user/signup', methods=['POST'])
-def signup():
-    try:
-        # 取得使用者的輸入值
-        userno = request.form.get('userno')
-        username = request.form.get('username')
-        gmail=request.form.get('gmail')
-        password = request.form.get('password1')
-        
-        
-        # 加密密碼
-        hashed_bytes = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-        hashed_str = hashed_bytes.decode('utf-8')  # 轉為字串
-
-        # 寫入資料庫
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO user (userno, username, password,gmail) VALUES (%s, %s, %s ,%s)",
-                       (userno, username, hashed_str,gmail))
-        conn.commit()
-        conn.close()
-        
-        return render_template('user/signup.html', success=True)
-    except Exception as e:
-        # 打印詳細錯誤訊息到控制台
-        print(f"Database connection error: {str(e)}")
-        return render_template('user/signup.html', success=False, message="資料庫連接失敗")
-# 使用者登入
-@app.route('/user/login', methods=['POST'])
-def login():
-    try:
-        userno = request.form.get('userno')
-        password = request.form.get('password')
-
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT userno, username, password FROM user WHERE userno = %s", (userno,))
-        result = cursor.fetchone()  # 返回字典，例如 {'userno': '123', 'username': 'test', 'password': 'hashed_str'}
-        conn.close()
-
-        if not result:
-            return render_template('user/login.html', success=False, message="帳號不存在")
-
-        # 使用字段名訪問（注意大小寫需與資料庫完全一致）
-        stored_hash_str = result['password']  # 正確訪問方式
-        userno_from_db = result['userno']
-        username_from_db = result['username']
-
-        if bcrypt.checkpw(password.encode('utf-8'), stored_hash_str.encode('utf-8')):
-            user = User(id=userno_from_db, username=username_from_db, password=stored_hash_str)
-            login_user(user)
-            return redirect('/')
-        else:
-            return render_template('user/login.html', success=False, message="密碼錯誤")
-
-    except Exception as e:
-        app.logger.error(f"登入錯誤詳細訊息: {repr(e)}")
-        return render_template('user/login.html', success=False, message=f"發生錯誤: {str(e)}")
-'''
 #------------------------------------------------------
-
 #Google sign in
-
 @app.route('/auth/google', methods=['POST'])
 def auth_google():
     print(request.json)
@@ -841,7 +741,7 @@ def auth_google():
 
         # 在這裡可以將用戶資料存入資料庫或 session
         session['user'] = user_data
-        
+
         return jsonify({
             'success': True,
             'user': user_data
@@ -854,8 +754,6 @@ def auth_google():
             'error': str(e)
         }), 401
 
-
-
 @app.route('/profile')
 def profile():
     if 'user' not in session:
@@ -867,15 +765,6 @@ def profile():
 def logout():
     session.pop('user', None)
     return jsonify({'success': True})
-#---------------
-#PDF雜湊
-# 在創建 Flask app 後添加配置
-app.config['UPLOAD_FOLDER'] = 'uploads'  # 確保這個文件夾存在
-app.config['ALLOWED_EXTENSIONS'] = {'pdf'}  # 只允許 PDF 文件
-os.makedirs(app.config['UPLOAD_FOLDER'],exist_ok=True)
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 @app.route('/policy/creat_PDF', methods=['POST'])
 def create_PDF():
@@ -899,12 +788,119 @@ def create_PDF():
     
     return jsonify(success=False, error='文件类型不支持')
 
-def hash_pdf_file(pdf_path):
-    """計算PDF文件的雜湊值"""
-    with open(pdf_path, 'rb') as file:
-        pdf_hash = hashlib.sha256(file.read()).hexdigest()
-    return pdf_hash
+@app.route('/policy/create_ID_image', methods=['GET', 'POST'])
+def create_ID_image():
+    id_fields = {}
+    filename = None
 
+    if request.method == 'POST':
+        file = request.files['file']
+        if not file:
+            return render_template("policy/create_ID_image.html", id_fields=None, filename=None)
+
+        filename = file.filename
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(filepath)
+
+        # OCR 辨識與簡繁轉換
+        try:
+            result = ocr.ocr(filepath, cls=True)
+        except RuntimeError as r:
+            return render_template('policy/create_ID_image.html', id_fields=None, filename=None)
+        text_list = [line[1][0] for block in result for line in block]
+        text_list = [cc.convert(t) for t in text_list]  # <<<< 加上這行
+        text = ' '.join(text_list)
+        text = cc.convert(text)
+        text = text.replace('编装', '統一編號')  # 修正常見錯字
+
+        # ===== 擷取姓名 =====
+        # 姓名擷取（從「出生」前的完整中文字抓取）
+        name = None  # 預設為 None，避免未賦值錯誤
+        name_match = re.search(r'姓名[:：]?\s*([\u4e00-\u9fa5]{2,5})', text)
+        if not name_match:
+            for i, t in enumerate(text_list):
+                if '出生' in t and i > 0:
+                    # 向前合併兩個詞作為姓名候選
+                    name_candidate = text_list[i - 2] + text_list[i - 1] if i > 1 else text_list[i - 1]
+                    match = re.search(r'([\u4e00-\u9fa5]{2,5})', name_candidate)
+                    if match:
+                        name = match.group(1)
+                        break
+        else:
+            name = name_match.group(1)
+        name = name.replace('出生', '').strip() if name else None
+
+        # ===== 擷取身分證字號 =====
+        id_number = re.search(r'[A-Z][0-9]{8,9}', text)
+
+        # ===== 擷取性別 =====
+        gender_match = re.search(r'性別[:：]?\s*(男|女)', text)
+
+        # ===== 擷取出生年月日 =====
+        birth_date = None
+        for i, t in enumerate(text_list):
+            if '出生' in t or '生' in t:
+                combined = ''.join(text_list[i:i+4])
+                birth_date = re.search(r'民國\d+年\d+月\d+日?', combined)
+                if birth_date:
+                    break
+
+        # --- 新的「發證日期」判讀區塊 ---
+        # ➤ 清洗發證日期函式：排除身分證字號
+        def clean_issue_date(raw_text: str) -> str:
+            # 擷取「民國xx年xx月xx日（可含括號地名）後接換發/初發/補發」
+            match = re.search(r'(民國\d+年\d+月\d+日(?:（.*?）)?(?:\s*(初發|換發|補發))?)', raw_text)
+            if match:
+                return match.group(1).strip()
+            return '❌ 無法辨識'
+
+        # ➤ 擷取發證日期主函式
+        def extract_issue_date(text_list):
+            issue_date = ''
+            keywords = ['發證', '換發', '發證日期']
+            for i, t in enumerate(text_list):
+                if any(k in t for k in keywords):
+                    combined = ''.join(text_list[i:i + 6])
+                    cleaned = clean_issue_date(combined)
+                    if cleaned != '❌ 無法辨識':
+                        issue_date = cleaned
+                        break
+            return issue_date
+
+        # ➤ 第一次 OCR 擷取
+        issue_date = extract_issue_date(text_list)
+
+        # ➤ 第二次從圖片裁切區塊 OCR 擷取
+        if not issue_date:
+            image = Image.open(filepath)
+            width, height = image.size
+            crop_box = (int(width * 0.5), int(height * 0.7), width, height)
+            cropped = image.crop(crop_box)
+            enlarged = cropped.resize((cropped.width * 2, cropped.height * 2))
+
+            crop_result = ocr.ocr(np.array(enlarged), cls=True)
+            crop_text_list = [line[1][0] for block in crop_result for line in block]
+            issue_date = extract_issue_date(crop_text_list)
+
+        # ➤ fallback：整段合併處理
+        if not issue_date:
+            combined_crop_text = ''.join(crop_text_list)
+            issue_date = clean_issue_date(combined_crop_text)
+
+        # ➤ 無法辨識結果
+        if not issue_date:
+            issue_date = '❌ 無法辨識'
+
+        # ===== 組合欄位結果 =====
+        id_fields = {
+            '姓名': name if name else '❌ 無法辨識',
+            '出生年月日': birth_date.group() if birth_date else '❌ 無法辨識',
+            '發證日期': issue_date if issue_date else '❌ 無法辨識',
+            '性別': gender_match.group(1) if gender_match else '❌ 無法辨識',
+            '身份證字號': id_number.group() if id_number else '❌ 無法辨識',
+        }
+
+    return render_template('policy/create_ID_image.html', id_fields=id_fields, filename=filename)
 
 #-----------------------
 # 啟動網站

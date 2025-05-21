@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>保單登記</title>
+</head>
+<body>
+
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> 
+<!------------------------->
+   
+<style>
+        /* 星空背景效果 */
+body {
+            margin: 0;
+			margin-bottom: 150px;
+            padding-top: 80px;
+            height: 100vh;
+            background: #1a1a2e; /* 深色背景 */
+            font-family: Arial, sans-serif;
+			overflow-x: hidden;
+			overflow-y: visible;
+			position: relative;
+			padding-top: 120px;
+			color: #333;
+			}
+ 
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://cdn.pixabay.com/photo/2017/08/30/02/18/starry-night-2695563_960_720.jpg') no-repeat center center fixed;
+            background-size: cover;
+            z-index: -1;
+        }
+
+        /* 小星星动画 */
+        .star {
+            position: absolute;
+            border-radius: 50%;
+            width: 2px;
+            height: 2px;
+            background-color: white;
+            animation: twinkle 1.5s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% {
+                opacity: 0.8;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0.2;
+                transform: scale(1.5);
+            }
+        }
+
+       /* Navbar文字設定 */
+	   .navbar {
+		position: fixed; /* 讓 navbar 固定在最上層 */
+		top: 0;
+		left: 0;
+		width: 100%;
+		z-index: 1000; /* 比 .register-box 的 10 還高 */
+		background-color: #1a1a2e; /* 半透明深色背景避免文字重疊星空看不清楚 */
+	}
+        .navbar-nav .nav-link {
+            font-size: 20px; /* 增大字體 */
+            font-weight: bold; /* 粗體字 */
+            color: white !important; /* 白色字 */
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: #ff6347 !important; /* Hover效果為番茄色 */
+        }
+
+        /* Navbar品牌文字設定 */
+        .navbar-brand {
+            font-size: 28px; /* 增大字體 */
+            font-weight: bold; /* 粗體字 */
+            color: white !important; /* 白色字 */
+        }
+
+        /* 表单宽度控制 */
+        .register-box {
+            margin-top: 80px;
+            background: rgba(0, 0, 0, 0.6); /* 半透明背景 */
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px; /* 占画面三分之一宽度 */
+            text-align: center;
+            z-index: 10;
+        }
+
+        .input-field {
+            margin-bottom: 15px;
+            width: 100%;
+            padding: 12px;
+            background: #333;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+        }
+
+        .input-field:focus {
+            outline: none;
+            background-color: #555;
+        }
+
+        .submit-btn {
+            background: #ff6347; /* 番茄色 */
+            border: none;
+            padding: 15px;
+            width: 100%;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+        }
+
+        .submit-btn:hover {
+            background-color: #ff4500; /* 番茄色变亮 */
+        }
+
+        .login-btn {
+            background: #3c7aac; /* 蓝色 */
+            border: none;
+            padding: 15px;
+            width: 100%;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            margin-top: 15px;
+        }
+
+        .login-btn:hover {
+            background-color: #0056b3; /* 深蓝色 */
+        }
+
+		
+
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">ChainSure</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="切換導航">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <!-- 客戶服務下拉選單 -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="customerDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            客戶服務
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="customerDropdown">
+                            <li><a class="dropdown-item" href="#">會員中心</a></li>
+                            <li><a class="dropdown-item" href="#">聯繫業務員</a></li>
+                            <li><a class="dropdown-item" href="#">點數查詢</a></li>
+                        </ul>
+                    </li>
+                    <!-- 保單服務下拉選單 -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="policyDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            保單服務
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="policyDropdown">
+                            <li><a class="dropdown-item" href="#">保單查詢</a></li>
+                            <li><a class="dropdown-item" href="#">保單內容問題</a></li>
+                        </ul>
+                    </li>
+                    <!-- 理賠服務下拉選單 -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="claimDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            理賠服務
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="claimDropdown">
+                            <li><a class="dropdown-item" href="#">終身壽險</a></li>
+                            <li><a class="dropdown-item" href="#">失能照護險</a></li>
+                            <li><a class="dropdown-item" href="#">投資型報單</a></li>
+                            <li><a class="dropdown-item" href="#">旅遊綜合保險</a></li>
+                        </ul>
+                    </li>
+                    <!-- 熱門活動下拉選單 -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="activityDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            熱門活動
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="activityDropdown">
+                            <li><a class="dropdown-item" href="#">贈品查詢</a></li>
+                            <li><a class="dropdown-item" href="#">理賠成功申請案例</a></li>
+                        </ul>
+                    </li>
+                    <!-- 登入選項 -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            登入
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="loginDropdown">
+                            <li><a class="dropdown-item" href="#">投保人登入</a></li>
+                            <li><a class="dropdown-item" href="#">被保人登入</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#">業務員登入</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+	</nav>
+	</div>
+<div class="stars"></div>
+<!--**************************-->
+<div class="container_css">    
+    <!-- <h2>更新保單</h2> -->
+    <form action="/policy/update" method="post">
+        <input type="number" id="updatePolicyNumber" placeholder="保單號碼" required>
+        <input type="number" id="updateInsuranceAmount" placeholder="新保額" required>
+        <input type="number" id="updatePremiumAmount" placeholder="新保費" required>
+        <input type="number" id="updateGrowthRate" placeholder="新成長率" required>
+        <input type="number" id="updateDeclaredInterestRate" placeholder="新公告利率" required>
+        <button type="submit">更新</button>
+    </form>
+
+    </div>
+</div>
+
+<style>
+    .container_css{
+        max-width: 400px;
+        margin: 40px auto;
+        background-color: #ffffff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+
+    form {
+        background-color: #ffffff;
+        padding: 40px 30px;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        max-width: 400px;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    h2 {
+        text-align: center;
+        color: #000;
+        /* margin-bottom: 30px; */
+    }
+
+    input[type="number"] {
+        display: block;
+        width: 100%;
+        padding: 10px 15px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 16px;
+        box-sizing: border-box;
+        transition: border-color 0.3s ease;
+    }
+
+    input[type="number"]:focus {
+        outline: none;
+        border-color: #ff6347;
+        box-shadow: 0 0 0 2px rgba(224, 109, 74, 0.2);
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        background-color: #ff6347;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+        background-color: #ff4500;
+    }
+
+    #status {
+        margin-top: 20px;
+        text-align: center;
+        font-size: 14px;
+        color: #d00;
+    }
+
+    @media (max-width: 480px) {
+        form {
+            padding: 30px 20px;
+        }
+    }
+</style>
+    <script>
+        // 创建小星星动画
+        function createStars() {
+            const numStars = 200;
+            for (let i = 0; i < numStars; i++) {
+                let star = document.createElement("div");
+                star.classList.add("star");
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                const duration = Math.random() * 2 + 1;
+                const delay = Math.random() * 5;
+                star.style.top = `${y}vh`;
+                star.style.left = `${x}vw`;
+                star.style.animationDuration = `${duration}s`;
+                star.style.animationDelay = `${delay}s`;
+                document.body.appendChild(star);
+            }
+        }
+
+        createStars();
+    </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

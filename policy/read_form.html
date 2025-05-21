@@ -1,0 +1,1110 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>測試樣板</title>
+<!-- 連結思源中文及css -->
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.umd.min.js"></script><!--記得家這行-->
+<link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
+<link href="/static/imgs/icon.jpg" rel="shortcut icon">
+<link href="/static/css/menu.css" rel="stylesheet"/>  
+<link href="/static/css/main.css" rel="stylesheet"/> 
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">     
+<!------------------------->
+</head>
+   
+<body>
+        <style>
+        /* 星空背景效果 */
+body {
+            margin: 0;
+			margin-bottom: 150px;
+            padding-top: 80px;
+            height: 100vh;
+            background: #1a1a2e; /* 深色背景 */
+            color: white;
+            font-family: Arial, sans-serif;
+			overflow-x: hidden;
+			overflow-y: visible;
+			position: relative;
+			padding-top: 120px;
+			}
+ 
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://cdn.pixabay.com/photo/2017/08/30/02/18/starry-night-2695563_960_720.jpg') no-repeat center center fixed;
+            background-size: cover;
+            z-index: -1;
+        }
+
+        /* 小星星动画 */
+        .star {
+            position: absolute;
+            border-radius: 50%;
+            width: 2px;
+            height: 2px;
+            background-color: white;
+            animation: twinkle 1.5s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% {
+                opacity: 0.8;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0.2;
+                transform: scale(1.5);
+            }
+        }
+
+       /* Navbar文字設定 */
+	   .navbar {
+		position: fixed; /* 讓 navbar 固定在最上層 */
+		top: 0;
+		left: 0;
+		width: 100%;
+		z-index: 1000; /* 比 .register-box 的 10 還高 */
+		background-color: #1a1a2e; /* 半透明深色背景避免文字重疊星空看不清楚 */
+	}
+        .navbar-nav .nav-link {
+            font-size: 20px; /* 增大字體 */
+            font-weight: bold; /* 粗體字 */
+            color: white !important; /* 白色字 */
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: #ff6347 !important; /* Hover效果為番茄色 */
+        }
+
+        /* Navbar品牌文字設定 */
+        .navbar-brand {
+            font-size: 28px; /* 增大字體 */
+            font-weight: bold; /* 粗體字 */
+            color: white !important; /* 白色字 */
+        }
+
+        /* 表单宽度控制 */
+        .register-box {
+            margin-top: 80px;
+            background: rgba(0, 0, 0, 0.6); /* 半透明背景 */
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px; /* 占画面三分之一宽度 */
+            text-align: center;
+            z-index: 10;
+        }
+
+        .input-field {
+            margin-bottom: 15px;
+            width: 100%;
+            padding: 12px;
+            background: #333;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+        }
+
+        .input-field:focus {
+            outline: none;
+            background-color: #555;
+        }
+
+        .submit-btn {
+            background: #ff6347; /* 番茄色 */
+            border: none;
+            padding: 15px;
+            width: 100%;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+        }
+
+        .submit-btn:hover {
+            background-color: #ff4500; /* 番茄色变亮 */
+        }
+
+        .login-btn {
+            background: #3c7aac; /* 蓝色 */
+            border: none;
+            padding: 15px;
+            width: 100%;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            margin-top: 15px;
+        }
+
+        .login-btn:hover {
+            background-color: #0056b3; /* 深蓝色 */
+        }
+
+		
+
+    </style>
+</head>
+
+<body>
+
+        <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">ChainSure</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="切換導航">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <!-- 客戶服務下拉選單 -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="customerDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            客戶服務
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="customerDropdown">
+                            <li><a class="dropdown-item" href="#">會員中心</a></li>
+                            <li><a class="dropdown-item" href="#">聯繫業務員</a></li>
+                            <li><a class="dropdown-item" href="#">點數查詢</a></li>
+                        </ul>
+                    </li>
+                    <!-- 保單服務下拉選單 -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="policyDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            保單服務
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="policyDropdown">
+                            <li><a class="dropdown-item" href="#">保單查詢</a></li>
+                            <li><a class="dropdown-item" href="#">保單內容問題</a></li>
+                        </ul>
+                    </li>
+                    <!-- 理賠服務下拉選單 -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="claimDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            理賠服務
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="claimDropdown">
+                            <li><a class="dropdown-item" href="#">終身壽險</a></li>
+                            <li><a class="dropdown-item" href="#">失能照護險</a></li>
+                            <li><a class="dropdown-item" href="#">投資型報單</a></li>
+                            <li><a class="dropdown-item" href="#">旅遊綜合保險</a></li>
+                        </ul>
+                    </li>
+                    <!-- 熱門活動下拉選單 -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="activityDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            熱門活動
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="activityDropdown">
+                            <li><a class="dropdown-item" href="#">贈品查詢</a></li>
+                            <li><a class="dropdown-item" href="#">理賠成功申請案例</a></li>
+                        </ul>
+                    </li>
+                    <!-- 登入選項 -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            登入
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="loginDropdown">
+                            <li><a class="dropdown-item" href="#">投保人登入</a></li>
+                            <li><a class="dropdown-item" href="#">被保人登入</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#">業務員登入</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+	</nav>
+	</div>
+    <div class="stars"></div>
+  
+
+
+
+    <!--**************************-->
+    <div class="container_css">    
+        <!--~~~~~~~~~~~~~~~~~-->       
+
+        
+        <!--~~~~~~~~~~~~~~~~~--> 
+        <div class="content">
+            
+            <h1>电子保单查询系统</h1>
+    
+            <div>
+                <input type="text" id="policyNumber" placeholder="请输入保单号码">
+                <button id="connectBtn">连接钱包</button>
+                <button id="queryBtn">查询保单</button>
+            </div>
+            <div class="wallet-status">
+                <span id="walletAddress">未连接钱包</span>
+            </div>
+            <div id="loading" class="loading" style="display: none;">查询中...</div>
+            <div id="result"></div>
+        
+            <!-- 授权管理界面 -->
+        <div id="authTab" class="tab-content">
+            <h2>保单授权管理</h2>
+            
+            <div class="auth-form">
+                <div class="form-group">
+                    <label>保单号码：</label>
+                    <input type="text" id="authPolicyNumber" placeholder="POL-001">
+                </div>
+                
+                <div class="form-group">
+                    <label>授权地址：</label>
+                    <input type="text" id="authAddress" placeholder="0x...">
+                </div>
+                
+                <div class="button-group">
+                    <button onclick="grantAuthorization()">授予权限</button>
+                    <button onclick="revokeAuthorization()">撤销权限</button>
+                </div>
+            </div>
+            
+            <div id="authStatus"></div>
+
+            
+        </div>
+        
+        <!--~~~~~~~~~~~~~~~~~--> 
+        <div class="footer">
+            NTUB imd, 2023.
+        </div>  
+    </div>
+    <!--**************************-->    
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script>
+        const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // 替换为实际合约地址
+        const contractABI = [
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_policyHolder",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_insuredPerson",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_insuranceAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_premiumPeriod",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_premiumAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_startDate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "_beneficiary",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_growthRate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_declaredInterestRate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "_pdfHash",
+				"type": "string"
+			}
+		],
+		"name": "addPolicy",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "_wallet",
+				"type": "address"
+			}
+		],
+		"name": "authorizePolicyAccess",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			}
+		],
+		"name": "deletePolicy",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			}
+		],
+		"name": "getPolicy",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getPolicyCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "_wallet",
+				"type": "address"
+			}
+		],
+		"name": "isAuthorized",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"name": "policies",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "policyHolder",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "insuredPerson",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "insuranceAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "premiumPeriod",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "premiumAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "startDate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "beneficiary",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "growthRate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "declaredInterestRate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "pdfHash",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "policyNumbers",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "_wallet",
+				"type": "address"
+			}
+		],
+		"name": "revokePolicyAccess",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_insuranceAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_premiumAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_growthRate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_declaredInterestRate",
+				"type": "uint256"
+			}
+		],
+		"name": "updatePolicy",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_pdfHash",
+				"type": "string"
+			}
+		],
+		"name": "updatePolicyPDF",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+]; // 保持与之前提供的ABI一致
+
+    let insuranceContract = null;
+
+        // 连接钱包函数（改造后）
+async function connectWallet() {
+    try {
+        if (!window.ethereum) throw new Error("请安装MetaMask");
+        
+        // 初始化Provider
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        
+        // 获取Signer
+        const signer = await provider.getSigner();
+        // 初始化合约实例
+        insuranceContract = new ethers.Contract(
+            "0x5FbDB2315678afecb367f032d93F642f64180aa3", // 替换实际地址
+            contractABI,
+            signer
+        );
+        
+// 验证合约连接
+console.log("合约实例:", insuranceContract);
+        console.log("合约地址:", await insuranceContract.getAddress());
+        // 更新钱包状态
+        const address = await signer.getAddress();
+        document.getElementById("walletAddress").textContent = 
+            `你的錢包:${address.slice(0,6)}...${address.slice(-4)}`;
+    }
+     catch (error) {
+        console.error("连接错误:", error);
+        alert(`连接失败: ${error.message}`);
+     }
+}
+// UI状态更新函数
+function updateUI() {
+    const btn = document.getElementById('connectBtn');
+    if (walletState.isConnected) {
+        btn.innerHTML = "✔️ 已连接";
+        btn.style.backgroundColor = "#4CAF50";
+    } else {
+        btn.innerHTML = "🔗 连接钱包";
+        btn.style.backgroundColor = "#f44336";
+    }
+}
+// ========== 加密解密配置 ==========
+const ENCRYPTION_CONFIG = {
+    key: CryptoJS.enc.Utf8.parse("32-ByteSecretKey-123456789012"), // 必须与加密时一致
+    iv: CryptoJS.enc.Utf8.parse("16-ByteInitVector"), // 必须与加密时一致
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7
+};
+
+// 解密函数（安全增强版）
+function decryptField(cipherText) {
+    if (!cipherText || typeof cipherText !== 'string') {
+        console.warn("无效的密文输入");
+        return "N/A";
+    }
+    
+    try {
+        // 验证是否为合法Base64格式
+        if (!/^[A-Za-z0-9+/=]+$/.test(cipherText)) {
+            throw new Error("密文格式无效");
+        }
+
+        const bytes = CryptoJS.AES.decrypt(
+            cipherText,
+            ENCRYPTION_CONFIG.key,
+            { 
+                iv: ENCRYPTION_CONFIG.iv,
+                mode: ENCRYPTION_CONFIG.mode,
+                padding: ENCRYPTION_CONFIG.padding
+            }
+        );
+        
+        const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+        
+        // 验证解密结果
+        if (!decrypted) {
+            throw new Error("解密结果为空");
+        }
+        
+        return decrypted;
+    } catch (error) {
+        console.error(`解密失败 (${cipherText.slice(0,10)}...):`, error);
+        return "⚠️ 解密错误";
+    }
+}
+
+        // 查询保单
+        async function queryPolicy() {
+            const policyNumber = document.getElementById("policyNumber").value;
+            const resultDiv = document.getElementById("result");
+            const loading = document.getElementById("loading");
+            
+            try {
+                if (!policyNumber) throw new Error("请输入保单号码");
+                
+
+                loading.style.display = "block";
+                resultDiv.innerHTML = "";
+
+                 // === 核心权限验证开始 ===
+        // 并行获取必要数据提升性能
+        const [currentAddress, policyInfo, isAuthorized] = await Promise.all([
+            insuranceContract.runner.address,  // 获取当前连接地址
+            insuranceContract.policies(policyNumber), // 获取保单基本信息
+            insuranceContract.isAuthorized(policyNumber, await insuranceContract.runner.address) // 检查授权状态
+        ]);
+
+        // 解析保单所有者地址（根据ABI结构，owner在第10位）
+        const policyOwner = policyInfo[10]; 
+
+        // 权限验证逻辑
+        const isOwner = currentAddress.toLowerCase() === policyOwner.toLowerCase();
+        if (!isOwner && !isAuthorized) {
+            throw new Error("⚠️ 无访问权限：您不是保单所有者且未被授权查看此保单");
+        }
+        // === 核心权限验证结束 ===
+    
+
+
+                // 获取保单数据
+                const policyData = await insuranceContract.getPolicy(policyNumber);
+        console.log("原始保单数据:", policyData);
+                
+                // 数值格式化工具函数
+const formatters = {
+  weiToEth: (wei) => ethers.formatEther(wei),
+  timestampToDate: (timestamp) => {
+    if (!timestamp) return '未设置';
+    try {
+      return new Date(Number(timestamp) * 1000).toLocaleDateString();
+    } catch {
+      return '无效日期';
+    }
+  },
+  bigIntToString: (value) => value.toString(),
+  parsePolicyData: (rawData) => ({
+    
+    policyHolder: rawData[0],
+    insuredPerson: rawData[1],
+    insuranceAmount: rawData[2],
+    premiumPeriod: Number(rawData[3]),
+    premiumAmount: rawData[4],
+    startDate: formatters.timestampToDate(rawData[5]),
+    beneficiary: rawData[6],
+    growthRate: Number(rawData[7]),
+    declaredInterestRate: Number(rawData[8]),
+    pdfHash: rawData[9]
+    
+  })
+};
+
+               // 获取并格式化数据
+    const rawData = await insuranceContract.getPolicy(policyNumber);
+    const formattedData = formatters.parsePolicyData(rawData);
+// 渲染数据
+renderPolicy(formattedData);     
+            } catch (error) {
+                loading.style.display = "none";
+                showError(`查询失败: ${error.message}`);
+            }
+        }
+        function renderPolicy(data) {
+  const html = `
+    <div class="policy-info">
+      
+      <p>投保人: ${data.policyHolder}</p>
+      <p>被保人: ${data.insuredPerson}</p>
+      <p>保额: ${data.insuranceAmount} </p>
+      <p>缴费年限: ${data.premiumPeriod} 年</p>
+      <p>每期保费: ${data.premiumAmount} </p>
+      <p>生效日期: ${data.startDate}</p>
+      <p>受益人: ${data.beneficiary}</p>
+      <p>增额比例: ${data.growthRate}%</p>
+      <p>宣告利率: ${data.declaredInterestRate}%</p>
+      <p>保单文件: <a href="https://ipfs.io/ipfs/${data.pdfHash}" target="_blank">查看PDF</a></p>
+    </div>
+  `;
+  document.getElementById("result").innerHTML = html;
+}
+        function showError(msg) {
+            document.getElementById("result").innerHTML = `
+                <div class="error">
+                    ⚠️ ${msg}
+                    ${msg.includes("权限") ? '<button onclick="connectWallet()">重新连接钱包</button>' : ''}
+                </div>
+            `;
+        }
+
+        // 事件绑定
+        document.getElementById("connectBtn").addEventListener("click", connectWallet);
+        document.getElementById("queryBtn").addEventListener("click", queryPolicy);
+		
+		
+		
+		/*以下是授權--------------------------------------------------------------------------*/
+		// 切换选项卡
+function switchTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    document.getElementById(`${tabName}Tab`).classList.add('active');
+    document.querySelector(`button[onclick="switchTab('${tabName}')"]`).classList.add('active');
+}
+
+// 授予权限
+async function grantAuthorization() {
+    try {
+        const policyNumber = document.getElementById('authPolicyNumber').value;
+        const address = document.getElementById('authAddress').value;
+        
+        // 验证输入
+        if (!policyNumber || !address) {
+            throw new Error("请填写完整信息");
+        }
+        if (!ethers.isAddress(address)) {
+            throw new Error("请输入有效的钱包地址");
+        }
+
+        // 验证调用者权限
+        const policyOwner = await insuranceContract.policies(policyNumber).then(r => r[10]);
+        const currentAddress = await insuranceContract.runner.address;
+        
+        if (currentAddress.toLowerCase() !== policyOwner.toLowerCase()) {
+            throw new Error("只有保单所有者可以授权");
+        }
+
+        // 发送授权交易
+        showAuthStatus("⏳ 正在提交授权交易...", "processing");
+        const tx = await insuranceContract.authorizePolicyAccess(policyNumber, address);
+        await tx.wait();
+        
+        showAuthStatus("✅ 授权成功！", "success");
+    } catch (error) {
+        console.error("授权失败:", error);
+        showAuthStatus(`❌ 错误: ${error.message}`, "error");
+    }
+}
+
+// 撤销权限
+async function revokeAuthorization() {
+    try {
+        const policyNumber = document.getElementById('authPolicyNumber').value;
+        const address = document.getElementById('authAddress').value;
+        
+        // 输入验证
+        if (!policyNumber || !address) {
+            throw new Error("请填写完整信息");
+        }
+        if (!ethers.isAddress(address)) {
+            throw new Error("无效的钱包地址格式");
+        }
+        
+        showAuthStatus("⏳ 正在提交撤销交易...", "processing");
+        const tx = await insuranceContract.revokePolicyAccess(policyNumber, address);
+        await tx.wait();
+        
+        showAuthStatus("✅ 权限撤销成功！", "success");
+    } catch (error) {
+        console.error("撤销权限失败:", error);
+        // 友好错误提示
+        let errorMsg = error.message;
+        if (error.info?.error?.message.includes("caller is not the owner")) {
+            errorMsg = "操作被拒绝：您不是该保单的所有者";
+        }
+        showAuthStatus(`❌ 错误: ${error.message}`, "error");
+    }
+}
+
+// 状态显示函数
+function showAuthStatus(message, type) {
+    const statusDiv = document.getElementById('authStatus');
+    statusDiv.innerHTML = message;
+    statusDiv.className = `auth-status ${type}`;
+    
+    // 自动清除状态
+    if (type !== 'processing') {
+        setTimeout(() => {
+            statusDiv.innerHTML = '';
+            statusDiv.className = 'auth-status';
+        }, 5000);
+    }
+}
+    </script>   
+   <!--**************************-->    
+</body>
+   
+</html>
+
+<style>
+
+
+.container_css {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    border-radius: 12px;
+    margin-top: 3rem;
+}
+
+
+h1 {
+    color: #0000;
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+input[type="text"] {
+    padding: 10px;
+    margin: 0.5rem 0;
+    width: 100%;
+    max-width: 400px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+button {
+    background-color: #ff6347;
+    color: white;
+    padding: 10px 18px;
+    margin: 0.5rem 0.5rem 0.5rem 0;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #ff4500;
+}
+
+.wallet-status {
+    margin-top: 1rem;
+    font-size: 0.95rem;
+    color: #555;
+}
+
+.loading {
+    margin: 1rem 0;
+    font-weight: bold;
+    color: #ff6347;
+}
+
+#result {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border-left: 4px solid #ff6347;
+    background-color: #fff7f6;
+    border-radius: 8px;
+}
+
+.policy-info p {
+    margin: 0.4rem 0;
+}
+
+.error {
+    color: #ff6347;
+    font-weight: bold;
+    background: #ffe6e6;
+    border-left: 4px solid #ff6347;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+/* Navigation */
+#navigation {
+  list-style: none;
+  display: flex;
+  background-color: #ff6347;
+  padding: 10px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+
+
+#navigation a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: background 0.3s ease;
+}
+
+
+
+.footer {
+    text-align: center;
+    margin-top: 2rem;
+    color: #888;
+    font-size: 0.9rem;
+}
+
+/* 授权區塊樣式 */
+.auth-form {
+    background: #f3f3f3;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+	color: #000;
+}
+
+.auth-form input[type="text"] {
+    width: 100%;
+}
+
+.button-group {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+</style>
+
+</style>
+
+    <script>
+        // 创建小星星动画
+        function createStars() {
+            const numStars = 200;
+            for (let i = 0; i < numStars; i++) {
+                let star = document.createElement("div");
+                star.classList.add("star");
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                const duration = Math.random() * 2 + 1;
+                const delay = Math.random() * 5;
+                star.style.top = `${y}vh`;
+                star.style.left = `${x}vw`;
+                star.style.animationDuration = `${duration}s`;
+                star.style.animationDelay = `${delay}s`;
+                document.body.appendChild(star);
+            }
+        }
+
+        createStars();
+    </script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

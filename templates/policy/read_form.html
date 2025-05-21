@@ -177,6 +177,70 @@
 				"internalType": "string",
 				"name": "_policyNumber",
 				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "_wallet",
+				"type": "address"
+			}
+		],
+		"name": "revokePolicyAccess",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_policyHolder",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_insuredPerson",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_beneficiary",
+				"type": "string"
+			}
+		],
+		"name": "updatePolicy",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_pdfHash",
+				"type": "string"
+			}
+		],
+		"name": "updatePolicyPDF",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
 			}
 		],
 		"name": "getPolicy",
@@ -363,75 +427,6 @@
 			}
 		],
 		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_policyNumber",
-				"type": "string"
-			},
-			{
-				"internalType": "address",
-				"name": "_wallet",
-				"type": "address"
-			}
-		],
-		"name": "revokePolicyAccess",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_policyNumber",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_insuranceAmount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_premiumAmount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_growthRate",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_declaredInterestRate",
-				"type": "uint256"
-			}
-		],
-		"name": "updatePolicy",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_policyNumber",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "_pdfHash",
-				"type": "string"
-			}
-		],
-		"name": "updatePolicyPDF",
-		"outputs": [],
-		"stateMutability": "nonpayable",
 		"type": "function"
 	}
 ]; // 保持与之前提供的ABI一致

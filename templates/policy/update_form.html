@@ -1,25 +1,552 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
+<!doctype html>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>保單登記</title>
+<meta charset="utf-8">
+<title>測試樣板</title>
+<!-- 連結思源中文及css -->
+ 
+<link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
+<link href="/static/imgs/icon.jpg" rel="shortcut icon">
+<link href="/static/css/menu.css" rel="stylesheet"/>  
+<link href="/static/css/main.css" rel="stylesheet"/>      
+<!------------------------->
 </head>
+   
 <body>
+    <!--**************************-->
+    <div class="container">    
+        <!--~~~~~~~~~~~~~~~~~-->
+        <div class="header">           
+        </div>        
+        
+        <!--~~~~~~~~~~~~~~~~~-->        
+        <ul id="navigation">        
+            <li><a href="/">返回主頁</a></li> 
+        </ul>
+        
+        <!--~~~~~~~~~~~~~~~~~--> 
+        <div class="content">
+            
+
+            <h1>保單修改</h1>
+    
+    <!-- Wallet Connection Section -->
+    <div class="section">
+        <h2>連接錢包</h2>
+        <button onclick="connectWallet()">Connect MetaMask</button>
+        <p id="walletAddress">無連結</p>
+    </div>
+
+    <!-- 修改后的前端界面 -->
+<div class="section">
     <h2>更新保單</h2>
-    <form action="/policy/update" method="post">
-        <input type="number" id="updatePolicyNumber" placeholder="保單號碼" required>
-        <input type="number" id="updateInsuranceAmount" placeholder="新保額" required>
-        <input type="number" id="updatePremiumAmount" placeholder="新保費" required>
-        <input type="number" id="updateGrowthRate" placeholder="新成長率" required>
-        <input type="number" id="updateDeclaredInterestRate" placeholder="新公告利率" required>
-        <button type="submit">更新</button>
-    </form>
+    <input type="text" id="policyNumber" placeholder="Policy Number">
+    <button onclick="loadPolicy()">載入保單</button>
+    
+    <div id="policyForm" style="display:none;">
+        <p>投保人姓名: <input type="text" id="policyHolder"></p>
+        <p>被保人姓名: <input type="text" id="insuredPerson"></p>
+        <p>受益人: <input type="text" id="beneficiary"></p>
+        <button onclick="updatePolicy()">Update Policy</button>
+    </div>
+</div>
 
-    <p id="status"></p>
-
+    <!-- PDF Update Section -->
+    <div class="section">
+    <h2>修改保單PDF</h2>
+    <input type="text" id="pdfPolicyNumber" placeholder="Policy Number">
+    
+    <!-- 新增文件上传部分 -->
+    <div style="margin: 10px 0;">
+        <input type="file" id="pdfUpload" accept=".pdf" style="display: none;">
+        <button onclick="document.getElementById('pdfUpload').click()">选择PDF文件</button>
+        <span id="fileName"></span>
+        <button onclick="uploadPDF()">上传并生成Hash</button>
+    </div>
+    
+    <input type="text" id="pdfHash" placeholder="New PDF Hash" readonly>
+    <button onclick="updatePDF()">Update PDF</button>
+</div>
+               
+        </div>       
+        
+        <!--~~~~~~~~~~~~~~~~~--> 
+        <div class="footer">
+            NTUB imd, 2023.
+        </div>  
+    </div>
+    <!--**************************-->    
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    
     <script>
+//連接後端PDF
+            async function uploadPDF() {
+  const fileInput = document.getElementById('pdfUpload');
+  if (fileInput.files.length === 0) return;
 
-    </script>
+  const formData = new FormData();
+  formData.append('file', fileInput.files[0]);
+
+  try {
+    const response = await fetch('/policy/creat_PDF', {
+      method: 'POST',
+      body: formData
+    });
+    
+    const result = await response.json();
+    if (result.success) {
+      document.getElementById('pdfHash').value = result.pdf_hash;
+    } else {
+      alert('上传失败: ' + result.error);
+    }
+  } catch (error) {
+    console.error('上传错误:', error);
+  }
+}
+
+// 显示文件名
+document.getElementById('pdfUpload').addEventListener('change', function(e) {
+    const fileName = e.target.files[0]?.name || '未选择文件';
+    document.getElementById('fileName').innerText = fileName;
+});
+
+        let provider;
+        let signer;
+        let contract;
+        const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // 替换为你的合约地址
+        const contractABI = [
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_policyHolder",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_insuredPerson",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_insuranceAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_premiumPeriod",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_premiumAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_startDate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "_beneficiary",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_growthRate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_declaredInterestRate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "_pdfHash",
+				"type": "string"
+			}
+		],
+		"name": "addPolicy",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "_wallet",
+				"type": "address"
+			}
+		],
+		"name": "authorizePolicyAccess",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			}
+		],
+		"name": "deletePolicy",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			}
+		],
+		"name": "getPolicy",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getPolicyCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "_wallet",
+				"type": "address"
+			}
+		],
+		"name": "isAuthorized",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"name": "policies",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "policyHolder",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "insuredPerson",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "insuranceAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "premiumPeriod",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "premiumAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "startDate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "beneficiary",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "growthRate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "declaredInterestRate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "pdfHash",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "policyNumbers",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "_wallet",
+				"type": "address"
+			}
+		],
+		"name": "revokePolicyAccess",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_policyHolder",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_insuredPerson",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_beneficiary",
+				"type": "string"
+			}
+		],
+		"name": "updatePolicy",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_pdfHash",
+				"type": "string"
+			}
+		],
+		"name": "updatePolicyPDF",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+];
+
+        async function connectWallet() {
+            if (window.ethereum) {
+                try {
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    signer = provider.getSigner();
+                    const address = await signer.getAddress();
+                    document.getElementById('walletAddress').innerText = `Connected: ${address}`;
+                    
+                    // 初始化合约实例
+                    contract = new ethers.Contract(contractAddress, contractABI, signer);
+                    
+                    // 监听账户变化
+                    window.ethereum.on('accountsChanged', (accounts) => {
+                        if (accounts.length > 0) {
+                            connectWallet();
+                        } else {
+                            document.getElementById('walletAddress').innerText = 'Not connected';
+                        }
+                    });
+                } catch (error) {
+                    console.error(error);
+                }
+            } else {
+                alert('Please install MetaMask!');
+            }
+        }
+
+        // 修改后的JavaScript函数
+async function loadPolicy() {
+    const policyNumber = document.getElementById('policyNumber').value;
+    try {
+        const policy = await contract.getPolicy(policyNumber);
+        // 调整索引对应关系
+        document.getElementById('policyHolder').value = policy[0];  // 原索引0是policyHolder
+        document.getElementById('insuredPerson').value = policy[1]; // 原索引1是insuredPerson
+        document.getElementById('beneficiary').value = policy[6];  // 原索引6是beneficiary
+        document.getElementById('policyForm').style.display = 'block';
+    } catch (error) {
+        alert('Error loading policy: ' + error.message);
+    }
+}
+
+async function updatePolicy() {
+    const policyNumber = document.getElementById('policyNumber').value;
+    const policyHolder = document.getElementById('policyHolder').value;
+    const insuredPerson = document.getElementById('insuredPerson').value;
+    const beneficiary = document.getElementById('beneficiary').value;
+
+    try {
+        const tx = await contract.updatePolicy(
+            policyNumber,
+            policyHolder,
+            insuredPerson,
+            beneficiary
+        );
+        await tx.wait();
+        alert('Policy updated successfully!');
+    } catch (error) {
+        alert('Error updating policy: ' + error.message);
+    }
+}
+
+        async function updatePDF() {
+            const policyNumber = document.getElementById('pdfPolicyNumber').value;
+            const newPdfHash = document.getElementById('pdfHash').value;
+
+            try {
+                const tx = await contract.updatePolicyPDF(policyNumber, newPdfHash);
+                await tx.wait();
+                alert('PDF hash updated successfully!');
+            } catch (error) {
+                alert('Error updating PDF: ' + error.message);
+            }
+        }
+    </script>    
+   <!--**************************-->       
 </body>
+   
 </html>

@@ -130,14 +130,14 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///keys.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# 連接本地 Ganache 區塊鏈
+# 連接本地 Hardhat 區塊鏈
 hardhat_url = "http://127.0.0.1:8545"
 w3 = Web3(Web3.HTTPProvider(hardhat_url))
 
 # 檢查是否成功連線
 if not w3.is_connected():
     raise Exception("無法連接本地區塊鏈，請檢查 Hardhat 是否運行")
-
+'''912行
 # 生成 RSA 密鑰 (公鑰和私鑰)
 private_key_cry = rsa.generate_private_key(
     public_exponent=65537,
@@ -239,7 +239,7 @@ with app.app_context():
 
 # 存储当前生成的密钥
 store_keys(private_key_cry, public_key)
-
+'''
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')  # 設定上傳資料夾路徑
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'pdf'}
 
@@ -265,6 +265,8 @@ ocr = PaddleOCR(
 )
 cc = OpenCC('s2t')
 
+
+'''
 # 設定智能合約地址 & ABI (需替換為你自己的合約資訊)
 contract_address = "0x5FbDB2315678afecb367f032d93F642f64180aa3"
 contract_address=w3.to_checksum_address(contract_address)
@@ -531,7 +533,7 @@ contract = w3.eth.contract(address=contract_address, abi=contract_abi)
 wallet_address = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 wallet_address=w3.to_checksum_address(wallet_address)
 private_key = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
-
+'''
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -596,13 +598,13 @@ def add_policy():
         return jsonify({"status": "error", "message": error_message}), 400
 
 #---------------------------------------
-
+'''
 #修改保單
-@app.route('/policy/update/fetch')
+@app.route('/policy/update/form')
 def policy_updatepolicy_form():
-    return render_template('policy/update_fetch.html')
+    return render_template('policy/update_form.html')
 
-
+'''
 #修改保單(區塊鏈)
 def update_policy(policy_number, insurance_amount, premium_amount, growth_rate, declared_interest_rate):
     nonce = w3.eth.get_transaction_count(wallet_address)
@@ -907,6 +909,8 @@ def create_ID_image():
 #-----------------------
 if __name__ == '__main__':
     app.run(debug=True)
+    '''
     with app.app_context():
         store_keys(private_key_cry, public_key)
+        '''
     app.run()

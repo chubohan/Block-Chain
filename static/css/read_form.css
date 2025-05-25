@@ -1,0 +1,269 @@
+/* 星空背景效果 */
+body {
+    margin: 0;
+    margin-bottom: 150px;
+    padding-top: 80px;
+    height: 100vh;
+    background: #1a1a2e; /* 深色背景 */
+    color: white;
+    font-family: Arial, sans-serif;
+    overflow-x: hidden;
+    overflow-y: visible;
+    position: relative;
+    padding-top: 120px;
+    }
+
+.stars {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('https://cdn.pixabay.com/photo/2017/08/30/02/18/starry-night-2695563_960_720.jpg') no-repeat center center fixed;
+    background-size: cover;
+    z-index: -1;
+}
+
+/* 小星星动画 */
+.star {
+    position: absolute;
+    border-radius: 50%;
+    width: 2px;
+    height: 2px;
+    background-color: white;
+    animation: twinkle 1.5s infinite alternate;
+}
+
+@keyframes twinkle {
+    0% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0.2;
+        transform: scale(1.5);
+    }
+}
+
+/* Navbar文字設定 */
+.navbar {
+position: fixed; /* 讓 navbar 固定在最上層 */
+top: 0;
+left: 0;
+width: 100%;
+z-index: 1000; /* 比 .register-box 的 10 還高 */
+background-color: #1a1a2e; /* 半透明深色背景避免文字重疊星空看不清楚 */
+}
+.navbar-nav .nav-link {
+    font-size: 20px; /* 增大字體 */
+    font-weight: bold; /* 粗體字 */
+    color: white !important; /* 白色字 */
+}
+
+.navbar-nav .nav-link:hover {
+    color: #ff6347 !important; /* Hover效果為番茄色 */
+}
+
+/* Navbar品牌文字設定 */
+.navbar-brand {
+    font-size: 28px; /* 增大字體 */
+    font-weight: bold; /* 粗體字 */
+    color: white !important; /* 白色字 */
+}
+
+/* 表单宽度控制 */
+.register-box {
+    margin-top: 80px;
+    background: rgba(0, 0, 0, 0.6); /* 半透明背景 */
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 400px; /* 占画面三分之一宽度 */
+    text-align: center;
+    z-index: 10;
+}
+
+.input-field {
+    margin-bottom: 15px;
+    width: 100%;
+    padding: 12px;
+    background: #333;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 16px;
+}
+
+.input-field:focus {
+    outline: none;
+    background-color: #555;
+}
+
+.submit-btn {
+    background: #ff6347; /* 番茄色 */
+    border: none;
+    padding: 15px;
+    width: 100%;
+    font-size: 18px;
+    border-radius: 5px;
+    cursor: pointer;
+    color: white;
+}
+
+.submit-btn:hover {
+    background-color: #ff4500; /* 番茄色变亮 */
+}
+
+.login-btn {
+    background: #3c7aac; /* 蓝色 */
+    border: none;
+    padding: 15px;
+    width: 100%;
+    font-size: 18px;
+    border-radius: 5px;
+    cursor: pointer;
+    color: white;
+    margin-top: 15px;
+}
+
+.login-btn:hover {
+    background-color: #0056b3; /* 深蓝色 */
+}
+
+.container_css {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    border-radius: 12px;
+    margin-top: 3rem;
+}
+
+
+h1 {
+    color: #0000;
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+input[type="text"] {
+    padding: 10px;
+    margin: 0.5rem 0;
+    width: 100%;
+    max-width: 400px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+button {
+    background-color: #ff6347;
+    color: white;
+    padding: 10px 18px;
+    margin: 0.5rem 0.5rem 0.5rem 0;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #ff4500;
+}
+
+.wallet-status {
+    margin-top: 1rem;
+    font-size: 0.95rem;
+    color: #555;
+}
+
+.loading {
+    margin: 1rem 0;
+    font-weight: bold;
+    color: #ff6347;
+}
+
+#result {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border-left: 4px solid #ff6347;
+    background-color: #fff7f6;
+    border-radius: 8px;
+}
+
+.policy-info p {
+    margin: 0.4rem 0;
+}
+
+.error {
+    color: #ff6347;
+    font-weight: bold;
+    background: #ffe6e6;
+    border-left: 4px solid #ff6347;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+/* Navigation */
+#navigation {
+  list-style: none;
+  display: flex;
+  background-color: #ff6347;
+  padding: 10px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+
+
+#navigation a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: background 0.3s ease;
+}
+
+
+
+.footer {
+    text-align: center;
+    margin-top: 2rem;
+    color: #888;
+    font-size: 0.9rem;
+}
+
+/* 授权區塊樣式 */
+.auth-form {
+    background: #f3f3f3;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+	color: #000;
+}
+
+.auth-form input[type="text"] {
+    width: 100%;
+}
+
+.button-group {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}

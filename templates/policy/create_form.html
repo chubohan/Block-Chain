@@ -16,6 +16,8 @@
 
 <body>
 
+<div class="stars"></div>
+
 <nav class="navbar navbar-expand-lg navbar-light fixed-top">
     <a class="navbar-brand" href="/">ChainSure</a>
     <button
@@ -142,14 +144,16 @@
   </div>
 </nav>
 
-<div class="stars"></div>
-
 <div class="container">
 	
   <h2>新增保單</h2>
   <div class="form-wrapper">
 
     <form id="policyForm">
+      <button type="button" class="btn btn-warning" onclick="connectWallet()" style="display: flex; justify-content: center">
+          連接錢包
+        </button>
+
       <label>
         保單編號 <span class="required-label">*</span>
         <input type="text" id="policyNumber" required />
@@ -207,26 +211,18 @@
 
       <div class="divider"></div>
 
-      <div class="upload-section">
+      <div class="upload-section"  style="display: flex; justify-content: center">
         <label style="margin: 0;">
           上傳 PDF 文件 <span class="required-label">*</span>
           <input type="file" id="pdfUpload" accept=".pdf" required />
         </label>
-        <button type="button" onclick="uploadPDF()">上傳並生成哈希</button>
+        <button type="button" onclick="uploadPDF()">上傳並發送簡訊</button>
       </div>
-
-      <label>
-        PDF 哈希值
-        <input type="text" id="pdfHash" readonly />
-      </label>
 
       <div class="form-footer">
         <div style="display: flex; justify-content: center"></div>
         <button type="submit" class="submit">提交保單</button>
-
-        <button type="button" class="btn btn-warning" onclick="connectWallet()">
-          連接錢包
-        </button>
+        
         <div id="status"></div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
       </div>

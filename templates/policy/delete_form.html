@@ -1,526 +1,117 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="zh-Hant">
 <head>
-<meta charset="utf-8">
-<title>測試樣板</title>
-<!-- 連結思源中文及css -->
-
-<script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
-<link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
-<link href="/static/imgs/icon.jpg" rel="shortcut icon">
-<link href="/static/css/menu.css" rel="stylesheet"/>  
-<link href="/static/css/main.css" rel="stylesheet"/>  
-<link href="/static/css/JS.css" rel="stylesheet">    
-<!------------------------->
+  <meta charset="UTF-8">
+  <title>刪除保單 - ChainSure</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- 字體與樣式 -->
+  <link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/static/imgs/icon.jpg" rel="shortcut icon">
+  <link href="/static/css/delete_form.css" rel="stylesheet"> <!-- 你剛提供的CSS放這裡 -->
 </head>
-   
 <body>
-    <!--**************************-->
-    <div class="container">    
-        <!--~~~~~~~~~~~~~~~~~-->
-        <div class="header">           
-        </div>        
-        
-        <!--~~~~~~~~~~~~~~~~~-->        
-        <ul id="navigation">        
-            <li><a href="/">返回主頁</a></li> 
+
+<!-- 星空背景 -->
+<div class="stars"></div>
+
+<!-- 導覽列 -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <a class="navbar-brand" href="/">ChainSure</a>
+  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav ms-auto">
+      <!-- 客戶服務 -->
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="customerDropdown" role="button" data-bs-toggle="dropdown">
+          客戶服務
+        </a>
+        <ul class="dropdown-menu" aria-labelledby="customerDropdown">
+          <li><a class="dropdown-item" href="#">會員中心</a></li>
+          <li><a class="dropdown-item" href="#">聯繫業務員</a></li>
+          <li><a class="dropdown-item" href="#">點數查詢</a></li>
         </ul>
-        
-        <!--~~~~~~~~~~~~~~~~~--> 
-        <div class="content">
-            
-            <div class="container">
-                <h1>保單管理系統</h1>
-                <h2>刪除保單</h2>
-                
-                <div class="wallet-info">
-                    <p>當前連接錢包: <span id="walletAddress">未連接</span></p>
-                    <button id="connectWallet">連接MetaMask錢包</button>
-                </div>
-                
-                <div class="form-group">
-                    <label for="policyNumber">保單編號:</label>
-                    <input type="text" id="policyNumber" placeholder="輸入要刪除的保單編號">
-                </div>
-                
-                <button id="deleteBtn" disabled>刪除保單</button>
-                
-                <div id="result" class="result" style="display: none;"></div>
-            </div>
-            <!--
-            <form action="/policy/delete" method="get">
-                <div class="form">
-                    <span class="name">客戶編號</span>
-                    <span class="value">
-                        <input type="text" name="cusno" required>
-                    </span>
-                    <br/>
-             
-                    
-                    <span class="name"></span>
-                    <span class="value"><input type="submit" value="刪除" style="width:80px"></span>
-                </div>
-            </form>
-            -->    
-        </div>   
-         
-        
-        <!--~~~~~~~~~~~~~~~~~--> 
-        <div class="footer">
-            NTUB imd, 2023.
-        </div>  
-    </div>
-    <!--**************************-->    
-    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-   
-    <script>
-        // 智能合約ABI (根據您的合約編譯後的ABI)
-        const contractABI = [
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_policyNumber",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "_policyHolder",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "_insuredPerson",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_insuranceAmount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_premiumPeriod",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_premiumAmount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_startDate",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "_beneficiary",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_growthRate",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_declaredInterestRate",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "_pdfHash",
-				"type": "string"
-			}
-		],
-		"name": "addPolicy",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_policyNumber",
-				"type": "string"
-			},
-			{
-				"internalType": "address",
-				"name": "_wallet",
-				"type": "address"
-			}
-		],
-		"name": "authorizePolicyAccess",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_policyNumber",
-				"type": "string"
-			}
-		],
-		"name": "deletePolicy",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_policyNumber",
-				"type": "string"
-			}
-		],
-		"name": "getPolicy",
-		"outputs": [
-			{
-				"internalType": "string",
-				"name": "",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "",
-				"type": "string"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getPolicyCount",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_policyNumber",
-				"type": "string"
-			},
-			{
-				"internalType": "address",
-				"name": "_wallet",
-				"type": "address"
-			}
-		],
-		"name": "isAuthorized",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "",
-				"type": "string"
-			}
-		],
-		"name": "policies",
-		"outputs": [
-			{
-				"internalType": "string",
-				"name": "policyNumber",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "policyHolder",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "insuredPerson",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "insuranceAmount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "premiumPeriod",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "premiumAmount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "startDate",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "beneficiary",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "growthRate",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "declaredInterestRate",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "owner",
-				"type": "address"
-			},
-			{
-				"internalType": "string",
-				"name": "pdfHash",
-				"type": "string"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "policyNumbers",
-		"outputs": [
-			{
-				"internalType": "string",
-				"name": "",
-				"type": "string"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_policyNumber",
-				"type": "string"
-			},
-			{
-				"internalType": "address",
-				"name": "_wallet",
-				"type": "address"
-			}
-		],
-		"name": "revokePolicyAccess",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_policyNumber",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_insuranceAmount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_premiumAmount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_growthRate",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_declaredInterestRate",
-				"type": "uint256"
-			}
-		],
-		"name": "updatePolicy",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_policyNumber",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "_pdfHash",
-				"type": "string"
-			}
-		],
-		"name": "updatePolicyPDF",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	}
-];
-        
-        // 智能合約地址 (部署後替換為您的合約地址)
-        const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-        
-        let web3;
-        let contract;
-        let accounts = [];
-        
-        // 連接MetaMask錢包
-        document.getElementById('connectWallet').addEventListener('click', async () => {
-            try {
-                if (window.ethereum) {
-                    web3 = new Web3(window.ethereum);
-                    await window.ethereum.enable();
-                    
-                    // 獲取帳戶
-                    accounts = await web3.eth.getAccounts();
-                    document.getElementById('walletAddress').textContent = accounts[0];
-                    
-                    // 初始化合約
-                    contract = new web3.eth.Contract(contractABI, contractAddress);
-                    
-                    // 啟用刪除按鈕
-                    document.getElementById('deleteBtn').disabled = false;
-                    
-                    // 隱藏連接按鈕
-                    document.getElementById('connectWallet').style.display = 'none';
-                    
-                    showResult('錢包連接成功!', 'success');
-                } else {
-                    showResult('請安裝MetaMask擴展程序!', 'error');
-                }
-            } catch (error) {
-                showResult('連接錢包失敗: ' + error.message, 'error');
-            }
-        });
-        
-        // 刪除保單
-        document.getElementById('deleteBtn').addEventListener('click', async () => {
-            const policyNumber = document.getElementById('policyNumber').value.trim();
-            
-            if (!policyNumber) {
-                showResult('請輸入保單編號', 'error');
-                return;
-            }
-            
-            try {
-                // 先檢查保單是否存在
-                const policy = await contract.methods.getPolicy(policyNumber).call({ from: accounts[0] });
-                
-                if (!policy || !policy[0]) {
-                    showResult('保單不存在', 'error');
-                    return;
-                }
-                
-                // 執行刪除操作
-                showResult('正在刪除保單，請等待交易確認...', 'success');
-                
-                const result = await contract.methods.deletePolicy(policyNumber)
-                    .send({ from: accounts[0] });
-                
-                showResult(`保單 ${policyNumber} 已成功刪除! 交易哈希: ${result.transactionHash}`, 'success');
-                document.getElementById('policyNumber').value = '';
-            } catch (error) {
-                let errorMsg = '刪除保單失敗: ';
-                
-                if (error.message.includes("Not the policy owner")) {
-                    errorMsg += '您不是此保單的所有者，無權刪除';
-                } else if (error.message.includes("Policy not found")) {
-                    errorMsg += '保單不存在';
-                } else {
-                    errorMsg += error.message;
-                }
-                
-                showResult(errorMsg, 'error');
-            }
-        });
-        
-        // 顯示結果
-        function showResult(message, type) {
-            const resultDiv = document.getElementById('result');
-            resultDiv.style.display = 'block';
-            resultDiv.textContent = message;
-            resultDiv.className = 'result ' + type;
-        }
-    </script>   
-   <!--**************************-->       
+      </li>
+      <!-- 其他功能 -->
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="policyDropdown" data-bs-toggle="dropdown">
+          保單服務
+        </a>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="#">保單查詢</a></li>
+          <li><a class="dropdown-item" href="#">保單內容問題</a></li>
+        </ul>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="claimDropdown" data-bs-toggle="dropdown">
+          理賠服務
+        </a>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="#">終身壽險</a></li>
+          <li><a class="dropdown-item" href="#">失能照護險</a></li>
+          <li><a class="dropdown-item" href="#">投資型報單</a></li>
+          <li><a class="dropdown-item" href="#">旅遊綜合保險</a></li>
+        </ul>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="activityDropdown" data-bs-toggle="dropdown">
+          熱門活動
+        </a>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="#">贈品查詢</a></li>
+          <li><a class="dropdown-item" href="#">理賠成功申請案例</a></li>
+        </ul>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" data-bs-toggle="dropdown">
+          登入
+        </a>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="/user/login/form">保人登入</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" href="/user/login/form">業務員登入</a></li>
+        </ul>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="idVerificationDropdown" data-bs-toggle="dropdown">
+          身分證驗證
+        </a>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="/policy/create_ID_image">身分證驗證</a></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<!-- 表單內容 -->
+<div class="container">
+  <h2>刪除保單</h2>
+  <div class="wallet-info text-center mb-4">
+    <p>當前連接錢包: <span id="walletAddress">未連接</span></p>
+    <button id="connectWallet">連接 MetaMask 錢包</button>
+  </div>
+
+  <div class="form-group mb-3">
+    <label for="policyNumber">保單編號:</label>
+    <input type="text" id="policyNumber" class="form-control" placeholder="輸入要刪除的保單編號">
+  </div>
+
+  <div class="text-center">
+    <button id="deleteBtn" disabled>刪除保單</button>
+  </div>
+
+  <div id="result" class="result" style="display: none;"></div>
+</div>
+
+<!-- 套件 -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script src="/static/js/delete_form.js"></script>
+
 </body>
-   
 </html>

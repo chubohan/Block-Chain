@@ -1,0 +1,422 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>測試樣板</title>
+<!-- 連結思源中文及css -->
+<link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
+<link href="/static/imgs/icon.jpg" rel="shortcut icon">
+<link href="/static/css/menu.css" rel="stylesheet"/>
+<link href="/static/css/main.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+<!------------------------->
+<style>
+/* 你的基底設定 */
+body {
+  margin: 0;
+  padding-top: 120px;
+  min-height: 100vh;
+  background: #1a1a2e;
+  color: white;
+  font-family: 'Noto Sans TC', Arial, sans-serif;
+  display: flex;
+  overflow-x: hidden;
+  overflow-y: auto;
+  justify-content: center;
+  align-items: center;
+    
+}
+   
+.stars {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%; /* 固定覆蓋整個視窗 */
+  background: url('https://cdn.pixabay.com/photo/2017/08/30/02/18/starry-night-2695563_960_720.jpg') repeat; /* 可以改 repeat-y */
+  background-size: cover;
+  z-index: -999;
+  pointer-events: none;
+}
+
+/* 閃爍小星星 */
+.star {
+  position: absolute;
+  border-radius: 50%;
+  width: 2px;
+  height: 2px;
+  background-color: white;
+  animation: twinkle 1.5s infinite alternate;
+}
+
+@keyframes twinkle {
+  0% { opacity: 0.6; transform: scale(1); }
+  100% { opacity: 1; transform: scale(1.5); }
+}
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: transparent;
+  padding: 0.8rem 1.5rem;
+  transition: transform 0.3s ease;
+}
+
+.navbar.hidden {
+  transform: translateY(-100%);
+}
+
+.navbar-brand {
+  font-weight: bold;
+  font-size: 2rem;
+  color: #ffffff;
+}
+
+.nav-link {
+  color: #ffffff;
+  font-size: 1.1rem;
+  padding: 0.5rem 1rem;
+  text-transform: uppercase;
+}
+
+.nav-link:hover {
+  color: #f39c12;
+}
+
+/* Dropdown Menu */
+.dropdown-menu {
+  min-width: 200px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+  background-color: #222;
+  display: none;
+}
+
+.nav-item:hover .dropdown-menu {
+  display: block;
+}
+
+.dropdown-item {
+  padding: 12px 16px;
+  color: #fff;
+  font-size: 1.1rem;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dropdown-item:hover {
+  background-color: #f39c12;
+  color: #222;
+}
+
+.dropdown-divider {
+  border-top: 1px solid #444;
+}
+
+/* 容器 */
+.container {
+  max-width: 600px;
+  margin: 40px auto 0 auto;
+  padding: 50px 20px 40px 20px;
+  z-index: 1;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.6);
+  color: #f0f0f5;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  position: relative;  /* ✅ 要加這個才能讓 z-index 生效 */
+  background: rgba(0, 0, 0, 0.85);  /* ✅ 更不透明一點，遮擋星星 */
+}
+
+</style>
+
+</head>
+
+<body>
+<div class="stars"></div>
+<nav class="navbar navbar-expand-lg navbar-light fixed-top">
+    <a class="navbar-brand" href="/">ChainSure</a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+      aria-controls="navbarNav"
+      aria-expanded="false"
+      aria-label="切換導航"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            id="customerDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            客戶服務
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="customerDropdown">
+            <li><a class="dropdown-item" href="#">會員中心</a></li>
+            <li><a class="dropdown-item" href="#">聯繫業務員</a></li>
+            <li><a class="dropdown-item" href="#">點數查詢</a></li>
+          </ul>
+        </li>
+
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            id="policyDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            保單服務
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="policyDropdown">
+            <li><a class="dropdown-item" href="#">保單查詢</a></li>
+            <li><a class="dropdown-item" href="#">保單內容問題</a></li>
+          </ul>
+        </li>
+
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            id="claimDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            理賠服務
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="claimDropdown">
+            <li><a class="dropdown-item" href="#">終身壽險</a></li>
+            <li><a class="dropdown-item" href="#">失能照護險</a></li>
+            <li><a class="dropdown-item" href="#">投資型報單</a></li>
+            <li><a class="dropdown-item" href="#">旅遊綜合保險</a></li>
+          </ul>
+        </li>
+
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            id="activityDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            熱門活動
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="activityDropdown">
+            <li><a class="dropdown-item" href="#">贈品查詢</a></li>
+            <li><a class="dropdown-item" href="#">理賠成功申請案例</a></li>
+          </ul>
+        </li>
+
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            id="loginDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            登入
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="loginDropdown">
+            <li><a class="dropdown-item" href="/user/login/form">保人登入</a></li>
+            <li><hr class="dropdown-divider" /></li>
+            <li><a class="dropdown-item" href="/user/login/form">業務員登入</a></li>
+          </ul>
+        </li>
+
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            id="idVerificationDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            身分證驗證
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="idVerificationDropdown">
+            <li><a class="dropdown-item" href="/policy/create_ID_image">身分證驗證</a></li>
+          </ul>
+        </li>
+
+      </ul>
+    </div>
+  </div>
+</nav>
+    <div class="stars"></div>
+
+    <div class="box">
+        <h2>上傳圖檔</h2>   
+
+        <form method="POST" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".pdf" required>
+            <br>
+            <button type="submit" class="btn-custom">上傳並處理PDF</button>
+        </form>
+
+        {% if pdf_hash %}
+            <div class="result-box mt-4">
+                <h3>處理結果</h3>
+                <p><strong>PDF雜湊值:</strong> {{ pdf_hash }}</p>
+            </div>
+        {% endif %}
+
+    </div>
+</body>
+
+</html>
+
+  <style> 
+    .box {
+    position: relative;
+    background: rgba(0, 0, 0, 0.6);  /* 黑底 + 半透明 */
+    backdrop-filter: blur(12px);    /* 毛玻璃模糊 */
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+    animation: fadeIn 1s ease;
+    color: white; /* 白字，搭配黑底 */
+    overflow: hidden;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 {
+      font-size: 32px;
+      margin-bottom: 15px;
+      position: relative;
+    }
+
+    h2::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 3px;
+      background: #ff6347;
+      border-radius: 10px;
+    }
+
+    .btn-custom {
+      background: linear-gradient(to right, #ff6347, #ff4500);
+      border: none;
+      color: white;
+      padding: 12px 30px;
+      font-size: 16px;
+      border-radius: 30px;
+      box-shadow: 0 4px 15px rgba(255, 99, 71, 0.4);
+      transition: all 0.3s ease;
+      margin-top: 20px;
+    }
+
+    .btn-custom:hover {
+      background: linear-gradient(to right, #ff4500, #ff6347);
+      box-shadow: 0 6px 25px rgba(255, 99, 71, 0.6);
+    }
+
+    input[type="file"] {
+      color: white;
+      margin-top: 15px;
+      margin-bottom: 10px;
+    }
+
+    .footer {
+      margin-top: 30px;
+      font-size: 14px;
+      color: #aaa;
+    }
+
+    a {
+      color: #ff6347;
+      text-decoration: none;
+    }
+
+    a:hover {
+      color: #ff4500;
+    }
+
+    .form-hint {
+      font-size: 14px;
+      color: #ccc;
+      margin-bottom: 10px;
+    }
+    .result-box {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(6px);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        margin-top: 20px;
+        animation: fadeIn 0.8s ease;
+        transition: all 0.3s ease;
+        }
+
+  </style>
+
+<script>
+    function createStars() {
+    const numStars = 200;
+    const starsContainer = document.querySelector(".stars");
+    const pageHeight = document.body.scrollHeight;
+
+    for (let i = 0; i < numStars; i++) {
+        let star = document.createElement("div");
+        star.classList.add("star");
+
+        const x = Math.random() * window.innerWidth;
+        const y = Math.random() * pageHeight;
+        const duration = Math.random() * 2 + 1;
+        const delay = Math.random() * 5;
+
+        star.style.top = `${y}px`;
+        star.style.left = `${x}px`;
+        star.style.animationDuration = `${duration}s`;
+        star.style.animationDelay = `${delay}s`;
+
+        starsContainer.appendChild(star);
+    }
+}
+
+createStars();
+
+// Navbar隱藏顯示的邏輯
+let lastScrollTop = 0;
+window.addEventListener('scroll', function() {
+    const navbar = document.querySelector('.navbar');
+    let currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+    
+    if (currentScroll > lastScrollTop) {
+        navbar.classList.add('hidden'); // 向下滾動隱藏navbar
+    } else {
+        navbar.classList.remove('hidden'); // 向上滾動顯示navbar
+    }
+    lastScrollTop = currentScroll <= 0 ? 0 : currentScroll; // 防止滾動條小於0
+});
+</script>

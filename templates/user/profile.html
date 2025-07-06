@@ -1,58 +1,64 @@
+<!-- templates/user/profile.html -->
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <title>測試樣板</title>
-    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
-    <link href="/static/imgs/icon.jpg" rel="shortcut icon">
-    <link href="/static/css/menu.css" rel="stylesheet"/>  
-    <link href="/static/css/main.css" rel="stylesheet"/>      
+    <title>使用者資料</title>
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/static/css/profile.css" rel="stylesheet">
 </head>
-    <body>
-    <div class="container">
-        <div class="header">           
-        </div>        
-        
-        <ul id="navigation">        
-            <li><a href="/">返回主頁</a></li> 
-        </ul>
-        
-        <div class="content">
-            <h2>樣板畫面</h2>
+<body>
+    <div class="stars"></div>
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+    <a class="navbar-brand" href="/">ChainSure</a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+      aria-controls="navbarNav"
+      aria-expanded="false"
+      aria-label="切換導航"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
 
-        <h1>歡迎 {{ user['name'] }}</h1>
-    <img src="{{ user['picture'] }}" alt="用戶頭像" width="100">
-    <p>Email: {{ user['email'] }}</p>
-    <button id="logoutButton">登出</button>
-
-        <script>
-        // 確保 Google 庫已載入
-        if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-            google.accounts.id.disableAutoSelect();
-        }
-
-        // 改用事件監聽器
-        document.getElementById('logoutButton').addEventListener('click', async function() {
-            try {
-                const response = await fetch('/logout', { 
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'include' // 如果需要傳送 cookies
-                });
-                
-                if (response.ok) {
-                    window.location.href = '/';
-                } else {
-                    console.error('登出失敗:', response.statusText);
-                }
-            } catch (error) {
-                console.error('登出時發生錯誤:', error);
-            }
-        });
-        </script>
-        </div>
+      </ul>
     </div>
-    </body>
+  </div>
+</nav>
+    <div class="container">
+	
+    <h2>使用者資料</h2>
+    <div class="form-wrapper">
+    <div>
+        {% if current_user.is_authenticated %}
+        <p>使用者名稱: {{ user.username }}</p>
+        <p>電子郵件: {{ user.gmail }}</p>
+        <p>年齡: {{ user.age if user.age else '未填寫' }}</p>
+        <p>性別: 
+            {% if user.gender == 'male' %} 男性
+            {% elif user.gender == 'female' %} 女性
+            {% elif user.gender == 'other' %} 其他
+            {% else %} 未填寫
+            {% endif %}
+        </p>
+        <p>身分: {% if current_user.insurance_officer == 1 %} 管理員
+                  {% else %} 客戶
+                  {% endif %}</p>
+    </div>
+    <form action="/user/logout" method="POST">
+        <button type="submit">登出</button>
+    </form>
+    {% else %}
+    <h1>請先登入</h1>
+    <a href="/user/profile">前往登入</a>
+    {% endif %}
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/eth-crypto@2.3.0/dist/eth-crypto-browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/profile.js"></script>
+</body>
 </html>

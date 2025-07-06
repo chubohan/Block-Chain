@@ -8,9 +8,9 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
-from pdf2image import convert_from_path
+#from pdf2image import convert_from_path
 from PIL import Image
-import pytesseract
+#import pytesseract
 import utils.db as db
 from web3 import Web3
 import json
@@ -35,19 +35,20 @@ from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 from werkzeug.security import generate_password_hash, check_password_hash
 import random
 import string
-from paddleocr import PaddleOCR, draw_ocr
+#from paddleocr import PaddleOCR, draw_ocr
 from PIL import Image
-from opencc import OpenCC
+#from opencc import OpenCC
 import os
 import re
-import cv2
+#import cv2
 import numpy as np
 #-----------------------
 # **匯入藍圖
 #-----------------------
 from myapp.user import user_bp
 from myapp.user import load_user as user_load_user
-
+from myapp.officer import officer_bp
+from myapp.policy import policy_bp
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # 或其他郵件伺服器
@@ -74,11 +75,12 @@ CORS(app)# 允許所有跨域請求
 #-------------------------
 
 app.register_blueprint(user_bp, url_prefix='/user')
-
+app.register_blueprint(officer_bp, url_prefix='/officer')
+app.register_blueprint(policy_bp, url_prefix='/policy')
 # 初始化 Flask-Login
 login_manager = LoginManager()
 login_manager.init_app(app)  # 綁定到應用
-login_manager.login_view = 'login'  # 指定登入路由
+login_manager.login_view = 'user.login'  # 指定登入路由
 #-----------------------
 # 載入使用者
 #-----------------------
@@ -254,6 +256,7 @@ def allowed_file(filename):
 
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+'''
 # 初始化 PaddleOCR 與簡轉繁
 ocr = PaddleOCR(
     use_angle_cls=True,
@@ -265,7 +268,7 @@ ocr = PaddleOCR(
 )
 cc = OpenCC('s2t')
 
-
+'''
 '''
 # 設定智能合約地址 & ABI (需替換為你自己的合約資訊)
 contract_address = "0x5FbDB2315678afecb367f032d93F642f64180aa3"
@@ -768,7 +771,7 @@ def logout():
     session.pop('user', None)
     return jsonify({'success': True})
 
-@app.route('/policy/creat_PDF', methods=['POST'])
+@app.route('/policy/create_PDF', methods=['POST'])
 def create_PDF():
     if 'file' not in request.files:
         return jsonify(success=False, error='未选择文件')
@@ -789,7 +792,7 @@ def create_PDF():
             return jsonify(success=False, error=f'处理失败: {str(e)}')
     
     return jsonify(success=False, error='文件类型不支持')
-
+'''
 @app.route('/policy/create_ID_image', methods=['GET', 'POST'])
 def create_ID_image():
     id_fields = {}
@@ -903,7 +906,45 @@ def create_ID_image():
         }
 
     return render_template('policy/create_ID_image.html', id_fields=id_fields, filename=filename)
+'''
 
+@app.route('/policy/update_pdf', methods=['POST'])
+def update_pdf():
+    try:
+        # 檢查文件
+        if 'file' not in request.files:
+            return jsonify(success=False, error='未選擇文件'), 400
+
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify(success=False, error='文件名無效'), 400
+
+        if not allowed_file(file.filename):
+            return jsonify(success=False, error='文件類型不支持'), 400
+
+        policy_number = request.form.get('policyNumber', '').strip()
+        if not policy_number:
+            return jsonify(success=False, error='缺少保單號碼'), 400
+
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+
+        try:
+            # 計算哈希值
+            pdf_hash = hash_pdf_file(filepath)
+            return jsonify(success=True, pdf_hash=pdf_hash)
+
+        except Exception as e:
+            return jsonify(success=False, error=f'處理失敗: {str(e)}'), 500
+
+        finally:
+            # 清理臨時文件
+            if os.path.exists(filepath):
+                os.remove(filepath)
+
+    except Exception as e:
+        return jsonify(success=False, error=f'服務器錯誤: {str(e)}'), 500
 #-----------------------
 # 啟動網站
 #-----------------------

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>保險員客戶管理系統</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .container { margin-bottom: 20px; }
+        input, button { padding: 8px; margin-right: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .error { color: red; }
+        .success { color: green; }
+        .delete-btn { color: red; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <a class="navbar-brand" href="/">ChainSure</a>
+    <h1>保險員客戶管理系統</h1>
+
+    <div id="officer-section">
+        <h2>歡迎，<span id="officer-name"></span></h2>
+
+        <div class="container">
+            <h3>新增客戶</h3>
+            <form id="client-form" onsubmit="linkClient(event)">
+                <input type="email" id="client-email" placeholder="客戶 Gmail" required>
+                <button type="submit">新增客戶</button>
+            </form>
+            <p id="client-message"></p>
+        </div>
+
+        <div class="container">
+            <h3>我的客戶列表</h3>
+            <button onclick="loadClients()">重新整理列表</button>
+            <table id="clients-table">
+                <thead>
+                    <tr>
+                        <th>姓名</th>
+                        <th>Gmail</th>
+                        <th>年齡</th>
+                        <th>性別</th>
+                        
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for client in clients %}
+                    <tr>
+                        <td>{{ client.username }}</td>
+                        <td>{{ client.gmail }}</td>
+                        <td>{{ client.age }}</td>
+                        <td>{{ client.gender }}</td>
+                        
+                        <td>
+                            <button class="delete-btn" onclick="deleteClient('{{ client.gmail }}')">刪除</button>
+                            <button onclick="addPolicy('{{ client.gmail }}')">新增保單</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+function addPolicy(clientGmail) {
+    window.location.href = `/officer/upload-policy-page?client_gmail=${encodeURIComponent(clientGmail)}`;
+}
+</script>
+    <script>
+        if (currentUser && currentUser.insurance_officer == 1) {
+            document.getElementById('officer-name').textContent = currentUser.username;
+            loadClients();
+        } else {
+            alert('您不是保險員或尚未登入，將返回首頁');
+            window.location.href = '/';
+        }
+
+        async function linkClient(event) {
+            event.preventDefault();
+            const clientEmail = document.getElementById('client-email').value.trim();
+            const messageElement = document.getElementById('client-message');
+
+            if (!clientEmail) {
+                showMessage(messageElement, 'error', '請輸入客戶 Gmail');
+                return;
+            }
+
+            try {
+                const response = await fetch('/officer/link-client', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ client_gmail: clientEmail }),
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || `HTTP 錯誤！狀態碼: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage(messageElement, 'success', `成功新增客戶：${data.client.username}`);
+                    document.getElementById('client-email').value = '';
+                    loadClients();
+                } else {
+                    showMessage(messageElement, 'error', data.message);
+                }
+            } catch (error) {
+                showMessage(messageElement, 'error', `請求失敗：${error.message}`);
+                console.error('請求錯誤:', error);
+            }
+        }
+
+        async function loadClients() {
+            try {
+                const response = await fetch('/officer/get-clients', {
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP 錯誤！狀態碼: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    renderClientsTable(data.clients);
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error('載入客戶列表失敗:', error);
+                alert(`載入客戶列表失敗：${error.message}`);
+            }
+        }
+
+        function renderClientsTable(clients) {
+            const tbody = document.querySelector('#clients-table tbody');
+            tbody.innerHTML = '';
+
+            if (clients.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6">目前沒有客戶</td></tr>';
+                return;
+            }
+
+            clients.forEach(client => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${client.username || '-'}</td>
+                    <td>${client.gmail || '-'}</td>
+                    <td>${client.age || '-'}</td>
+                    <td>${client.gender || '-'}</td>
+                    <td>${client.created_at || '-'}</td>
+                    <td><button class="delete-btn" onclick="deleteClient('${client.gmail}')">刪除</button></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        async function deleteClient(clientGmail) {
+            if (!confirm(`確定要刪除客戶：${clientGmail}？`)) return;
+
+            try {
+                const response = await fetch('/officer/delete-client', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ client_gmail: clientGmail }),
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || `HTTP 錯誤！狀態碼: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('客戶已刪除');
+                    loadClients();
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                console.error('刪除失敗:', error);
+                alert(`刪除失敗：${error.message}`);
+            }
+        }
+
+        function showMessage(element, type, message) {
+            element.textContent = message;
+            element.className = type;
+        }
+    </script>
+</body>
+</html>

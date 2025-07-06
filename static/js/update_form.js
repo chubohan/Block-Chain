@@ -1,25 +1,32 @@
-// 创建小星星动画
 function createStars() {
     const numStars = 200;
+    const starsContainer = document.querySelector(".stars");
+    const pageHeight = document.body.scrollHeight;
+
     for (let i = 0; i < numStars; i++) {
         let star = document.createElement("div");
         star.classList.add("star");
-        const x = Math.random() * 100;
-        const y = Math.random() * 100;
+
+        const x = Math.random() * window.innerWidth;
+        const y = Math.random() * pageHeight;
         const duration = Math.random() * 2 + 1;
         const delay = Math.random() * 5;
-        star.style.top = `${y}vh`;
-        star.style.left = `${x}vw`;
+
+        star.style.top = `${y}px`;
+        star.style.left = `${x}px`;
         star.style.animationDuration = `${duration}s`;
         star.style.animationDelay = `${delay}s`;
-        document.body.appendChild(star);
+
+        starsContainer.appendChild(star);
     }
 }
 
-createStars();
+createStars(); 
 
-// 智能合約ABI (根據您的合約編譯後的ABI)
-const contractABI = [
+// 全局變量
+        let provider, signer, contract;
+        const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+        const contractABI = [
 	{
 		"inputs": [
 			{
@@ -393,86 +400,141 @@ const contractABI = [
 	}
 ];
 
-// 智能合約地址 (部署後替換為您的合約地址)
-const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-
-let web3;
-let contract;
-let accounts = [];
-
-// 連接MetaMask錢包
-document.getElementById('connectWallet').addEventListener('click', async () => {
-    try {
-        if (window.ethereum) {
-            web3 = new Web3(window.ethereum);
-            await window.ethereum.enable();
-            
-            // 獲取帳戶
-            accounts = await web3.eth.getAccounts();
-            document.getElementById('walletAddress').textContent = accounts[0];
-            
-            // 初始化合約
-            contract = new web3.eth.Contract(contractABI, contractAddress);
-            
-            // 啟用刪除按鈕
-            document.getElementById('deleteBtn').disabled = false;
-            
-            
-            
-            showResult('錢包連接成功!', 'success');
-        } else {
-            showResult('請安裝MetaMask擴展程序!', 'error');
+        // 連接錢包
+        async function connectWallet() {
+            if (window.ethereum) {
+                try {
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    signer = provider.getSigner();
+                    const address = await signer.getAddress();
+                    document.getElementById('walletAddress').innerText = `已連接: ${address}`;
+                    
+                    contract = new ethers.Contract(contractAddress, contractABI, signer);
+                    
+                    window.ethereum.on('accountsChanged', (accounts) => {
+                        if (accounts.length > 0) {
+                            connectWallet();
+                        } else {
+                            document.getElementById('walletAddress').innerText = '未連接';
+                        }
+                    });
+                } catch (error) {
+                    console.error("錢包連接錯誤:", error);
+                    alert(`錢包連接失敗: ${error.message}`);
+                }
+            } else {
+                alert('請安裝 MetaMask 擴展程序!');
+            }
         }
-    } catch (error) {
-        showResult('連接錢包失敗: ' + error.message, 'error');
-    }
-});
 
-// 刪除保單
-document.getElementById('deleteBtn').addEventListener('click', async () => {
-    const policyNumber = document.getElementById('policyNumber').value.trim();
-    
-    if (!policyNumber) {
-        showResult('請輸入保單編號', 'error');
-        return;
-    }
-    
-    try {
-        // 先檢查保單是否存在
-        const policy = await contract.methods.getPolicy(policyNumber).call({ from: accounts[0] });
-        
-        if (!policy || !policy[0]) {
-            showResult('保單不存在', 'error');
-            return;
+        // 載入保單
+        async function loadPolicy() {
+            const policyNumber = document.getElementById('policyNumber').value.trim();
+            if (!policyNumber) {
+                alert('請輸入保單號碼');
+                return;
+            }
+            
+            try {
+                const policy = await contract.getPolicy(policyNumber);
+                
+                // 顯示保單信息
+                document.getElementById('policyHolder').value = policy[0];
+                document.getElementById('insuredPerson').value = policy[1];
+                document.getElementById('beneficiary').value = policy[6];
+                
+                // 顯示表單
+                document.getElementById('policyForm').style.display = 'block';
+                document.getElementById('pdfSection').style.display = 'block';
+                
+                // 重置PDF區域
+                document.getElementById('fileName').innerText = '';
+                document.getElementById('pdfUpload').value = '';
+                
+            } catch (error) {
+                console.error("載入保單錯誤:", error);
+                alert(`載入保單失敗: ${error.message}`);
+            }
         }
-        
-        // 執行刪除操作
-        showResult('正在刪除保單，請等待交易確認...', 'success');
-        
-        const result = await contract.methods.deletePolicy(policyNumber)
-            .send({ from: accounts[0] });
-        
-        showResult(`保單 ${policyNumber} 已成功刪除! 交易哈希: ${result.transactionHash}`, 'success');
-        document.getElementById('policyNumber').value = '';
-    } catch (error) {
-        let errorMsg = '刪除保單失敗: ';
-        
-        if (error.message.includes("Not the policy owner")) {
-            errorMsg += '您不是此保單的所有者，無權刪除';
-        } else if (error.message.includes("Policy not found")) {
-            errorMsg += '保單不存在';
-        } else {
-            errorMsg += error.message;
-        }
-        
-        showResult(errorMsg, 'error');
-    }
-});
 
-// 顯示結果
-function showResult(message, type) {
-    const resultDiv = document.getElementById('result');
-    resultDiv.style.display = 'block';
-    resultDiv.textContent = message;
-    resultDiv.className = 'result ' + type;
-}
+        // 更新保單
+        async function updatePolicy() {
+            const policyNumber = document.getElementById('policyNumber').value.trim();
+            const policyHolder = document.getElementById('policyHolder').value.trim();
+            const insuredPerson = document.getElementById('insuredPerson').value.trim();
+            const beneficiary = document.getElementById('beneficiary').value.trim();
+            
+            if (!policyHolder || !insuredPerson || !beneficiary) {
+                alert('請填寫所有必填字段');
+                return;
+            }
+            
+            try {
+                const tx = await contract.updatePolicy(
+                    policyNumber,
+                    policyHolder,
+                    insuredPerson,
+                    beneficiary
+                );
+                await tx.wait();
+                swal("成功!", "保單已更新!", "success");
+            } catch (error) {
+                console.error("更新保單錯誤:", error);
+                alert(`更新失敗: ${error.message}`);
+            }
+        }
+
+        // 上傳PDF並自動更新到區塊鏈
+        async function uploadAndUpdatePDF() {
+            const policyNumber = document.getElementById('policyNumber').value.trim();
+            const fileInput = document.getElementById('pdfUpload');
+            
+            if (!policyNumber) {
+                alert('請先輸入並載入保單號碼');
+                return;
+            }
+            
+            if (fileInput.files.length === 0) {
+                alert('請先選擇PDF文件');
+                return;
+            }
+
+            // 顯示加載狀態
+            document.getElementById('pdfStatus').style.display = 'block';
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('policyNumber', policyNumber);
+
+            try {
+                // 第一步：上傳文件到後端
+                const response = await fetch('/policy/update_pdf', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    // 第二步：直接更新到區塊鏈（無需用戶干預）
+                    const tx = await contract.updatePolicyPDF(policyNumber, result.pdf_hash);
+                    await tx.wait();
+                    
+                    swal("成功!", "PDF已上傳並更新到區塊鏈!", "success");
+                } else {
+                    throw new Error(result.error || '上傳失敗');
+                }
+            } catch (error) {
+                console.error('PDF更新錯誤:', error);
+                alert(`PDF更新失敗: ${error.message}`);
+            } finally {
+                // 隱藏加載狀態
+                document.getElementById('pdfStatus').style.display = 'none';
+            }
+        }
+
+        // 顯示文件名
+        document.getElementById('pdfUpload').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name || '未選擇文件';
+            document.getElementById('fileName').innerText = fileName;
+        });

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>我的保單</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/static/css/create_form.css" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">ChainSure</a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/">首頁</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/logout">登出</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-5">
+  <h2 class="mb-4">我的保單</h2>
+
+  <h4>待確認保單</h4>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>保單編號</th>
+        <th>投保人</th>
+        <th>被保險人</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for policy in pending_policies %}
+        {% if policy.status == 0 %}
+        <tr>
+          <td>{{ policy.policy_number }}</td>
+          <td>{{ policy.policy_holder }}</td>
+          <td>{{ policy.insured_person }}</td>
+          <td>
+            <a href="{{ url_for('policy.confirm_policy', policy_number=policy.policy_number) }}" class="btn btn-info btn-sm">詳細資料</a>
+
+          </td>
+        </tr>
+        {% endif %}
+      {% else %}
+        <tr><td colspan="4">目前沒有待確認保單</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h4 class="mt-5">已完成保單</h4>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>保單編號</th>
+        <th>投保人</th>
+        <th>被保險人</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for policy in completed_policies %}
+        {% if policy.status == 1 %}
+        <tr>
+          <td>{{ policy.policy_number }}</td>
+          <td>{{ policy.policy_holder }}</td>
+          <td>{{ policy.insured_person }}</td>
+          <td>
+            <a href="{{ url_for('policy.completed_policy_form', policy_number=policy.policy_number) }}" class="btn btn-info btn-sm">詳細資料</a>
+
+          </td>
+        </tr>
+        {% endif %}
+      {% else %}
+        <tr><td colspan="4">目前沒有已完成保單</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+  async function loadPolicies() {
+    const res = await fetch('/policy/my_policies');
+    const data = await res.json();
+
+    const pendingTable = document.getElementById('pendingPolicies');
+    const completedTable = document.getElementById('completedPolicies');
+
+    data.pending.forEach(p => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${p.policy_number}</td>
+        <td>${p.policy_holder}</td>
+        <td>${p.insured_person}</td>
+        <td>
+          <a href="/policy/create_form/${p.policy_number}" class="btn btn-primary btn-sm">詳細資訊</a>
+        </td>
+      `;
+      pendingTable.appendChild(tr);
+    });
+
+    data.completed.forEach(p => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${p.policy_number}</td>
+        <td>${p.policy_holder}</td>
+        <td>${p.insured_person}</td>
+        <td>
+          <a href="/policy/read/${p.policy_number}" class="btn btn-secondary btn-sm">查看</a>
+        </td>
+      `;
+      completedTable.appendChild(tr);
+    });
+  }
+
+  loadPolicies();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

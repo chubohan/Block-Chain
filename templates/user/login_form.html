@@ -32,15 +32,6 @@
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="policyDropdown" role="button" aria-expanded="false">
-                            保單服務
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="policyDropdown">
-                            <li><a class="dropdown-item" href="#">保單查詢</a></li>
-                            <li><a class="dropdown-item" href="#">保單內容問題</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="claimDropdown" role="button" aria-expanded="false">
                             理賠服務
                         </a>
@@ -87,7 +78,6 @@
     <div class="login-box mt-5">
         <h2>登入</h2>
         <form action="/user/login" method="post">
-            <input type="text" name="username" class="input-field" placeholder="帳號" required>
             <input type="email" name="gmail" class="input-field" placeholder="Gmail" required>
             <input type="password" name="password" class="input-field" placeholder="密碼" required>
 
@@ -106,7 +96,9 @@
         <!-- Google 登入按鈕 -->
         <div id="g_id_onload"
              data-client_id="551019375208-ee9n8eg06kg6v7chg9k8h7p98luc4p63.apps.googleusercontent.com"
-             data-callback="handleCredentialResponse"></div>
+             data-context="signin"
+             data-login_uri="http://localhost:5000/user/auth/google" 
+             data-callback="handleGoogleLogin"></div>
         <div class="g_id_signin" data-type="standard" data-size="large"></div>
     </div>
 

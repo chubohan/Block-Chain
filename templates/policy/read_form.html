@@ -1,142 +1,177 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="zh-Hant">
 <head>
-<meta charset="utf-8">
-<title>測試樣板</title>
-<!-- 連結思源中文及css -->
-<script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.umd.min.js"></script><!--記得加這行-->
-<link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
-<link href="/static/imgs/icon.jpg" rel="shortcut icon">
-<link href="/static/css/menu.css" rel="stylesheet"/>  
-<link href="/static/css/main.css" rel="stylesheet"/> 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="/static/css/read_form.css" rel="stylesheet"> <!-- 你剛提供的CSS放這裡 -->     
-<!-------------------------> 
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>保單管理 - 星空風格</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+ <link href="/static/css/read_form.css" rel="stylesheet">
 </head>
-
 <body>
+
 <div class="stars"></div>
 
-<!-- 導覽列 -->
-<nav class="navbar navbar-expand-lg navbar-dark">
-  <a class="navbar-brand" href="/">ChainSure</a>
-  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="navbarNav">
-    <ul class="navbar-nav ms-auto">
-      <!-- 客戶服務 -->
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="customerDropdown" role="button" data-bs-toggle="dropdown">
-          客戶服務
-        </a>
-        <ul class="dropdown-menu" aria-labelledby="customerDropdown">
-          <li><a class="dropdown-item" href="#">會員中心</a></li>
-          <li><a class="dropdown-item" href="#">聯絡業務員</a></li>
-          <li><a class="dropdown-item" href="#">點數查詢</a></li>
-        </ul>
-      </li>
-      <!-- 其他功能 -->
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="policyDropdown" data-bs-toggle="dropdown">
-          保單服務
-        </a>
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="#">保單查詢</a></li>
+<nav class="navbar navbar-expand-lg navbar-light fixed-top">
+    <a class="navbar-brand" href="/">ChainSure</a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+      aria-controls="navbarNav"
+      aria-expanded="false"
+      aria-label="切換導航"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            id="customerDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            客戶服務
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="customerDropdown">
+            <li><a class="dropdown-item" href="#">會員中心</a></li>
+            <li><a class="dropdown-item" href="#">聯繫業務員</a></li>
+            <li><a class="dropdown-item" href="#">點數查詢</a></li>
+          </ul>
+        </li>
+
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            id="policyDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            保單服務
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="policyDropdown">
+          <li><a class="dropdown-item" href="/policy/create/form">新增保單</a></li>
+          <li><a class="dropdown-item" href="/policy/delete/form">刪除查詢</a></li>
+          <li><a class="dropdown-item" href="/policy/update/form">修改保單</a></li>
           <li><a class="dropdown-item" href="#">保單內容問題</a></li>
-        </ul>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="claimDropdown" data-bs-toggle="dropdown">
-          理賠服務
-        </a>
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="#">終身壽險</a></li>
-          <li><a class="dropdown-item" href="#">失能照護險</a></li>
-          <li><a class="dropdown-item" href="#">投資型報單</a></li>
-          <li><a class="dropdown-item" href="#">旅遊綜合保險</a></li>
-        </ul>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="activityDropdown" data-bs-toggle="dropdown">
-          熱門活動
-        </a>
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="#">贈品查詢</a></li>
-          <li><a class="dropdown-item" href="#">理賠成功申請案例</a></li>
-        </ul>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" data-bs-toggle="dropdown">
-          登入
-        </a>
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="/user/login/form">保人登入</a></li>
-          <li><hr class="dropdown-divider"></li>
-          <li><a class="dropdown-item" href="/user/login/form">業務員登入</a></li>
-        </ul>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="idVerificationDropdown" data-bs-toggle="dropdown">
-          身分證驗證
-        </a>
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="/policy/create_ID_image">身分證驗證</a></li>
-        </ul>
-      </li>
-    </ul>
+          </ul>
+        </li>
+
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            id="claimDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            理賠服務
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="claimDropdown">
+            <li><a class="dropdown-item" href="#">終身壽險</a></li>
+            <li><a class="dropdown-item" href="#">失能照護險</a></li>
+            <li><a class="dropdown-item" href="#">投資型報單</a></li>
+            <li><a class="dropdown-item" href="#">旅遊綜合保險</a></li>
+          </ul>
+        </li>
+
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            id="activityDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            熱門活動
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="activityDropdown">
+            <li><a class="dropdown-item" href="#">贈品查詢</a></li>
+            <li><a class="dropdown-item" href="#">理賠成功申請案例</a></li>
+          </ul>
+        </li>
+
+      {% if not current_user.is_authenticated %}
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
+                登入
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="loginDropdown">
+                <li><a class="dropdown-item" href="/user/login/form">保人登入</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="/user/login/form">業務員登入</a></li>
+            </ul>
+        </li>
+        {% endif %}
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
+                身分證驗證
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="loginDropdown">
+                <li><a class="dropdown-item" href="/policy/create_ID_image">身分證驗證</a></li>
+            </ul>
+        </li>
+    
+        {% if current_user.is_authenticated %}
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
+                個人檔案
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="loginDropdown">
+                <li><a class="dropdown-item" href="/user/profile">個人檔案</a></li>
+            </ul>
+        {% endif %}
+        </li>
+      </ul>
+    </div>
   </div>
 </nav>
-  
-<!--**************************-->
-<div class="container_css">    
-    <!--~~~~~~~~~~~~~~~~~-->       
 
-    <!--~~~~~~~~~~~~~~~~~--> 
-    <div class="content">
-        
-        <h1>電子保單查詢系統</h1>
+<main class="container">
+  <h2>保單查詢系統</h2>
+  <div class="input-group">
+    <input type="text" id="policyNumber" placeholder="請輸入保單號碼" />
+    <button id="connectBtn" class="btn" onclick="connectWallet()">連接錢包</button>
+    <button id="queryBtn" class="btn">查詢保單</button>
+  </div>
+  <div class="wallet-status">
+    <span id="walletAddress">未連接錢包</span>
+  </div>
+  <div id="loading" class="loading" style="display:none;">查詢中...</div>
+  <div id="result"></div>
 
-        <div>
-            <input type="text" id="policyNumber" placeholder="請輸入保單號碼">
-            <button id="connectBtn">連接錢包</button>
-            <button id="queryBtn">查詢保單</button>
-        </div>
-        <div class="wallet-status">
-            <span id="walletAddress">未連接錢包</span>
-        </div>
-        <div id="loading" class="loading" style="display: none;">查詢中...</div>
-        <div id="result"></div>
-    
-        <!-- 授權管理介面 -->
-        <div id="authTab" class="tab-content">
-            <h2>保單授權管理</h2>
-            
-            <div class="auth-form">
-                <div class="form-group">
-                    <label>保單號碼：</label>
-                    <input type="text" id="authPolicyNumber" placeholder="POL-001">
-                </div>
-                
-                <div class="form-group">
-                    <label>授權地址：</label>
-                    <input type="text" id="authAddress" placeholder="0x...">
-                </div>
-                
-                <div class="button-group">
-                    <button onclick="grantAuthorization()">授予權限</button>
-                    <button onclick="revokeAuthorization()">撤銷權限</button>
-                </div>
-            </div>
-            
-            <div id="authStatus"></div>
+  <section id="authTab" class="auth-tab">
+    <h3>保單授權管理</h3>
+    <div class="auth-form">
+      <label for="authPolicyNumber">保單號碼：</label>
+      <input type="text" id="authPolicyNumber" placeholder="POL-001" />
 
-        </div>
+      <label for="authAddress">授權地址：</label>
+      <input type="text" id="authAddress" placeholder="0x..." />
 
-<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/static/js/read_form.js"></script>
+      <div class="button-group">
+        <button onclick="grantAuthorization()" class="btn">授予權限</button>
+        <button onclick="revokeAuthorization()" class="btn btn-revoke">撤銷權限</button>
+      </div>
+    </div>
+    <div id="authStatus"></div>
+  </section>
+</main>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/eth-crypto@2.3.0/dist/eth-crypto-browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/static/js/read_form.js"></script>
 
-</body>   
+</body>
 </html>

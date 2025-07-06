@@ -69,31 +69,49 @@ function decryptField(cipherText) {
   return decrypted.toString(CryptoJS.enc.Utf8);
 }
 
-// 連接後端PDF
-async function uploadPDF() {
-  const fileInput = document.getElementById('pdfUpload');
-  if (fileInput.files.length === 0) return;
 
-  const formData = new FormData();
-  formData.append('file', fileInput.files[0]);
 
-  try {
-    const response = await fetch('/policy/creat_PDF', {
-      method: 'POST',
-      body: formData
-    });
-    
-    const result = await response.json();
-    if (result.success) {
-      document.getElementById('pdfHash').value = result.pdf_hash;
-    } else {
-      alert('上傳失敗: ' + result.error);
-    }
-  } catch (error) {
-    console.error('上傳錯誤:', error);
+async function connectWallet() {
+	if (window.ethereum) {
+	  web3 = new Web3(window.ethereum);
+	  await window.ethereum.request({ method: "eth_requestAccounts" });
+	  contract = new web3.eth.Contract(contractABI, contractAddress);
+	  console.log("錢包連線成功");
+	} else {
+	  alert("請安裝 MetaMask");
+	}
   }
-}
+/*---------------*/  
+async function uploadPDF() {
+	/* */
+    const fileInput = document.getElementById('pdfUpload');
+    if (fileInput.files.length === 0) {
+        // 沒選PDF直接回傳空字串
+        return "";
+    }
 
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+
+    try {
+        const response = await fetch('/policy/create_PDF', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            return result.pdf_hash;
+        } else {
+            alert('PDF 上傳失敗: ' + result.error);
+            return "";
+        }
+    } catch (error) {
+        console.error('上傳錯誤:', error);
+        return "";
+    }
+}
+  
 //------------------------
 // 全域宣告 (必須!)
 let web3 = null;
@@ -103,7 +121,7 @@ let account = null; // 明確初始化為 null
 // 合約地址和 ABI（需與後端一致）
 const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 const contractABI = [
-    {
+	{
 		"inputs": [
 			{
 				"internalType": "string",
@@ -280,6 +298,25 @@ const contractABI = [
 				"internalType": "string",
 				"name": "_policyNumber",
 				"type": "string"
+			}
+		],
+		"name": "getPolicyOwner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
 			},
 			{
 				"internalType": "address",
@@ -417,24 +454,19 @@ const contractABI = [
 				"type": "string"
 			},
 			{
-				"internalType": "uint256",
-				"name": "_insuranceAmount",
-				"type": "uint256"
+				"internalType": "string",
+				"name": "_policyHolder",
+				"type": "string"
 			},
 			{
-				"internalType": "uint256",
-				"name": "_premiumAmount",
-				"type": "uint256"
+				"internalType": "string",
+				"name": "_insuredPerson",
+				"type": "string"
 			},
 			{
-				"internalType": "uint256",
-				"name": "_growthRate",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_declaredInterestRate",
-				"type": "uint256"
+				"internalType": "string",
+				"name": "_beneficiary",
+				"type": "string"
 			}
 		],
 		"name": "updatePolicy",
@@ -482,6 +514,7 @@ async function connectWallet() {
     contract = new web3.eth.Contract(contractABI, contractAddress);
     
     console.log("當前連接帳戶:", account);
+	document.getElementById('walletAddress').textContent = account;
     alert("錢包連接成功: " + account);
     
   } catch (error) {
@@ -493,6 +526,9 @@ async function connectWallet() {
 // 表單提交處理
 document.getElementById("policyForm").addEventListener("submit", async (e) => {
     e.preventDefault();
+	//-----------------
+	 await submitAndConfirmPolicy();
+	 //---------------------
     const statusDiv = document.getElementById("status");
     statusDiv.innerHTML = "<p>處理中...</p>";
 
@@ -537,6 +573,8 @@ document.getElementById("policyForm").addEventListener("submit", async (e) => {
       // ========== 加密結束 ==========
 
       // 收集並加密表單資料
+	  const pdfHash = await uploadPDF();
+		if (!pdfHash) return;
       const params = {
           _policyNumber: document.getElementById("policyNumber").value,
           // 加密敏感欄位
@@ -547,12 +585,12 @@ document.getElementById("policyForm").addEventListener("submit", async (e) => {
           _premiumAmount: document.getElementById("premiumAmount").value,
           _startDate: Math.floor(new Date(document.getElementById("startDate").value).getTime() / 1000),
           // 加密受益人資訊
-          _beneficiary: encryptField(document.getElementById("beneficiary").value),
+          _beneficiary: document.getElementById("beneficiary").value,
           _growthRate: parseInt(document.getElementById("growthRate").value),
           _declaredInterestRate: parseInt(document.getElementById("declaredInterestRate").value),
-          _pdfHash: document.getElementById("pdfHash").value
+          _pdfHash: pdfHash
       };
-
+	  console.log(pdfHash);
       console.log("加密後參數:", {
           ...params,
           _policyHolder: "<加密資料>",
@@ -600,11 +638,89 @@ document.getElementById("policyForm").addEventListener("submit", async (e) => {
       `;
 
     } catch (error) {
-      console.error("交易失敗:", error);
-      statusDiv.innerHTML = `
-          <p style="color:red">❌ 交易失敗</p>
-          <p>錯誤訊息: ${error.message}</p>
-          ${error.stack ? `<pre>${error.stack}</pre>` : ''}
-      `;
+      console.error("交易失败详情:", error);
+        
+        // 解析错误类型
+        let userMessage = '交易失败';
+        let techMessage = '';
+
+        // 优先处理用户取消签名的情况
+        if (error.code === 4001 || error.message?.includes('denied transaction signature')) {
+            userMessage = '您已取消交易簽名';
+            techMessage = '用户主动取消交易';
+        }
+        // 处理合约revert错误
+        else {
+            const errorMessage = parseVMError(error);
+            techMessage = errorMessage;
+            
+            // 映射已知错误
+            if (errorMessage.includes('Policy number already exists')) {
+                userMessage = '保單編號已存在，請檢查後重新提交';
+            } 
+            else if (errorMessage.includes('invalid opcode')) {
+                userMessage = '合约执行异常，请检查参数格式';
+            }
+        }
+
+        // 显示提示
+        statusDiv.innerHTML = `
+            <p style="color:red">❌ ${userMessage}</p>
+            
+        `;
+
+        // 开发环境显示完整错误
+        if (process.env.NODE_ENV === 'development') {
+            statusDiv.innerHTML += `<pre>${error.stack}</pre>`;
+        }
     }
 });
+async function submitAndConfirmPolicy() {
+    const statusDiv = document.getElementById("status");
+    statusDiv.innerHTML = "<p>處理中...</p>";
+
+    // 如果需要上傳PDF
+    let pdfHash = "";
+    try {
+        pdfHash = await uploadPDF();
+    } catch (err) {
+        console.warn("PDF未選擇或上傳失敗，將使用空值");
+    }
+
+    const policyData = {
+        client_gmail: document.getElementById("clientGmail").value,
+        policy_number: document.getElementById("policyNumber").value,
+        insurance_company: document.getElementById("insuranceCompany").value,
+        policy_holder: document.getElementById("policyHolder").value,
+        insured_person: document.getElementById("insuredPerson").value,
+        insurance_amount: document.getElementById("insuranceAmount").value,
+        premium_period: document.getElementById("premiumPeriod").value,
+        premium_amount: document.getElementById("premiumAmount").value,
+        start_date: document.getElementById("startDate").value,
+        beneficiary: document.getElementById("beneficiary").value,
+        growth_rate: document.getElementById("growthRate").value,
+        declared_interest_rate: document.getElementById("declaredInterestRate").value,
+        pdf_filename: pdfHash || "",  // 沒有就空字串
+        officer_gmail: document.getElementById("officerGmail").value
+    };
+
+    try {
+        const response = await fetch('/policy/create_and_confirm', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(policyData)
+        });
+
+        const result = await response.json();
+        if (!result.success) throw new Error(result.message);
+
+        statusDiv.innerHTML = `<p style="color:green">✅ 資料已儲存</p>`;
+
+
+
+    } catch (err) {
+        console.error("提交失敗:", err);
+        statusDiv.innerHTML = `<p style="color:red">❌ ${err.message}</p>`;
+    }
+}
+

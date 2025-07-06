@@ -143,110 +143,150 @@
 </nav>
 
 <div class="container">
-  <h2 class="mt-5">確認保單資料</h2>
+	
+  <h2>已完成保單</h2>
+<div class="form-wrapper">
 
-  <div class="form-wrapper">
-    <form id="policyForm">
+  <form id="policyForm">
+    <label>
+      客戶 Gmail
+      <input type="email" id="clientGmail" value="{{ policy.client_gmail }}" readonly />
+    </label> 
+    <label>
+      保險員 Gmail
+      <input type="email" id="officerGmail" value="{{ policy.officer_gmail }}" readonly />
+    </label> 
+    <label>
+      保單編號
+      <input type="text" id="policyNumber" value="{{ policy.policy_id }}" readonly />
+    </label>
 
-      <button type="button" class="btn btn-warning mb-3" onclick="connectWallet()">
-        連接錢包
-      </button>
-      <p>當前連接錢包: <span id="walletAddress">未連接</span></p>
+    <label>
+      保險公司名稱
+      <input type="text" id="insuranceCompany" value="{{ policy.company }}" readonly />
+    </label>
 
-    <input type="hidden" id="clientGmail" value="{{ current_user.id }}">
-<input type="hidden" id="officerGmail" value="{{ policy.officer_gmail }}">
+    <label>
+      投保人姓名
+      <input type="text" id="policyHolder" value="{{ policy.policyHolder }}" readonly />
+    </label>
 
-      <label>保單編號
-        <input type="text" id="policyNumber" required readonly />
+    <label>
+      被保險人姓名
+      <input type="text" id="insuredPerson" value="{{ policy.insuredPerson }}" readonly />
+    </label>
+
+    <label>
+      保險金額 (NTD)
+      <input type="number" id="insuranceAmount" value="{{ policy.insuranceAmount }}" readonly />
+    </label>
+
+    <label>
+      繳費期間 (年)
+      <input type="number" id="premiumPeriod" value="{{ policy.premiumPeriod }}" readonly />
+    </label>
+
+    <label>
+      保費金額 (NTD)
+      <input type="number" id="premiumAmount" value="{{ policy.premiumAmount }}" readonly />
+    </label>
+
+    <label>
+      生效日期
+      <input type="text" id="startDate" value="{{ policy.startDate }}" readonly />
+    </label>
+
+    <label>
+      受益人
+      <input type="text" id="beneficiary" value="{{ policy.beneficiary }}" readonly />
+    </label>
+
+    <label>
+      增額比例 (%)
+      <input type="number" id="growthRate" value="{{ policy.growthRate }}" readonly />
+    </label>
+
+    <label>
+      宣告利率 (%)
+      <input type="number" id="declaredInterestRate" value="{{ policy.declaredInterestRate }}" readonly />
+    </label>
+
+    <div class="divider"></div>
+
+    <div class="upload-section" style="display: flex; justify-content: center">
+      <label style="margin: 0;">
+        已上傳 PDF 文件：
+        {% if policy.pdf_hash %}
+          <a href="https://ipfs.io/ipfs/{{ policy.pdf_hash }}" target="_blank">查看 PDF</a>
+        {% else %}
+          無文件
+        {% endif %}
       </label>
+    </div>
 
-      <label>保險公司名稱
-        <input type="text" id="insuranceCompany" required readonly />
-      </label>
-
-      <label>投保人姓名
-        <input type="text" id="policyHolder" required readonly />
-      </label>
-
-      <label>被保險人姓名
-        <input type="text" id="insuredPerson" required readonly />
-      </label>
-
-      <label>保險金額 (NTD)
-        <input type="number" id="insuranceAmount" required readonly />
-      </label>
-
-      <label>繳費期間 (年)
-        <input type="number" id="premiumPeriod" required readonly />
-      </label>
-
-      <label>保費金額 (NTD)
-        <input type="number" id="premiumAmount" required readonly />
-      </label>
-
-      <label>生效日期
-        <input type="date" id="startDate" required readonly />
-      </label>
-
-      <label>受益人
-        <input type="text" id="beneficiary" required readonly />
-      </label>
-
-      <label>增額比例 (%)
-        <input type="number" id="growthRate" required readonly />
-      </label>
-
-      <label>宣告利率 (%)
-        <input type="number" id="declaredInterestRate" required readonly />
-      </label>
-      <div class="divider"></div>
-
-      <div class="upload-section"  style="display: flex; justify-content: center">
-        <label style="margin: 0;">
-          上傳 PDF 文件 <span class="required-label">*</span>
-          <input type="file" id="pdfUpload" accept=".pdf" required />
-        </label>
-      
+    <div class="form-footer">
+      <div style="display: flex; justify-content: center">
+        <!-- 無按鈕，唯讀 -->
       </div>
-      <div class="mt-4 text-center">
-        <button type="submit" class="submit">確認上鏈</button>
-        <button type="button" class="btn btn-secondary" onclick="modifyPolicy()">我要修改</button>
+      <div id="status"></div>
+    </div>
+
+  </form>
+</div>
+
+      <div class="form-footer">
+        <div style="display: flex; justify-content: center"></div>
+        
+        <div id="status"></div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
       </div>
-
-      <div id="status" class="mt-3"></div>
-
     </form>
   </div>
 </div>
+<script>
+async function submitPolicy() {
+    const formData = new FormData();
 
+    formData.append('clientGmail', document.getElementById('clientGmail').value.trim());
+    formData.append('policyNumber', document.getElementById('policyNumber').value.trim());
+    formData.append('insuranceCompany', document.getElementById('insuranceCompany').value.trim());
+    formData.append('policyHolder', document.getElementById('policyHolder').value.trim());
+    formData.append('insuredPerson', document.getElementById('insuredPerson').value.trim());
+    formData.append('insuranceAmount', document.getElementById('insuranceAmount').value.trim());
+    formData.append('premiumPeriod', document.getElementById('premiumPeriod').value.trim());
+    formData.append('premiumAmount', document.getElementById('premiumAmount').value.trim());
+    formData.append('startDate', document.getElementById('startDate').value.trim());
+    formData.append('beneficiary', document.getElementById('beneficiary').value.trim());
+    formData.append('growthRate', document.getElementById('growthRate').value.trim());
+    formData.append('declaredInterestRate', document.getElementById('declaredInterestRate').value.trim());
+    formData.append('pdfUpload', document.getElementById('pdfUpload').files[0]);
+
+    try {
+        const response = await fetch('/officer/upload-policy', {
+            method: 'POST',
+            body: formData,
+            credentials: 'include'
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert('保單已暫存並發送簡訊');
+            window.location.href = '/officer/client-page';
+        } else {
+            alert('操作失敗：' + result.message);
+        }
+    } catch (error) {
+        console.error(error);
+        alert('伺服器錯誤：' + error.message);
+    }
+}
+</script>
+
+<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/eth-crypto@2.3.0/dist/eth-crypto-browser.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-<script src="/static/js/create_form.js"></script>
-
-<script>
-  //若沒有資料則會出錯policy not defined!!!
-// 自動填值 (假設後端會渲染資料到這裡)
-window.onload = function() {
-  document.getElementById("policyNumber").value = "{{ policy.policy_number }}";
-  document.getElementById("insuranceCompany").value = "{{ policy.insurance_company }}";
-  document.getElementById("policyHolder").value = "{{ policy.policy_holder }}";
-  document.getElementById("insuredPerson").value = "{{ policy.insured_person }}";
-  document.getElementById("insuranceAmount").value = "{{ policy.insurance_amount }}";
-  document.getElementById("premiumPeriod").value = "{{ policy.premium_period }}";
-  document.getElementById("premiumAmount").value = "{{ policy.premium_amount }}";
-  document.getElementById("startDate").value = "{{ policy.start_date }}";
-  document.getElementById("beneficiary").value = "{{ policy.beneficiary }}";
-  document.getElementById("growthRate").value = "{{ policy.growth_rate }}";
-  document.getElementById("declaredInterestRate").value = "{{ policy.declared_interest_rate }}";
-}
-
-function modifyPolicy() {
-  window.location.href = '/policy/update/form?policy_number={{ policy.policy_number }}';
-}
-
-</script>
 
 </body>
 </html>

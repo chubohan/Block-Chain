@@ -62,6 +62,17 @@
                             <li><a class="dropdown-item" href="#">理賠成功申請案例</a></li>
                         </ul>
                     </li>
+                    {% if current_user.insurance_officer %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="activityDropdown" role="button" aria-expanded="false">
+                            我的客戶
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="activityDropdown">
+                            <li><a class="dropdown-item" href="/officer/client-page">我的客戶</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    {% if not current_user.is_authenticated %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
                             登入
@@ -72,6 +83,7 @@
                             <li><a class="dropdown-item" href="/user/login/form">業務員登入</a></li>
                         </ul>
                     </li>
+                    {% endif %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
                             身分證驗證
@@ -79,6 +91,26 @@
                         <ul class="dropdown-menu" aria-labelledby="loginDropdown">
                             <li><a class="dropdown-item" href="/policy/create_ID_image">身分證驗證</a></li>
                         </ul>
+                    </li>
+                    {% if not current_user.insurance_officer  and current_user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="activityDropdown" role="button" aria-expanded="false">
+                            我的保單
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="activityDropdown">
+                            <li><a class="dropdown-item" href="/policy/mypolicy">我的保單</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
+                            個人檔案
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="loginDropdown">
+                            <li><a class="dropdown-item" href="/user/profile">個人檔案</a></li>
+                        </ul>
+                    {% endif %}
                     </li>
                 </ul>
             </div>

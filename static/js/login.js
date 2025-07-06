@@ -16,13 +16,19 @@ function createStars() {
         }
         createStars();
 
-function handleCredentialResponse(response) {
-            fetch('/auth/google', {
+        function handleGoogleLogin(response) {
+            // 修改请求地址为 /user/auth/google
+            fetch('/user/auth/google', {  // 添加蓝图前缀 /user
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({ credential: response.credential })
             })
             .then(res => res.json())
-            .then(data => window.location.href = '/profile')
-            .catch(err => console.error('Google 登入失敗:', err));
+            .then(data => {
+                if (data.redirect) {
+                    window.location.href = data.redirect;
+                }
+            });
         }

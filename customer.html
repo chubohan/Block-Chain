@@ -1,0 +1,253 @@
+<!DOCTYPE html> 
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>保險員客戶管理系統</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    /* 星空背景 */
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background-color: #1a1a2e;
+      padding: 20px;
+      color: white;
+      margin: 0;
+      overflow-x: hidden;
+      position: relative;
+    }
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('https://cdn.pixabay.com/photo/2017/08/30/02/18/starry-night-2695563_960_720.jpg') repeat;
+      background-size: cover;
+      z-index: -999;
+      pointer-events: none;
+    }
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      width: 2px;
+      height: 2px;
+      background-color: white;
+      animation: twinkle 1.5s infinite alternate;
+    }
+    @keyframes twinkle {
+      0% { opacity: 0.6; transform: scale(1); }
+      100% { opacity: 1; transform: scale(1.5); }
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+    .card {
+      border-radius: 1rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      background-color: rgba(0, 0, 0, 0.75);
+      color: #f0f0f5;
+    }
+    .delete-btn {
+      color: red;
+    }
+    .form-inline {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    table {
+      background-color: rgba(255, 255, 255, 0.9);
+      color: #000;
+    }
+    .success {
+      color: #2ecc71;
+    }
+    .error {
+      color: #e74c3c;
+    }
+  </style>
+</head>
+<body>
+  <div class="stars"></div>
+  <script>
+    function createStars() {
+      const numStars = 200;
+      for (let i = 0; i < numStars; i++) {
+        const star = document.createElement("div");
+        star.classList.add("star");
+        star.style.top = `${Math.random() * 100}vh`;
+        star.style.left = `${Math.random() * 100}vw`;
+        star.style.animationDuration = `${Math.random() * 2 + 1}s`;
+        star.style.animationDelay = `${Math.random() * 5}s`;
+        document.body.appendChild(star);
+      }
+    }
+    createStars();
+  </script>
+
+  <div class="container">
+    <a class="navbar-brand h3 text-warning" href="/">ChainSure</a>
+    <h2 class="my-3 text-warning">保險員客戶管理系統</h2>
+
+    <div id="officer-section">
+      <h5>歡迎，<span id="officer-name" class="text-primary fw-bold"></span></h5>
+
+      <div class="card p-4 my-4">
+        <h5 class="mb-3">新增客戶</h5>
+        <form id="client-form" onsubmit="linkClient(event)" class="form-inline">
+          <input type="email" id="client-email" class="form-control" placeholder="客戶 Gmail" required />
+          <button type="submit" class="btn btn-warning">新增客戶</button>
+        </form>
+        <p id="client-message" class="mt-2"></p>
+      </div>
+
+      <div class="card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0">我的客戶列表</h5>
+          <button class="btn btn-outline-light btn-sm" onclick="loadClients()">重新整理列表</button>
+        </div>
+
+        <table class="table table-hover text-center align-middle" id="clients-table">
+          <thead class="table-light">
+            <tr>
+              <th>姓名</th>
+              <th>Gmail</th>
+              <th>年齡</th>
+              <th>性別</th>
+              <th>註冊日期</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for client in clients %}
+            <tr>
+              <td>{{ client.username }}</td>
+              <td>{{ client.gmail }}</td>
+              <td>{{ client.age }}</td>
+              <td>{{ client.gender }}</td>
+              <td>{{ client.created_at }}</td>
+              <td>
+                <button class="btn btn-sm btn-danger" onclick="deleteClient('{{ client.gmail }}')">刪除</button>
+                <button class="btn btn-sm btn-primary" onclick="addPolicy('{{ client.gmail }}')">新增保單</button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 既有 JavaScript 保持不變 -->
+  <script>
+    function addPolicy(clientGmail) {
+      window.location.href = `/officer/upload-policy-page?client_gmail=${encodeURIComponent(clientGmail)}`;
+    }
+    if (currentUser && currentUser.insurance_officer == 1) {
+      document.getElementById("officer-name").textContent = currentUser.username;
+      loadClients();
+    } else {
+      alert("您不是保險員或尚未登入，將返回首頁");
+      window.location.href = "/";
+    }
+    async function linkClient(event) {
+      event.preventDefault();
+      const clientEmail = document.getElementById("client-email").value.trim();
+      const messageElement = document.getElementById("client-message");
+      if (!clientEmail) {
+        showMessage(messageElement, "error", "請輸入客戶 Gmail");
+        return;
+      }
+      try {
+        const response = await fetch("/officer/link-client", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest"
+          },
+          body: JSON.stringify({ client_gmail: clientEmail }),
+          credentials: "include"
+        });
+        const data = await response.json();
+        if (data.success) {
+          showMessage(messageElement, "success", `成功新增客戶：${data.client.username}`);
+          document.getElementById("client-email").value = "";
+          loadClients();
+        } else {
+          showMessage(messageElement, "error", data.message);
+        }
+      } catch (error) {
+        showMessage(messageElement, "error", `請求失敗：${error.message}`);
+      }
+    }
+    async function loadClients() {
+      try {
+        const response = await fetch("/officer/get-clients", { credentials: "include" });
+        const data = await response.json();
+        if (data.success) {
+          renderClientsTable(data.clients);
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (error) {
+        alert(`載入客戶列表失敗：${error.message}`);
+      }
+    }
+    function renderClientsTable(clients) {
+      const tbody = document.querySelector("#clients-table tbody");
+      tbody.innerHTML = "";
+      if (clients.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='6'>目前沒有客戶</td></tr>";
+        return;
+      }
+      clients.forEach(client => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${client.username || "-"}</td>
+          <td>${client.gmail || "-"}</td>
+          <td>${client.age || "-"}</td>
+          <td>${client.gender || "-"}</td>
+          <td>${client.created_at || "-"}</td>
+          <td>
+            <button class="btn btn-sm btn-danger" onclick="deleteClient('${client.gmail}')">刪除</button>
+            <button class="btn btn-sm btn-primary" onclick="addPolicy('${client.gmail}')">新增保單</button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+    async function deleteClient(clientGmail) {
+      if (!confirm(`確定要刪除客戶：${clientGmail}？`)) return;
+      try {
+        const response = await fetch("/officer/delete-client", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest"
+          },
+          body: JSON.stringify({ client_gmail: clientGmail }),
+          credentials: "include"
+        });
+        const data = await response.json();
+        if (data.success) {
+          alert("客戶已刪除");
+          loadClients();
+        } else {
+          alert(data.message);
+        }
+      } catch (error) {
+        alert(`刪除失敗：${error.message}`);
+      }
+    }
+    function showMessage(element, type, message) {
+      element.textContent = message;
+      element.className = type;
+    }
+  </script>
+</body>
+</html>

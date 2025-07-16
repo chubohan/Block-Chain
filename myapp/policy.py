@@ -44,6 +44,7 @@ def confirm_policy(policy_number):
 @login_required
 def create_and_confirm():
     data = request.json
+    print("✅ 收到前端資料：", data)
 
     # 必要欄位檢查
     required_fields = ['policy_number', 'policy_holder', 'insured_person', 'insurance_amount']
@@ -55,12 +56,15 @@ def create_and_confirm():
     try:
         with conn.cursor() as cursor:
             # 1️⃣ 儲存到 policy_draft
+            # policy_draft 插入語句（保持不變，包含 pdf_filename）
             insert_draft_sql = """
                 INSERT INTO policy_draft (
-                    client_gmail, policy_number, insurance_company, policy_holder, insured_person,
-                    insurance_amount, premium_period, premium_amount, start_date, beneficiary,
-                    growth_rate, declared_interest_rate, pdf_filename, officer_gmail, created_at, status
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), 1)
+                    policy_number, insurance_company, policy_holder, insured_person,
+                    insurance_amount, premium_period, premium_amount, start_date,
+                    beneficiary, growth_rate, declared_interest_rate,
+                    pdf_hash, pdf_filename, client_gmail, officer_gmail, created_at, status
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), 1)
                 ON DUPLICATE KEY UPDATE
                     policy_holder = VALUES(policy_holder),
                     insured_person = VALUES(insured_person),
@@ -71,12 +75,13 @@ def create_and_confirm():
                     beneficiary = VALUES(beneficiary),
                     growth_rate = VALUES(growth_rate),
                     declared_interest_rate = VALUES(declared_interest_rate),
+                    pdf_hash = VALUES(pdf_hash),
                     pdf_filename = VALUES(pdf_filename),
                     officer_gmail = VALUES(officer_gmail),
+                    client_gmail = VALUES(client_gmail),
                     status = 1
             """
             cursor.execute(insert_draft_sql, (
-                data.get('client_gmail', ''),
                 data.get('policy_number'),
                 data.get('insurance_company'),
                 data.get('policy_holder'),
@@ -88,11 +93,13 @@ def create_and_confirm():
                 data.get('beneficiary'),
                 data.get('growth_rate'),
                 data.get('declared_interest_rate'),
-                data.get('pdf_filename', ''),
-                data.get('officer_gmail', '')
+                data.get('pdf_hash'),
+                data.get('pdf_filename'),  # 這裡有
+                data.get('client_gmail'),
+                data.get('officer_gmail')
             ))
 
-            # 2️⃣ 同步寫入 policy 正式表
+            # policy 表插入語句，**不要帶入 pdf_filename**
             insert_policy_sql = """
                 INSERT INTO policy (
                     policy_id, policyHolder, insuredPerson, insuranceAmount,
@@ -127,15 +134,17 @@ def create_and_confirm():
                 data.get('growth_rate'),
                 data.get('declared_interest_rate'),
                 data.get('insurance_company'),
-                data.get('client_gmail', ''),
-                data.get('officer_gmail', ''),
-                data.get('pdf_filename', '')
+                data.get('client_gmail'),
+                data.get('officer_gmail'),
+                data.get('pdf_hash')
             ))
-            # 刪除對應的 policy_draft
+
+            # 3️⃣ 刪除原本 policy_draft 草稿（不管 status）
             delete_draft_sql = """
                 DELETE FROM policy_draft WHERE policy_number = %s and status=0
             """
             cursor.execute(delete_draft_sql, (data.get('policy_number'),))
+
             conn.commit()
         return jsonify(success=True, message="保單已儲存並確認")
     except Exception as e:

@@ -83,34 +83,34 @@ async function connectWallet() {
   }
 /*---------------*/  
 async function uploadPDF() {
-	/* */
     const fileInput = document.getElementById('pdfUpload');
-    if (fileInput.files.length === 0) {
-        // 沒選PDF直接回傳空字串
-        return "";
+    if (!fileInput || fileInput.files.length === 0) {
+        return "";  // 沒選擇就回空值
     }
 
     const formData = new FormData();
-    formData.append('file', fileInput.files[0]);
+    formData.append("file", fileInput.files[0]);
 
     try {
-        const response = await fetch('/policy/create_PDF', {
-            method: 'POST',
-            body: formData
+        const response = await fetch("/policy/creat_PDF", {
+            method: "POST",
+            body: formData,
         });
+        const data = await response.json();
 
-        const result = await response.json();
-        if (result.success) {
-            return result.pdf_hash;
+        if (data.success) {
+            console.log("成功取得 IPFS hash:", data.pdf_hash);
+            return data.pdf_hash;
         } else {
-            alert('PDF 上傳失敗: ' + result.error);
+            console.error("上傳失敗:", data.error);
             return "";
         }
     } catch (error) {
-        console.error('上傳錯誤:', error);
+        console.error("上傳錯誤:", error);
         return "";
     }
 }
+
   
 //------------------------
 // 全域宣告 (必須!)
@@ -573,8 +573,7 @@ document.getElementById("policyForm").addEventListener("submit", async (e) => {
       // ========== 加密結束 ==========
 
       // 收集並加密表單資料
-	  const pdfHash = await uploadPDF();
-		if (!pdfHash) return;
+	  const pdfHash = document.getElementById('pdfHash').value;
       const params = {
           _policyNumber: document.getElementById("policyNumber").value,
           // 加密敏感欄位
@@ -676,19 +675,12 @@ document.getElementById("policyForm").addEventListener("submit", async (e) => {
     }
 });
 async function submitAndConfirmPolicy() {
-    const statusDiv = document.getElementById("status");
-    statusDiv.innerHTML = "<p>處理中...</p>";
-
-    // 如果需要上傳PDF
-    let pdfHash = "";
-    try {
-        pdfHash = await uploadPDF();
-    } catch (err) {
-        console.warn("PDF未選擇或上傳失敗，將使用空值");
-    }
-
+	const CURRENT_CLIENT_GMAIL = document.getElementById('clientGmail').value;
+	const CURRENT_OFFICER_GMAIL = document.getElementById('officerGmail').value;
+    const pdfHash = document.getElementById('pdfHash').value;
+	console.log("取得 IPFS hash:", pdfHash);
+	console.log("準備傳送的 hash 是:", pdfHash);
     const policyData = {
-        client_gmail: document.getElementById("clientGmail").value,
         policy_number: document.getElementById("policyNumber").value,
         insurance_company: document.getElementById("insuranceCompany").value,
         policy_holder: document.getElementById("policyHolder").value,
@@ -700,27 +692,24 @@ async function submitAndConfirmPolicy() {
         beneficiary: document.getElementById("beneficiary").value,
         growth_rate: document.getElementById("growthRate").value,
         declared_interest_rate: document.getElementById("declaredInterestRate").value,
-        pdf_filename: pdfHash || "",  // 沒有就空字串
-        officer_gmail: document.getElementById("officerGmail").value
+        pdf_hash: pdfHash,
+        client_gmail: CURRENT_CLIENT_GMAIL,   // 預設變數 or 後端模板渲染進來
+        officer_gmail: CURRENT_OFFICER_GMAIL
     };
-
-    try {
-        const response = await fetch('/policy/create_and_confirm', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(policyData)
-        });
-
-        const result = await response.json();
-        if (!result.success) throw new Error(result.message);
-
-        statusDiv.innerHTML = `<p style="color:green">✅ 資料已儲存</p>`;
-
-
-
-    } catch (err) {
-        console.error("提交失敗:", err);
-        statusDiv.innerHTML = `<p style="color:red">❌ ${err.message}</p>`;
-    }
+	console.log("即將送出:", policyData);
+    // 傳送到 Flask
+    await fetch('/policy/create_and_confirm', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(policyData)
+})
+.then(res => res.json())
+.then(res => {
+    if (res.success) alert("保單已上鏈並儲存");
+    else alert("失敗：" + res.message);
+})
+.catch(err => {
+    alert("請求失敗: " + err.message);
+    console.error("❌ 錯誤:", err);
+});
 }
-

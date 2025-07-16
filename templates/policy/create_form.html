@@ -153,8 +153,9 @@
       </button>
       <p>當前連接錢包: <span id="walletAddress">未連接</span></p>
 
-    <input type="hidden" id="clientGmail" value="{{ current_user.id }}">
-<input type="hidden" id="officerGmail" value="{{ policy.officer_gmail }}">
+      <input type="hidden" id="clientGmail" value="{{ current_user.id }}">
+      <input type="hidden" id="officerGmail" value="{{ policy.officer_gmail }}">
+      <input type="hidden" id="pdfHash" value="{{ policy.pdf_hash }}">
 
       <label>保單編號
         <input type="text" id="policyNumber" required readonly />
@@ -201,13 +202,16 @@
       </label>
       <div class="divider"></div>
 
-      <div class="upload-section"  style="display: flex; justify-content: center">
-        <label style="margin: 0;">
-          上傳 PDF 文件 <span class="required-label">*</span>
-          <input type="file" id="pdfUpload" accept=".pdf" required />
-        </label>
-      
-      </div>
+      <div class="upload-section" style="display: flex; justify-content: center">
+      <label style="margin: 0;">
+        已上傳 PDF 文件：
+        {% if policy.pdf_hash %}
+          <a href="https://ipfs.io/ipfs/{{ policy.pdf_hash }}" target="_blank">查看 PDF</a>
+        {% else %}
+          無文件
+        {% endif %}
+      </label>
+    </div>
       <div class="mt-4 text-center">
         <button type="submit" class="submit">確認上鏈</button>
         <button type="button" class="btn btn-secondary" onclick="modifyPolicy()">我要修改</button>

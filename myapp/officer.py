@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, render_template, redirect
 from flask_login import login_required, current_user
-from utils import db
+from utils import db, ipfs
 
 officer_bp = Blueprint('officer', __name__, url_prefix='/officer')
 
@@ -136,14 +136,18 @@ import os
 from flask import current_app
 from werkzeug.utils import secure_filename
 from datetime import datetime
+from utils.ipfs import upload_to_pinata
 
 @officer_bp.route('/upload-policy', methods=['POST'])
 @login_required
 def upload_policy():
+    conn=None
+
     if not getattr(current_user, 'insurance_officer', False):
         return jsonify({'success': False, 'message': '無權限操作'}), 403
 
     try:
+        # 取得表單資料
         client_gmail = request.form.get('clientGmail')
         policy_number = request.form.get('policyNumber')
         insurance_company = request.form.get('insuranceCompany')
@@ -158,34 +162,36 @@ def upload_policy():
         declared_interest_rate = request.form.get('declaredInterestRate')
         pdf_file = request.files.get('pdfUpload')
 
-        # 驗證
-        if not all([client_gmail, policy_number, insurance_company, policy_holder, insured_person, insurance_amount,
-                    premium_period, premium_amount, start_date, beneficiary, growth_rate, declared_interest_rate, pdf_file]):
+        if not all([...]):
             return jsonify({'success': False, 'message': '所有欄位皆為必填'}), 400
 
-        # 儲存PDF
+        # 儲存到暫存路徑以便上傳至 Pinata
         filename = secure_filename(f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{pdf_file.filename}")
         upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
         pdf_file.save(upload_path)
 
+        # 上傳至 Pinata 並取得 IPFS hash
+        pdf_hash = upload_to_pinata(upload_path, filename)
+        print("儲存的檔名為：", filename)
+        # 寫入 policy_draft
         conn = db.get_connection()
         with conn.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO policy_draft (
                     client_gmail, policy_number, insurance_company, policy_holder, insured_person,
                     insurance_amount, premium_period, premium_amount, start_date,
-                    beneficiary, growth_rate, declared_interest_rate, pdf_filename, officer_gmail
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    beneficiary, growth_rate, declared_interest_rate,
+                    pdf_filename, pdf_hash, officer_gmail
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 client_gmail, policy_number, insurance_company, policy_holder, insured_person,
                 insurance_amount, premium_period, premium_amount, start_date,
-                beneficiary, growth_rate, declared_interest_rate, filename, current_user.id
+                beneficiary, growth_rate, declared_interest_rate,
+                filename, pdf_hash, current_user.id
             ))
             conn.commit()
 
-        # 這裡可以加上簡訊發送功能
-
-        return jsonify({'success': True})
+        return jsonify({'success': True, 'ipfs_hash': pdf_hash})
     except Exception as e:
         if conn:
             conn.rollback()
@@ -193,6 +199,7 @@ def upload_policy():
     finally:
         if conn:
             conn.close()
+
 @officer_bp.route('/upload-policy-page', methods=['GET'])
 @login_required
 def upload_policy_page():

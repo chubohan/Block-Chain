@@ -115,17 +115,33 @@ body {
   background: rgba(0, 0, 0, 0.85);  /* ✅ 更不透明一點，遮擋星星 */
 }
 
-/* 主標題（新增保單置中） */
-h2 {
-  font-weight: 900;
-  font-size: 3rem;
-  letter-spacing: 0.08em;
-  margin-bottom: 1.4em;
-  color: #f39c12;
-  text-shadow: 0 0 8px #f39c12cc, 1px 1px 3px rgba(0,0,0,0.7);
-  user-select: none;
-  text-align: center;  /* 置中 */
+.form-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  gap: 12px;
 }
+
+.form-row label {
+  width: 160px;               /* 固定寬度讓左邊齊頭 */
+  text-align: right;
+  font-weight: bold;
+  color: #fff;
+}
+
+.form-row input {
+  flex: 1;
+  max-width: 400px;
+  padding: 10px 14px;
+  border: 1.8px solid #666;
+  border-radius: 8px;
+  background-color: #333;
+  color: #eee;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
 
 /* 表單標籤 */
 form label {
@@ -147,13 +163,13 @@ form label input {
   border: 1.8px solid #666;
   border-radius: 8px;
   font-size: 16px;
-  background-color: #222;
   color: #eee;
   box-sizing: border-box;
   transition: border-color 0.3s ease, background-color 0.3s ease;
   background-color: #222;     /* ✅ 不要透明 */
   z-index: 2;
   position: relative;
+  text-align: right;
 }
 
 input[type="text"]:focus,
@@ -161,8 +177,8 @@ input[type="number"]:focus,
 input[type="date"]:focus,
 input[type="file"]:focus {
   outline: none;
-  border-color: #f39c12;
-  background-color: #2a2a3a;
+  border-color: #fff;
+  background-color: #555;
   box-shadow: 0 0 8px #f39c12cc;
 }
 
@@ -179,48 +195,48 @@ input[type="file"] {
   user-select: none;
 }
 
-/* 按鈕 */
+/* 基礎按鈕樣式 */
 button {
-  background-color: #f39c12;
-  color: #222;
-  padding: 12px 28px;
+  background: linear-gradient(135deg, #f39c12, #e67e22);
+  color: #fff;
+  padding: 14px 32px;
   border: none;
-  border-radius: 10px;
+  border-radius: 16px;
   font-size: 1.1rem;
   font-weight: 700;
   cursor: pointer;
-  margin-top: 18px;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  box-shadow: 0 4px 10px #f39c12aa;
+  margin-top: 20px;
+  box-shadow: 0 8px 18px rgba(243, 156, 18, 0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+/* hover 效果：微微浮起 + 陰影加深 */
 button:hover {
-  background-color: #e67e22;
-  color: #111;
-  box-shadow: 0 6px 14px #e67e22cc;
+  background: linear-gradient(135deg, #e67e22, #d35400);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(230, 126, 34, 0.5);
 }
 
-/* 送出按鈕特別樣式 */
+/* active 效果：點擊時縮回 */
+button:active {
+  transform: translateY(1px);
+  box-shadow: 0 6px 12px rgba(230, 126, 34, 0.3);
+}
+
+
 button.submit {
-  width: 100%;
-  max-width: 420px;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 24px auto 0 auto
+}
+button.submit .icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
 }
 
-/* 連接錢包按鈕 */
-button.btn-warning {
-  background-color: #d35400;
-  color: white;
-  margin-top: 12px;
-  box-shadow: 0 3px 8px #d35400bb;
-}
-
-button.btn-warning:hover {
-  background-color: #b03e00;
-  box-shadow: 0 4px 12px #b03e00cc;
-}
 
 /* 狀態文字 */
 #status {

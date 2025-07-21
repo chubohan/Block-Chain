@@ -114,16 +114,6 @@ body {
   z-index: 1;
 }
 
-/* 標題樣式 */
-h2 {
-  font-weight: 900;
-  font-size: 3rem;
-  letter-spacing: 0.08em;
-  margin-bottom: 1.4em;
-  color: #f39c12;
-  text-shadow: 0 0 8px #f39c12cc, 1px 1px 3px rgba(0,0,0,0.7);
-  text-align: center;
-}
 
 /* 標籤與輸入欄位 */
 form label {
@@ -172,51 +162,7 @@ input[type="file"] {
   margin-left: 0.15em;
 }
 
-/* ========== 按鈕樣式 ========== */
-button {
-  background-color: #f39c12;
-  color: #222;
-  padding: 12px 28px;
-  border: none;
-  border-radius: 10px;
-  font-size: 1.1rem;
-  font-weight: 700;
-  cursor: pointer;
-  margin-top: 18px;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  box-shadow: 0 4px 10px #f39c12aa;
-}
 
-button:hover {
-  background-color: #e67e22;
-  color: #111;
-  box-shadow: 0 6px 14px #e67e22cc;
-}
-
-button.submit {
-  width: 100%;
-  max-width: 420px;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-button.btn-warning {
-  background-color: #d35400;
-  color: white;
-  margin-top: 12px;
-  box-shadow: 0 3px 8px #d35400bb;
-}
-
-button.btn-warning:hover {
-  background-color: #b03e00;
-  box-shadow: 0 4px 12px #b03e00cc;
-}
-
-button:disabled {
-  background-color: #999;
-  cursor: not-allowed;
-}
 
 /* ========== 額外設定 ========== */
 #status {

@@ -8,6 +8,7 @@
   <!-- 字體與樣式 -->
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/static/css/base.css" rel="stylesheet">
   <link href="/static/css/delete_form.css" rel="stylesheet"> <!-- 你剛提供的CSS放這裡 -->
 </head>
 <body>
@@ -119,12 +120,13 @@
   </div>
 
   <div class="form-group mb-3">
-    <label for="policyNumber">保單編號:</label>
+    <label for="policyNumber" class="form-label">保單編號:</label>
     <input type="text" id="policyNumber" class="form-control" placeholder="輸入要刪除的保單編號">
   </div>
 
   <div class="text-center">
-    <button id="deleteBtn" disabled>刪除保單</button>
+    <!-- <button id="deleteBtn" disabled>刪除保單</button> -->
+    <button id="deleteBtn" disabled type="submit" class="submit"><img src="{{ url_for('static', filename='imgs/delete.png') }}" alt="Send Icon" class="icon">刪除保單</button>
   </div>
 
   <div id="result" class="result" style="display: none;"></div>

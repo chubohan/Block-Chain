@@ -229,3 +229,164 @@ def completed_policy_form():
             return render_template('policy/completed_policy_form.html', policy=policy)
     finally:
         conn.close()
+
+@policy_bp.route('/authorization/<policy_number>', methods=['GET'])
+@login_required
+def authorization_page(policy_number):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute('''
+            SELECT gmail, authorized_gmail, relationship
+            FROM authorization
+            WHERE policy_number = %s
+        ''', (policy_number,))
+        rows = cursor.fetchall()
+
+        
+
+        cursor.close()
+        conn.close()
+
+        return render_template('/policy/authorization_page.html',
+                               policy_number=policy_number,
+                               authorized_list=rows)
+
+    except Exception as e:
+        print(e)
+        return render_template('/policy/authorization_page.html',
+                               policy_number=policy_number,
+                               authorized_list=[],
+                               error='查詢失敗')
+'''
+# 顯示授權管理頁面
+@policy_bp.route('/authorization')
+@login_required
+def authorization():
+    user_email = current_user.id
+    conn = get_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM authorization WHERE gmail = %s", (user_email,))
+            auths = cursor.fetchall()
+        return render_template('/policy/authorization.html', auths=auths, current_user_email=user_email)
+    finally:
+        conn.close()
+'''
+# 新增授權 API
+@policy_bp.route('/add-authorization', methods=['POST'])
+@login_required
+def add_authorization():
+    try:
+        data = request.get_json()
+        gmail = current_user.id
+        authorized_gmail = data.get('authorized_gmail')
+        authorized_wallet = data.get('authorized_wallet')
+        relationship = data.get('relationship')
+        policy_number = data.get('policy_number')
+        tx_hash = data.get('tx_hash')
+
+        if not all([gmail, authorized_wallet, relationship, policy_number]):
+            return jsonify({'success': False, 'message': '缺少必要欄位'}), 400
+
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute('''
+            INSERT INTO authorization (policy_number, gmail, authorized_gmail, authorized_wallet, relationship, tx_hash)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE 
+                relationship = VALUES(relationship),
+                tx_hash = VALUES(tx_hash),
+                authorized_wallet = VALUES(authorized_wallet)
+        ''', (policy_number, gmail, authorized_gmail, authorized_wallet, relationship, tx_hash))
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return jsonify({'success': True, 'message': '授權成功'})
+
+    except Exception as e:
+        print(e)
+        return jsonify({'success': False, 'message': '授權失敗'})
+    
+# 刪除授權 API
+@policy_bp.route('/delete-authorization', methods=['POST'])
+@login_required
+def delete_authorization():
+    data = request.get_json()
+    policy_number = data.get('policy_number')
+    authorized_gmail = data.get('authorized_gmail')
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute(
+            'DELETE FROM authorization WHERE policy_number = %s AND authorized_gmail = %s',
+            (policy_number, authorized_gmail)
+        )
+        conn.commit()
+        return jsonify({'success': True, 'message': '刪除成功'})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+import pymysql.cursors  # 確保有這行
+# 查詢使用者錢包地址
+@policy_bp.route('/get-wallet-address', methods=['POST'])
+@login_required
+def get_wallet_address():
+    data = request.get_json()
+    gmail = data.get('gmail')
+
+    if not gmail:
+        return jsonify({'success': False, 'message': '缺少 Gmail'}), 400
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        cursor.execute("SELECT wallet FROM user WHERE gmail = %s", (gmail,))
+        row = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        if row and row['wallet']:
+            return jsonify({'success': True, 'wallet': row['wallet']})
+        else:
+            return jsonify({'success': False, 'message': '查無此用戶或未註冊錢包'})
+    except Exception as e:
+        print("get_wallet_address error:", e)
+        return jsonify({'success': False, 'message': '伺服器錯誤'})
+    
+@policy_bp.route('/get-authorizations/<policy_number>', methods=['GET'])
+@login_required
+def get_authorizations(policy_number):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute('''
+            SELECT gmail, authorized_gmail, relationship
+            FROM authorization
+            WHERE policy_number = %s
+        ''', (policy_number,))
+        rows = cursor.fetchall()
+        print("查詢保單編號：", policy_number)
+        print("查詢結果：", rows)
+        # 將 tuple list 轉成 list of dicts
+        authorized_list = [
+            {'gmail': row[0], 'authorized_gmail': row[1], 'relationship': row[2]}
+            for row in rows
+        ]
+        
+        cursor.close()
+        conn.close()
+
+        return jsonify({'success': True, 'authorized_list': authorized_list})
+
+    except Exception as e:
+        print(e)
+        return jsonify({'success': False, 'message': '查詢失敗'})

@@ -475,7 +475,7 @@ def profile():
     conn = db.get_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT username, age, gender, gmail 
+        SELECT username, age, gender, gmail ,wallet
         FROM user 
         WHERE gmail = %s
     """, (current_user.id,))
@@ -483,6 +483,27 @@ def profile():
     conn.close()
 
     return render_template('user/profile.html', user=user_data)
+
+@user_bp.route('/save-wallet', methods=['POST'])
+@login_required
+def save_wallet():
+    data = request.get_json()
+    wallet = data.get('wallet')
+
+    if not wallet:
+        return jsonify({'success': False, 'message': '錢包地址缺失'}), 400
+
+    try:
+        conn = db.get_connection()
+        with conn.cursor() as cursor:
+            sql = "UPDATE user SET wallet = %s WHERE gmail = %s"
+            cursor.execute(sql, (wallet, current_user.id))
+        conn.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        conn.close()
 # 登出路由
 @user_bp.route('/logout', methods=['POST'])
 @login_required

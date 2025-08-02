@@ -46,7 +46,7 @@
           <td>{{ policy.insured_person }}</td>
           <td>
             <a href="{{ url_for('policy.confirm_policy', policy_number=policy.policy_number) }}" class="btn btn-info btn-sm">詳細資料</a>
-
+            
           </td>
         </tr>
         {% endif %}
@@ -75,7 +75,7 @@
           <td>{{ policy.insured_person }}</td>
           <td>
             <a href="{{ url_for('policy.completed_policy_form', policy_number=policy.policy_number) }}" class="btn btn-info btn-sm">詳細資料</a>
-
+            <a href="{{ url_for('policy.authorization_page', policy_number=policy.policy_number) }}" class="btn btn-warning btn-sm">授權</a>
           </td>
         </tr>
         {% endif %}

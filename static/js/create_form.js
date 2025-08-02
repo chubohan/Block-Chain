@@ -527,7 +527,7 @@ async function connectWallet() {
 document.getElementById("policyForm").addEventListener("submit", async (e) => {
     e.preventDefault();
 	//-----------------
-	 await submitAndConfirmPolicy();
+	 
 	 //---------------------
     const statusDiv = document.getElementById("status");
     statusDiv.innerHTML = "<p>處理中...</p>";
@@ -635,7 +635,7 @@ document.getElementById("policyForm").addEventListener("submit", async (e) => {
           <p>區塊高度: ${receipt.blockNumber}</p>
           <p>交易哈希: ${receipt.transactionHash}</p>
       `;
-
+		await submitAndConfirmPolicy();
     } catch (error) {
       console.error("交易失败详情:", error);
         

@@ -48,6 +48,10 @@
         <p>身分: {% if current_user.insurance_officer == 1 %} 管理員
                   {% else %} 客戶
                   {% endif %}</p>
+        <p>目前錢包:{% if user.wallet %}
+                    {{ user.wallet }}
+                    {% else %}尚未連接
+                    {% endif %}</p><a href="/policy/wallet">我要修改</a></li>          
     </div>
     <form action="/user/logout" method="POST">
         <button type="submit">登出</button>

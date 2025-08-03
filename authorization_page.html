@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>授權管理 - ChainSure</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/base.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* 星空背景與動畫 */
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: #1a1a2e;
+            color: white;
+            font-family: 'Noto Sans TC', Arial, sans-serif;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 星空背景 */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://cdn.pixabay.com/photo/2017/08/30/02/18/starry-night-2695563_960_720.jpg') repeat;
+            background-size: cover;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* 閃爍星星 */
+        .star {
+            position: absolute;
+            border-radius: 50%;
+            width: 2px;
+            height: 2px;
+            background-color: white;
+            animation: twinkle 1.5s infinite alternate;
+            pointer-events: none;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.6; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.5); }
+        }
+
+        /* 導航欄樣式 - 使用您提供的設定 */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            padding: 0.8rem 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .navbar.hidden {
+            transform: translateY(-100%);
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 2rem;
+            color: #ffffff !important;
+        }
+
+        .nav-link {
+            color: #ffffff !important;
+            font-size: 1.1rem;
+            padding: 0.5rem 1rem;
+            text-transform: uppercase;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link:focus {
+            color: #f39c12 !important;
+        }
+
+        /* 下拉選單 */
+        .dropdown-menu {
+            min-width: 200px;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+            background-color: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            margin-top: 0.5rem;
+        }
+
+        .dropdown-item {
+            padding: 0.75rem 1.5rem;
+            color: #fff;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-item:hover, .dropdown-item:focus {
+            background-color: #f39c12;
+            color: #222;
+        }
+
+        .dropdown-divider {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* 主要內容區 */
+        main {
+            padding-top: 120px; /* 根據導航欄高度調整 */
+            min-height: calc(100vh - 120px);
+            position: relative;
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px 20px;
+            background: rgba(0, 0, 0, 0.85);
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.6);
+            color: #f0f0f5;
+        }
+
+        h1 {
+            color: #f39c12;
+            margin-bottom: 1.5rem;
+        }
+
+        h3 {
+            color: #ddd;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #fff;
+        }
+
+        input[type="email"],
+        input[type="text"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #444;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background-color: #333;
+            color: #fff;
+        }
+
+        input[type="email"]:focus,
+        input[type="text"]:focus {
+            border-color: #f39c12;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.2);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            font-weight: 500;
+            transition: all 0.3s;
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: #ff6347;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #ff4500;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        hr {
+            margin: 2rem 0;
+            border-color: #444;
+        }
+
+        #authorizedList {
+            list-style: none;
+            padding: 0;
+        }
+
+        #authorizedList li {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .policy-number {
+            font-size: 1.2rem;
+            color: #f39c12;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            padding: 0.5rem;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            display: inline-block;
+        }
+
+        /* 響應式調整 */
+        @media (max-width: 992px) {
+            .navbar-collapse {
+                background: rgba(0, 0, 0, 0.9);
+                backdrop-filter: blur(10px);
+                padding: 1rem;
+                margin-top: 0.5rem;
+                border-radius: 8px;
+            }
+            
+            .nav-link {
+                padding: 0.75rem 0;
+            }
+            
+            .dropdown-menu {
+                background: rgba(30, 30, 30, 0.95);
+                margin-left: 1rem;
+            }
+            
+            main {
+                padding-top: 100px; /* 移動設備上減少頂部間距 */
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 星空背景 -->
+    <div class="stars"></div>
+    
+    <!-- 閃爍星星將由JavaScript動態生成 -->
+    
+    <!-- 導航欄 - 使用您提供的設定 -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">ChainSure</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="customerDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            客戶服務
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="customerDropdown">
+                            <li><a class="dropdown-item" href="#">會員中心</a></li>
+                            <li><a class="dropdown-item" href="#">聯繫業務員</a></li>
+                            <li><a class="dropdown-item" href="#">點數查詢</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="policyDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            保單服務
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="policyDropdown">
+                            <li><a class="dropdown-item" href="/policy/delete/form">刪除查詢</a></li>
+                            <li><a class="dropdown-item" href="/policy/update/form">修改保單</a></li>
+                            <li><a class="dropdown-item" href="/policy/read/form">保單查詢</a></li>
+                            <li><a class="dropdown-item" href="#">保單內容問題</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="claimDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            理賠服務
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="claimDropdown">
+                            <li><a class="dropdown-item" href="#">終身壽險</a></li>
+                            <li><a class="dropdown-item" href="#">失能照護險</a></li>
+                            <li><a class="dropdown-item" href="#">投資型報單</a></li>
+                            <li><a class="dropdown-item" href="#">旅遊綜合保險</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="activityDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            熱門活動
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="activityDropdown">
+                            <li><a class="dropdown-item" href="#">贈品查詢</a></li>
+                            <li><a class="dropdown-item" href="#">理賠成功申請案例</a></li>
+                        </ul>
+                    </li>
+
+                    {% if not current_user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            登入
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="loginDropdown">
+                            <li><a class="dropdown-item" href="/user/login/form">保人登入</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/user/login/form">業務員登入</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="idVerifyDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            身分證驗證
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="idVerifyDropdown">
+                            <li><a class="dropdown-item" href="/policy/create_ID_image">身分證驗證</a></li>
+                        </ul>
+                    </li>
+            
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            個人檔案
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="profileDropdown">
+                            <li><a class="dropdown-item" href="/user/profile">個人檔案</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要內容區 -->
+    <main>
+        <div class="container">
+            <h1>授權管理</h1>
+            <div class="policy-number">保單編號：{{ policy_number }}</div>
+            
+            <div>
+                <h3>新增授權</h3>
+                <div class="form-group">
+                    <label for="authorizedGmail">被授權人 Gmail：</label>
+                    <input type="email" id="authorizedGmail" placeholder="輸入 Gmail">
+                    <div class="error-message" id="emailError">請輸入有效的電子郵件地址</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="authorizedWallet">或被授權人錢包地址：</label>
+                    <input type="text" id="authorizedWallet" placeholder="輸入錢包地址">
+                    <div class="error-message" id="walletError">請輸入有效的錢包地址</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="relationship">與此保戶的關係：</label>
+                    <input type="text" id="relationship" placeholder="例如：配偶、子女、朋友" required>
+                    <div class="error-message" id="relationshipError">請輸入關係說明</div>
+                </div>
+                
+                <button class="btn btn-primary" onclick="addAuthorization()">➕ 新增授權</button>
+            </div>
+            
+            <hr>
+            
+            <div>
+                <h3>已授權人員</h3>
+                <ul id="authorizedList">
+                    {% for auth in authorized_list %}
+                    <li>
+                        <span>
+                            {{ auth.authorized_gmail or auth.authorized_wallet }}（{{ auth.relationship }}）
+                        </span>
+                        <button class="btn btn-danger" onclick="deleteAuthorization('{{ auth.authorized_gmail }}')">🗑️ 刪除</button>
+                    </li>
+                    {% else %}
+                    <li>尚無授權人</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 合約配置
+        const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+        const contractABI = [ /* 保持原有的ABI內容不變 */ ];
+        
+        let provider;
+        let signer;
+        let insuranceContract;
+        const policyNumber = "{{ policy_number }}";
+        const clientGmail = "{{ current_user.id }}";
+
+        // 初始化合約
+        async function loadContract() {
+            try {
+                if (!window.ethereum) {
+                    showAlert("請先安裝 MetaMask", "danger");
+                    return;
+                }
+
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = await provider.getSigner();
+                insuranceContract = new ethers.Contract(contractAddress, contractABI, signer);
+
+                console.log("合約載入完成");
+            } catch (err) {
+                console.error("合約初始化錯誤", err);
+                showAlert("合約初始化失敗，請稍候或重新整理", "danger");
+            }
+        }
+        
+        // 顯示提示訊息
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.role = 'alert';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            
+            const container = document.querySelector('.container');
+            container.prepend(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.classList.remove('show');
+                setTimeout(() => alertDiv.remove(), 150);
+            }, 5000);
+        }
+        
+        // 驗證表單
+        function validateForm() {
+            let isValid = true;
+            const gmail = document.getElementById('authorizedGmail').value.trim();
+            const walletInput = document.getElementById('authorizedWallet').value.trim();
+            const relationship = document.getElementById('relationship').value.trim();
+            
+            // 重置錯誤訊息
+            document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+            
+            if (!relationship) {
+                document.getElementById('relationshipError').style.display = 'block';
+                isValid = false;
+            }
+            
+            if (!gmail && !walletInput) {
+                document.getElementById('emailError').style.display = 'block';
+                document.getElementById('walletError').style.display = 'block';
+                isValid = false;
+            }
+            
+            if (walletInput && !ethers.utils.isAddress(walletInput)) {
+                document.getElementById('walletError').style.display = 'block';
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+        
+        // 新增授權
+        async function addAuthorization() {
+            if (!validateForm()) return;
+            
+            const gmail = document.getElementById('authorizedGmail').value.trim();
+            const walletInput = document.getElementById('authorizedWallet').value.trim();
+            const relationship = document.getElementById('relationship').value.trim();
+            
+            let walletAddress = walletInput;
+            
+            // 如果沒有輸入錢包地址但有輸入Gmail，嘗試查詢錢包地址
+            if (!walletInput && gmail) {
+                try {
+                    showAlert("正在查詢錢包地址...", "info");
+                    
+                    const res = await fetch('/policy/get-wallet-address', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ gmail: gmail })
+                    });
+                    
+                    const result = await res.json();
+                    
+                    if (result.success) {
+                        walletAddress = result.wallet;
+                    } else {
+                        showAlert("❌ 查無此 Gmail 或對方未註冊錢包", "danger");
+                        return;
+                    }
+                } catch (err) {
+                    console.error("Gmail 查詢失敗:", err);
+                    showAlert("❌ 查詢失敗，請稍後再試", "danger");
+                    return;
+                }
+            }
+            
+            try {
+                // 確保合約已載入
+                if (!insuranceContract) {
+                    showAlert("合約尚未載入，請稍候或重新整理", "danger");
+                    return;
+                }
+                
+                showAlert("正在處理授權...", "info");
+                
+                // 檢查是否是保單擁有者
+                const policy = await insuranceContract.policies(policyNumber);
+                const policyOwner = policy[10];
+                const currentAddress = await signer.getAddress();
+                
+                if (currentAddress.toLowerCase() !== policyOwner.toLowerCase()) {
+                    showAlert("❌ 只有保單擁有者可授權", "danger");
+                    return;
+                }
+                
+                // 執行授權交易
+                const tx = await insuranceContract.authorizePolicyAccess(policyNumber, walletAddress);
+                showAlert("交易已發送，等待確認...", "info");
+                
+                await tx.wait();
+                
+                // 保存到後端
+                const res = await fetch('/policy/add-authorization', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        policy_number: policyNumber,
+                        authorized_gmail: gmail,
+                        authorized_wallet: walletAddress,
+                        relationship: relationship,
+                        tx_hash: tx.hash
+                    })
+                });
+                
+                const result = await res.json();
+                if (result.success) {
+                    showAlert("✅ 授權成功", "success");
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showAlert("❌ 資料庫寫入失敗：" + result.message, "danger");
+                }
+                
+            } catch (error) {
+                console.error("授權失敗：", error);
+                showAlert("❌ 授權失敗：" + (error.reason || error.message), "danger");
+            }
+        }
+        
+        // 刪除授權
+        async function deleteAuthorization(gmail) {
+            if (!confirm("確定要刪除此授權嗎？")) return;
+            
+            let walletAddress;
+            
+            try {
+                showAlert("正在處理取消授權...", "info");
+                
+                const res = await fetch('/policy/get-wallet-address', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ gmail: gmail })
+                });
+                
+                const result = await res.json();
+                if (!result.success) {
+                    showAlert("❌ 查無此 Gmail 對應的錢包地址", "danger");
+                    return;
+                }
+                
+                walletAddress = result.wallet;
+            } catch (err) {
+                console.error("取得錢包地址失敗：", err);
+                showAlert("❌ 取得錢包地址失敗，請稍後再試", "danger");
+                return;
+            }
+            
+            if (!walletAddress || !ethers.utils.isAddress(walletAddress)) {
+                showAlert("❌ 無效的錢包地址", "danger");
+                return;
+            }
+            
+            try {
+                const policy = await insuranceContract.policies(policyNumber);
+                const policyOwner = policy[10];
+                const currentAddress = await signer.getAddress();
+                
+                if (currentAddress.toLowerCase() !== policyOwner.toLowerCase()) {
+                    showAlert("❌ 只有保單擁有者可以刪除授權", "danger");
+                    return;
+                }
+                
+                const tx = await insuranceContract.revokePolicyAccess(policyNumber, walletAddress);
+                showAlert("交易已發送，等待確認...", "info");
+                
+                await tx.wait();
+                
+                const response = await fetch('/policy/delete-authorization', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        policy_number: policyNumber,
+                        authorized_gmail: gmail,
+                        authorized_wallet: walletAddress,
+                        tx_hash: tx.hash
+                    })
+                });
+                
+                const dbResult = await response.json();
+                if (dbResult.success) {
+                    showAlert("✅ 已成功取消授權", "success");
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showAlert("❌ 後端刪除失敗：" + dbResult.message, "danger");
+                }
+                
+            } catch (err) {
+                console.error("取消授權失敗：", err);
+                showAlert("❌ 取消授權失敗：" + (err.reason || err.message), "danger");
+            }
+        }
+        
+        // 創建閃爍星星
+        function createStars() {
+            const starsContainer = document.createElement('div');
+            starsContainer.className = 'stars-container';
+            document.body.appendChild(starsContainer);
+            
+            // 創建100顆星星
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                
+                // 隨機位置
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                
+                // 隨機大小 (1px到3px)
+                const size = 1 + Math.random() * 2;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                
+                // 隨機動畫延遲
+                star.style.animationDelay = `${Math.random() * 2}s`;
+                
+                // 隨機動畫持續時間
+                star.style.animationDuration = `${1 + Math.random() * 2}s`;
+                
+                starsContainer.appendChild(star);
+            }
+        }
+        
+        // 頁面載入時初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            loadContract().then(() => {
+                console.log("合約初始化完成");
+            }).catch(err => {
+                console.error("合約初始化錯誤", err);
+                showAlert("❌ 合約初始化失敗，請重新整理頁面", "danger");
+            });
+            
+            createStars();
+        });
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

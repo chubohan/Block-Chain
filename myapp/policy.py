@@ -390,3 +390,5 @@ def get_authorizations(policy_number):
     except Exception as e:
         print(e)
         return jsonify({'success': False, 'message': '查詢失敗'})
+
+

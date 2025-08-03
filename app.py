@@ -945,6 +945,11 @@ def update_pdf():
 
     except Exception as e:
         return jsonify(success=False, error=f'服務器錯誤: {str(e)}'), 500
+    
+#連接錢包
+@app.route('/policy/wallet')
+def wallet():
+    return render_template("policy/wallet.html")
 #-----------------------
 # 啟動網站
 #-----------------------

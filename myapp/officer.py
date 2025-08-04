@@ -161,6 +161,7 @@ def upload_policy():
         growth_rate = request.form.get('growthRate')
         declared_interest_rate = request.form.get('declaredInterestRate')
         pdf_file = request.files.get('pdfUpload')
+        ipfs_hash = request.form.get('ipfsHash')
 
         if not all([...]):
             return jsonify({'success': False, 'message': '所有欄位皆為必填'}), 400
@@ -171,7 +172,7 @@ def upload_policy():
         pdf_file.save(upload_path)
 
         # 上傳至 Pinata 並取得 IPFS hash
-        pdf_hash = upload_to_pinata(upload_path, filename)
+        pdf_hash = ipfs_hash
         print("儲存的檔名為：", filename)
         # 寫入 policy_draft
         conn = db.get_connection()

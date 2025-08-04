@@ -255,7 +255,7 @@ async function submitPolicy() {
     document.getElementById("ipfsHash").value = result.path;
 
     formData.append('pdfUpload', file);
-
+    formData.append('ipfsHash', result.path);
     try {
         const response = await fetch('/officer/upload-policy', {
             method: 'POST',
@@ -264,7 +264,12 @@ async function submitPolicy() {
         });
 
         const result = await response.json();
-
+        if (result.success) {
+            alert('保單已暫存並發送簡訊');
+            window.location.href = '/officer/client-page';
+        } else {
+            alert('操作失敗：' + result.message);
+        }
     } catch (error) {
         console.error(error);
         alert('伺服器錯誤：' + error.message);

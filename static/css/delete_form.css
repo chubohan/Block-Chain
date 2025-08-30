@@ -105,12 +105,11 @@ body {
   max-width: 800px;
   margin: 40px auto;
   padding: 50px 20px;
-  background: rgba(0, 0, 0, 0.5);
-  border-radius: 12px;
-  box-shadow: 0 0 15px rgba(0,0,0,0.6);
+  border-radius: 12px;;
+  box-shadow: 0 0 10px ;
   color: #f0f0f5;
   position: relative;  /* ✅ 要加這個才能讓 z-index 生效 */
-  background: rgba(0, 0, 0, 0.85);  /* ✅ 更不透明一點，遮擋星星 */
+  background: rgba(0, 0, 0, 0.5);  /* ✅ 更不透明一點，遮擋星星 */
   z-index: 1;
 }
 
@@ -146,9 +145,8 @@ input[type="number"]:focus,
 input[type="date"]:focus,
 input[type="file"]:focus {
   outline: none;
-  border-color: #f39c12;
-  background-color: #2a2a3a;
-  box-shadow: 0 0 8px #f39c12cc;
+  border-color: gray;
+  box-shadow: 0 0 8px gray
 }
 
 input[type="file"] {
@@ -186,19 +184,46 @@ form, label, button {
 /* 結果顯示 */
 .result {
   margin-top: 20px;
-  padding: 12px;
-  border-radius: 6px;
-  font-weight: bold;
+  padding: 14px 18px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease-in-out;
 }
 
+/* ✅ 成功訊息 */
 .result.success {
-  background-color: #e6ffe6;
-  color: #2e7d32;
+  background: linear-gradient(135deg, #d4f7dc, #e6ffe6);
+  color: #1b5e20;
   border: 1px solid #66bb6a;
 }
 
+.result.success::before {
+  content: "✔";
+  font-size: 1.2rem;
+  color: #2e7d32;
+}
+
+/* ❌ 錯誤訊息 */
 .result.error {
-  background-color: #ffe6e6;
-  color: #c62828;
+  background: linear-gradient(135deg, #ffe6e6, #ffebeb);
+  color: #b71c1c;
   border: 1px solid #ef5350;
 }
+
+.result.error::before {
+  content: "✖";
+  font-size: 1.2rem;
+  color: #c62828;
+}
+
+/* hover 動畫效果 */
+.result:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+

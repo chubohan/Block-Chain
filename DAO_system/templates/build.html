@@ -22,7 +22,20 @@
         line-height: 1.6;
         }
 
-        .card-dark{ background:rgba(0,0,0,0.7); border-radius:16px; border:1px solid #30363d; }
+        .card-dark {
+        background:rgba(0,0,0,0.7);
+        border-radius: 10px;
+        border: 1px solid rgba(100, 149, 237, 0.4); /* 藍色邊框 (Cornflower Blue) */
+        padding: 24px;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .card-dark:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+        }
+
         .img-hero{ max-width:120px; height:auto; object-fit:contain; margin-left: 50px;}
         .img-hero2{ max-width:150px; height:auto; object-fit:contain; margin-right:1050px; margin-right: 1020px;}
         /* 標題 */
@@ -140,35 +153,35 @@
         100% { background-position: 0% 50%; }
         }
 
-.join-btn {
-  background-color: #1abc9c;
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: 0.2s;
-}
+    .join-btn {
+    background-color: #1abc9c;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s;
+    }
 
-.join-btn:hover {
-  background-color: #16a085;
-}
+    .join-btn:hover {
+    background-color: #16a085;
+    }
 
-.enter-btn {
-  background-color: #3498db;
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: 0.2s;
-}
+    .enter-btn {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s;
+    }
 
-.enter-btn:hover {
-  background-color: #2980b9;
-}
+    .enter-btn:hover {
+    background-color: #2980b9;
+    }
 
 
     </style>
@@ -276,6 +289,8 @@
             </div>
             <div id="layoutSidenav_content">
                 <main>
+                    <div class="stars" id="stars"></div>
+
                     <body class="container py-4">
 
                     <h2 class="mb-4 fw-bold text-center">🚀 DAO 前端測試</h2>

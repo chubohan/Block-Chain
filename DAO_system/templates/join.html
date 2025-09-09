@@ -22,7 +22,20 @@
         line-height: 1.6;
         }
 
-        .card-dark{ background:rgba(0,0,0,0.7); border-radius:16px; border:1px solid #30363d; }
+        .card-dark {
+        background:rgba(0,0,0,0.7);
+        border-radius: 10px;
+        border: 1px solid rgba(100, 149, 237, 0.4); /* 藍色邊框 (Cornflower Blue) */
+        padding: 24px;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .card-dark:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+        }
+
         .img-hero{ max-width:120px; height:auto; object-fit:contain; margin-left: 50px;}
         .img-hero2{ max-width:150px; height:auto; object-fit:contain; margin-right:1050px; margin-right: 1020px;}
         /* 標題 */
@@ -54,24 +67,89 @@
 
 
 
-        /* DAO 列表 */
-        #daoList {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        margin-top: 1rem;
-        }
-        #daoList .dao-item {
-        background: #15171c;
-        border: 1.5px solid rgba(0,255,224,0.5);
-        padding: 12px 18px;
-        border-radius: 10px;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        #daoList .dao-item:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 0 12px rgba(0,255,224,0.4);
-        }
+/* 色票：與頁面一致的藍色系 */
+:root{
+  --accent: #3182ce;          /* 亮藍 */
+  --accent-darker: #2b6cb0;   /* 深藍 */
+  --border: rgba(49,130,206,.35);
+  --border-hover: rgba(66,153,225,.7);
+  --muted: #a3b3c6;
+}
+
+/* DAO 列表容器 */
+#daoList{
+  margin-top: 1rem;
+}
+#daoList .dao-list{
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+/* 單列樣式：名稱 / 按鈕 / 人數 */
+#daoList .dao-item{
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.03);       /* 比 #15171c 更融合整體背景 */
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+}
+#daoList .dao-item:hover{
+  transform: translateY(-2px);
+  border-color: var(--border-hover);
+  box-shadow: 0 10px 24px rgba(0,0,0,.28), 0 0 16px rgba(66,153,225,.22);
+}
+
+/* 文字 */
+#daoList .dao-name{
+  font-weight: 600;
+  color: #e9eef7;
+}
+#daoList .dao-count{
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* 按鈕沿用你的 .btn .btn-primary（藍色版） */
+#daoList .dao-apply.btn{
+  padding: 8px 16px;
+  border-radius: 999px;              /* 膠囊造型 */
+  box-shadow: 0 0 10px rgba(66,153,225,.35);
+}
+#daoList .dao-apply.btn:hover{
+  box-shadow: 0 0 18px rgba(66,153,225,.55);
+}
+
+/* RWD：手機堆疊兩行，仍保持按鈕在右側 */
+@media (max-width: 576px){
+  #daoList .dao-item{
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "name dao-apply"
+      "count dao-apply";
+    gap: 6px 10px;
+    padding: 12px 14px;
+  }
+  #daoList .dao-name{ grid-area: name; }
+  #daoList .dao-count{ grid-area: count; }
+  #daoList .dao-apply{ grid-area: dao-apply; }
+}
+
+/* 空狀態（若沒有 DAO） */
+#daoList .empty{
+  padding: 18px;
+  text-align: center;
+  color: var(--muted);
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+}
+
 
         /* 發光動畫 */
         @keyframes glowing {
@@ -79,25 +157,6 @@
         50% { background-position: 100% 50%; }
         100% { background-position: 0% 50%; }
         }
-
-.btn { display: inline-flex; align-items: center; justify-content: center; font-weight: 600; border-radius: 8px; padding: 10px 18px; border: none; cursor: pointer; transition: 0.3s ease; }
-
-
-.btn-primary {
-  background: linear-gradient(135deg, #1e3c72, #2a5298); /* 深藍到亮藍漸層 */
-  color: #fff;
-  font-weight: 700;
-  box-shadow: 0 0 10px rgba(42, 82, 152, 0.6);
-}
-
-.btn-primary:hover {
-  background: linear-gradient(135deg, #2b6cb0, #3182ce); /* Hover 時更亮的藍 */
-  box-shadow: 0 0 18px rgba(66, 153, 225, 0.8);
-  transform: translateY(-2px);
-}
-
-
-
 
     </style>
     </head>
@@ -204,6 +263,7 @@
             </div>
             <div id="layoutSidenav_content">
                 <main>
+                    <div class="stars" id="stars"></div>
                     <body class="container py-4">
 
                     <h2 class="mb-4 fw-bold text-center">🚀 DAO 前端測試</h2>
@@ -221,17 +281,17 @@
                     </div>
 
 
-  <div id="daoList">
-  <ul class="dao-list">
-    {% for dao in daos %}
-    <li class="dao-item">
-      <div class="dao-name">{{ dao.name }}：</div>
-      <a href="{{ url_for('apply', id=dao.id) }}" class="btn btn-primary dao-apply">申請加入</a>
-      <div class="dao-count">{{ dao.members }}人</div>
-    </li>
-    {% endfor %}
-  </ul>
-</div>
+                    <div id="daoList">
+                    <ul class="dao-list">
+                        {% for dao in daos %}
+                        <li class="dao-item">
+                        <div class="dao-name">{{ dao.name }}：</div>
+                        <a href="{{ url_for('apply', id=dao.id) }}" class="btn btn-primary dao-apply">申請加入</a>
+                        <div class="dao-count">{{ dao.members }}人</div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    </div>
 
                 <script>
     

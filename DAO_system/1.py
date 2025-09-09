@@ -603,6 +603,14 @@ factory_address = Web3.to_checksum_address("0x5fbdb2315678afecb367f032d93f642f64
 def index():
     return render_template("index.html")
 
+@app.route("/join")
+def join():
+    return render_template("join.html")    # 加入 DAO 頁面
+
+@app.route("/build")
+def build():
+    return render_template("build.html")   # 建立 DAO 頁面
+
 @app.route('/api/daos', methods=['GET'])
 def get_daos():
     """獲取所有DAO地址"""

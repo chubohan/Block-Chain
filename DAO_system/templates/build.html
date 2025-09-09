@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>Dashboard - SB Admin</title>
+        <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+        <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <style>
+        body {
+        font-family: "Inter", "Noto Sans TC", sans-serif;
+        background: rgb(26, 26, 46);
+        color: #eaeaea;
+        margin: 0;
+        padding: 30px;
+        line-height: 1.6;
+        }
+
+        .card-dark{ background:rgba(0,0,0,0.7); border-radius:16px; border:1px solid #30363d; }
+        .img-hero{ max-width:120px; height:auto; object-fit:contain; margin-left: 50px;}
+        .img-hero2{ max-width:150px; height:auto; object-fit:contain; margin-right:1050px; margin-right: 1020px;}
+        /* 標題 */
+        h2 {
+        text-align: center;
+        font-size: 2rem;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        }
+
+        h3 {
+        font-size: 1.3rem;
+        color: #fff;
+        margin-top: 2rem;
+        margin-bottom: 0.8rem;
+        text-shadow: 0 0 6px rgba(0,255,198,0.5);
+        }
+        /* 區塊容器 */
+        .main-div {
+            padding: 18px 20px;
+            background: rgba(20, 20, 25, 0.9);
+            border: 1px solid rgba(0,255,224,0.3);
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        /* 讓按鈕不要緊貼輸入框 */
+        .main-div .btn {
+            min-width: 100px;
+        }
+
+        /* 深色背景下輸入框更清楚 */
+        .main-div .form-control {
+            background-color: #1e1e24;
+            color: #fff;
+            border: 1px solid rgba(0,255,224,0.3);
+        }
+        .main-div .form-control:focus {
+            border-color: #00ffe0;
+            box-shadow: 0 0 6px rgba(0,255,224,0.5);
+        }
+
+
+        /* 錢包地址 */
+        #walletAddress {
+        margin-left: 10px;
+        font-weight: 600;
+        color: #f39c12;
+        text-shadow: 0 0 6px rgba(243,156,18,0.7);
+        }
+
+
+
+        /* 按鈕 */
+        .btn-create-dao {
+        padding: 12px 26px;
+        font-size: 1rem;
+        font-weight: 700;
+        border-radius: 10px;
+        border: 2px solid transparent;
+        background: #111;
+        color: #00ffe0;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        }
+        .btn-create-dao::before {
+        content: "";
+        position: absolute;
+        inset: -2px;
+        border-radius: 12px;
+        background: linear-gradient(90deg, #00ffe0, #00ff88, #00ffe0);
+        background-size: 300% 300%;
+        animation: glowing 3s linear infinite;
+        z-index: -1;
+        }
+        .btn-create-dao::after {
+        content: "";
+        position: absolute;
+        inset: 2px;
+        border-radius: 8px;
+        background: #111;
+        z-index: -1;
+        }
+        .btn-create-dao:hover {
+        color: #fff;
+        transform: scale(1.05);
+        }
+
+        /* DAO 列表 */
+        #daoList {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 1rem;
+        }
+        #daoList .dao-item {
+        background: #15171c;
+        border: 1.5px solid rgba(0,255,224,0.5);
+        padding: 12px 18px;
+        border-radius: 10px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        #daoList .dao-item:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 0 12px rgba(0,255,224,0.4);
+        }
+
+        /* 發光動畫 */
+        @keyframes glowing {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+        }
+
+.join-btn {
+  background-color: #1abc9c;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.join-btn:hover {
+  background-color: #16a085;
+}
+
+.enter-btn {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.enter-btn:hover {
+  background-color: #2980b9;
+}
+
+
+    </style>
+    </head>
+    <body class="sb-nav-fixed">
+        <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+            <!-- Navbar Brand-->
+            <a class="navbar-brand ps-3" href="/">DAO System</a>
+            <!-- Sidebar Toggle-->
+            <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
+            <!-- Navbar Search-->
+            <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
+                <div class="input-group">
+                    <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..." aria-describedby="btnNavbarSearch" />
+                    <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
+                </div>
+            </form>
+            <!-- Navbar-->
+            <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="#!">Settings</a></li>
+                        <li><a class="dropdown-item" href="#!">Activity Log</a></li>
+                        <li><hr class="dropdown-divider" /></li>
+                        <li><a class="dropdown-item" href="#!">Logout</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+        <div id="layoutSidenav">
+            <div id="layoutSidenav_nav">
+                <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+                    <div class="sb-sidenav-menu">
+                        <div class="nav">
+                            <div class="sb-sidenav-menu-heading">Dao</div>
+                             <a class="nav-link" href="{{ url_for('join') }}">
+                                <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                                Join
+                            </a>
+                            <a class="nav-link" href="{{ url_for('build') }}">
+                                <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                                Built
+                            </a>
+                            
+                            <div class="sb-sidenav-menu-heading">Interface</div>
+                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
+                                <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
+                                Layouts
+                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                            </a>
+                            <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
+                                <nav class="sb-sidenav-menu-nested nav">
+                                    <a class="nav-link" href="layout-static.html">Static Navigation</a>
+                                    <a class="nav-link" href="layout-sidenav-light.html">Light Sidenav</a>
+                                </nav>
+                            </div>
+                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapsePages" aria-expanded="false" aria-controls="collapsePages">
+                                <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
+                                Pages
+                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                            </a>
+                            <div class="collapse" id="collapsePages" aria-labelledby="headingTwo" data-bs-parent="#sidenavAccordion">
+                                <nav class="sb-sidenav-menu-nested nav accordion" id="sidenavAccordionPages">
+                                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#pagesCollapseAuth" aria-expanded="false" aria-controls="pagesCollapseAuth">
+                                        Authentication
+                                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                                    </a>
+                                    <div class="collapse" id="pagesCollapseAuth" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordionPages">
+                                        <nav class="sb-sidenav-menu-nested nav">
+                                            <a class="nav-link" href="login.html">Login</a>
+                                            <a class="nav-link" href="register.html">Register</a>
+                                            <a class="nav-link" href="password.html">Forgot Password</a>
+                                        </nav>
+                                    </div>
+                                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#pagesCollapseError" aria-expanded="false" aria-controls="pagesCollapseError">
+                                        Error
+                                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                                    </a>
+                                    <div class="collapse" id="pagesCollapseError" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordionPages">
+                                        <nav class="sb-sidenav-menu-nested nav">
+                                            <a class="nav-link" href="401.html">401 Page</a>
+                                            <a class="nav-link" href="404.html">404 Page</a>
+                                            <a class="nav-link" href="500.html">500 Page</a>
+                                        </nav>
+                                    </div>
+                                </nav>
+                            </div>
+                            <div class="sb-sidenav-menu-heading">Addons</div>
+                            <a class="nav-link" href="charts.html">
+                                <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
+                                Charts
+                            </a>
+                            <a class="nav-link" href="tables.html">
+                                <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
+                                Tables
+                            </a>
+                        </div>
+                    </div>
+                    <div class="sb-sidenav-footer">
+                        <div class="small">Logged in as:</div>
+                        Start Bootstrap
+                    </div>
+                </nav>
+            </div>
+            <div id="layoutSidenav_content">
+                <main>
+                    <body class="container py-4">
+
+                    <h2 class="mb-4 fw-bold text-center">🚀 DAO 前端測試</h2>
+
+                    <!-- 連接錢包 -->
+                    <div class="card-dark p-4 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                        <button id="connectWallet" type="button" class="btn  btn-primary" onclick="connectWallet()" >
+                            🔗 連接錢包
+                        </button>
+                        <p class="mb-0">當前連接錢包：<span id="walletAddress" class="fw-bold text-info">未連接</span></p>
+                        <img class="img-hero" src="{{ url_for('static', filename='imgs/connect_wallet.png') }}" alt="連接錢包">
+                        </div>
+                        
+                    </div>
+
+                    <!-- 創建新 DAO -->
+                    <div class="card-dark p-4 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <div style="min-width:280px;">
+                        <h3 class="fw-bold mb-2">創建新 DAO</h3>
+                        <p class="text-secondary small mb-3">輸入月保費金額並建立屬於你的 DAO</p>
+                        <div class="d-flex gap-2">
+                            <input type="text" id="monthlyPremium" class="form-control w-auto" placeholder="輸入月保費 (ETH)">
+                            <button id="createDAO" class="btn btn-primary px-4 fw-bold">✨ 創建 DAO</button>
+                        </div>
+                        </div>
+                        <img class="img-hero2" src="{{ url_for('static', filename='imgs/create_dao.png') }}" alt="創建 DAO 插圖" >
+                    </div>
+
+                <script>
+    let provider;
+    let signer;
+    let walletAddress;
+    let factoryContract;
+    const API_URL = "http://localhost:5000/api"; // 後端API地址
+
+    const factoryAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+    const factoryABI = [
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "daoAddress",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "monthlyPremium",
+				"type": "uint256"
+			}
+		],
+		"name": "DAOCreated",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_monthlyPremium",
+				"type": "uint256"
+			}
+		],
+		"name": "createDAO",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "daoAddresses",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getDAOAddresses",
+		"outputs": [
+			{
+				"internalType": "address[]",
+				"name": "",
+				"type": "address[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+];
+    const daoABI = [
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_monthlyPremium",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "claimant",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "reason",
+				"type": "string"
+			}
+		],
+		"name": "ClaimCreated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "passed",
+				"type": "bool"
+			}
+		],
+		"name": "ClaimExecuted",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "month",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "PaidPremium",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "support",
+				"type": "bool"
+			}
+		],
+		"name": "Voted",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "claimId",
+				"type": "uint256"
+			}
+		],
+		"name": "canExecute",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "allowed",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "executeAfter",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "claims",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "claimant",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "reason",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "yesVotes",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "noVotes",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "executed",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "createdAt",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amountInWei",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "_reason",
+				"type": "string"
+			}
+		],
+		"name": "createClaim",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "claimId",
+				"type": "uint256"
+			}
+		],
+		"name": "executeClaim",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "claimId",
+				"type": "uint256"
+			}
+		],
+		"name": "getClaim",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "claimant",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "reason",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "yesVotes",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "noVotes",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bool",
+						"name": "executed",
+						"type": "bool"
+					},
+					{
+						"internalType": "uint256",
+						"name": "createdAt",
+						"type": "uint256"
+					}
+				],
+				"internalType": "struct DAO.Claim",
+				"name": "",
+				"type": "tuple"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getClaimTime",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getMemberCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getMonthlyPremium",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getTotalClaims",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "claimId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			}
+		],
+		"name": "hasVoted",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "hasVotedMap",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			}
+		],
+		"name": "isMember",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "memberCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "memberPaidTotal",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "members",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "monthlyPremium",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "month",
+				"type": "uint256"
+			}
+		],
+		"name": "payPremium",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "claimId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "support",
+				"type": "bool"
+			}
+		],
+		"name": "vote",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+];
+
+    async function connectWallet() {
+      if (window.ethereum) {
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+        walletAddress = await signer.getAddress();
+        document.getElementById("walletAddress").innerText = walletAddress;
+        factoryContract = new ethers.Contract(factoryAddress, factoryABI, provider);
+        loadDAOAddresses();
+      } else {
+        alert("請安裝 MetaMask");
+      }
+    }
+
+    async function createDAO() {
+      const premiumInput = document.getElementById("monthlyPremium").value;
+      if (!premiumInput) {
+        alert("請輸入月保費");
+        return;
+      }
+      const premiumWei = ethers.utils.parseEther(premiumInput);
+      try {
+        const factoryWithSigner = factoryContract.connect(signer);
+        const tx = await factoryWithSigner.createDAO(premiumWei);
+        await tx.wait();
+        loadDAOAddresses();
+      } catch (err) {
+        console.error("創建 DAO 發生錯誤:", err);
+      }
+    }
+
+    async function loadDAOAddresses() {
+  const daoListDiv = document.getElementById("daoList");
+  daoListDiv.innerHTML = "<div>載入中...</div>";
+
+  try {
+    console.log("發送請求到 /api/daos");
+    const response = await fetch(`${API_URL}/daos`);
+    const result = await response.json();
+    console.log("完整響應:", result);
+
+    // 檢查響應狀態
+    if (result.status !== 'success') {
+      throw new Error(result.message || "獲取DAOs失敗");
+    }
+
+    const daos = result.data.daos;
+    console.log("DAO列表:", daos);
+
+    if (!daos || daos.length === 0) {
+      daoListDiv.innerHTML = "<div>尚未創建任何DAO</div>";
+      return;
+    }
+
+    daoListDiv.innerHTML = "";
+    
+    for (let i = 0; i < daos.length; i++) {
+      const addr = daos[i];
+      console.log(`處理DAO ${i}: ${addr}`);
+      
+      const div = document.createElement("div");
+      div.className = "dao-item";
+      div.innerHTML = `
+        <span>DAO ${i + 1}: ${addr}</span>
+        <button class="info-btn" data-index="${i}">詳細資訊</button>
+        <button class="action-btn" data-address="${addr}">...</button>
+      `;
+
+      // 檢查成員狀態
+      const isMember = await checkMembership(addr);
+      const actionBtn = div.querySelector(".action-btn");
+      actionBtn.textContent = isMember ? "進入DAO" : "加入DAO";
+      actionBtn.className = isMember ? "enter-btn" : "join-btn";
+      actionBtn.onclick = isMember ? 
+        () => enterDAO(addr) : 
+        () => joinDAO(addr);
+
+      // 詳細資訊按鈕
+      div.querySelector(".info-btn").onclick = () => showDAOInfo(addr, i);
+      
+      daoListDiv.appendChild(div);
+    }
+  } catch (err) {
+    console.error("載入DAO列表失敗:", err);
+    daoListDiv.innerHTML = `
+      <div class="error">
+        載入失敗: ${err.message}
+        <button onclick="loadDAOAddresses()">重試</button>
+      </div>
+    `;
+  }
+}
+
+// 單獨封裝成員檢查函數
+async function checkMembership(daoAddress) {
+  if (!walletAddress) {
+    console.log("未連接錢包，跳過成員檢查");
+    return false;
+  }
+  
+  try {
+    console.log(`檢查成員資格: DAO=${daoAddress}, User=${walletAddress}`);
+    const response = await fetch(
+      `${API_URL}/dao/${daoAddress}/is_member?user=${walletAddress}`
+    );
+    const result = await response.json();
+    console.log("成員資格檢查結果:", result);
+    return result.is_member === true;
+  } catch (err) {
+    console.error("檢查成員資格失敗:", err);
+    return false;
+  }
+}
+
+    async function addDAOToList(addr, index, parentElement) {
+  const div = document.createElement("div");
+  div.innerHTML = `DAO ${index + 1}: ${addr} `;
+
+  // 詳細資訊按鈕
+  const infoBtn = document.createElement("button");
+  infoBtn.innerText = "詳細資訊";
+  infoBtn.addEventListener("click", () => showDAOInfo(addr, index));
+  div.appendChild(infoBtn);
+
+  // 檢查是否為成員
+  let isMember = false;
+  if (walletAddress) {
+    try {
+      const response = await fetch(
+        `${API_URL}/dao/${addr}/is_member?user=${walletAddress}`
+      );
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("檢查成員資格失敗:", errorData.error || "未知錯誤");
+        throw new Error(errorData.error || "檢查成員資格失敗");
+      }
+      
+      const data = await response.json();
+      isMember = data.is_member;
+    } catch (err) {
+      console.error("檢查成員資格時發生錯誤:", err);
+      // 顯示用戶友好的錯誤消息
+      alert(`無法檢查成員資格: ${err.message}`);
+      // 可以選擇在這裡設置默認狀態或重試邏輯
+      isMember = false; // 默認設置為非成員
+    }
+  }
+
+      // 加入/進入按鈕
+      const actionBtn = document.createElement("button");
+      if (isMember) {
+        actionBtn.innerText = "進入DAO";
+        actionBtn.className = "enter-btn";
+        actionBtn.addEventListener("click", () => enterDAO(addr));
+      } else {
+        actionBtn.innerText = "加入DAO";
+        actionBtn.className = "join-btn";
+        actionBtn.addEventListener("click", () => joinDAO(addr));
+      }
+      div.appendChild(actionBtn);
+
+      parentElement.appendChild(div);
+    }
+
+    async function showDAOInfo(addr, index) {
+      try {
+        const daoContract = new ethers.Contract(addr, daoABI, provider);
+        const [monthlyPremiumWei, memberCount, totalClaims] = await Promise.all([
+          daoContract.getMonthlyPremium(),
+          daoContract.getMemberCount(),
+          daoContract.getTotalClaims()
+        ]);
+
+        let paidTotal = 0;
+        if (walletAddress) {
+          try {
+            paidTotal = await daoContract.memberPaidTotal(walletAddress);
+            paidTotal = ethers.utils.formatEther(paidTotal);
+          } catch (err) {
+            console.warn("無法取得使用者已繳總額", err);
+          }
+        }
+
+        alert(
+          `DAO ${index + 1} 詳細資訊：
+地址: ${addr}
+月保費: ${ethers.utils.formatEther(monthlyPremiumWei)} ETH
+成員數: ${memberCount}
+總理賠數: ${totalClaims}
+你已繳總額: ${paidTotal} ETH`
+        );
+      } catch (err) {
+        console.error("取得 DAO 詳細資訊失敗:", err);
+      }
+    }
+
+	
+    function enterDAO(daoAddress) {
+  // 使用後端路由而不是直接訪問HTML文件
+  const url = `/dao-details?address=${encodeURIComponent(daoAddress)}`;
+  console.log("跳轉到:", url);
+  
+  // 檢查路徑是否可用
+  fetch(url)
+    .then(response => {
+      if (response.ok) {
+        window.location.href = url;
+      } else {
+        throw new Error("DAO詳細頁面不可用");
+      }
+    })
+    .catch(err => {
+      console.error("跳轉失敗:", err);
+      alert(`無法進入DAO界面: ${err.message}`);
+    });
+}
+
+    async function joinDAO(daoAddress, event) {
+  if (!walletAddress) {
+    alert("請先連接錢包");
+    return;
+  }
+
+  try {
+    // 保存按鈕原始狀態
+    
+
+
+    // 1. 獲取DAO合約實例
+    const daoContract = new ethers.Contract(daoAddress, daoABI, signer);
+    
+    // 2. 獲取月保費（添加調試日誌）
+    console.log("正在獲取月保費...");
+    const monthlyPremiumWei = await daoContract.getMonthlyPremium();
+    console.log("獲得的月保費 (wei):", monthlyPremiumWei.toString());
+    
+    if (!monthlyPremiumWei) {
+      throw new Error("無法獲取有效的月保費金額");
+    }
+
+    // 3. 顯示確認對話框
+    const monthlyPremiumEth = ethers.utils.formatEther(monthlyPremiumWei);
+    const confirmJoin = confirm(
+      `確定要加入此DAO嗎？\n需支付月費: ${monthlyPremiumEth} ETH`
+    );
+    
+    if (confirmJoin) {
+      console.log("發送加入交易...");
+      const tx = await daoContract.payPremium(1, { 
+        value: monthlyPremiumWei // 直接使用合約返回的BigNumber
+      });
+      
+      console.log("交易已發送，哈希:", tx.hash);
+      alert("交易已提交，請等待確認...");
+      
+      const receipt = await tx.wait();
+      console.log("交易已確認:", receipt.transactionHash);
+      alert("成功加入DAO!");
+      
+      // 刷新列表
+      loadDAOAddresses();
+    }
+  } catch (err) {
+    console.error("加入DAO失敗 - 完整錯誤:", err);
+    
+    let errorMsg = "加入DAO失敗: ";
+    if (err.code === "INVALID_ARGUMENT") {
+      errorMsg += "無效的金額參數，請聯繫管理員";
+    } else if (err.message.includes("user rejected transaction")) {
+      errorMsg += "您取消了交易";
+    } else {
+      errorMsg += err.message;
+    }
+    
+    alert(errorMsg);
+  } 
+}
+
+    document.getElementById("connectWallet").addEventListener("click", connectWallet);
+    document.getElementById("createDAO").addEventListener("click", createDAO);                    </script>
+                </main>
+                <footer class="py-4 bg-light mt-auto">
+                    <div class="container-fluid px-4">
+                        <div class="d-flex align-items-center justify-content-between small">
+                            <div class="text-muted">Copyright &copy; Your Website 2023</div>
+                            <div>
+                                <a href="#">Privacy Policy</a>
+                                &middot;
+                                <a href="#">Terms &amp; Conditions</a>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+        <script src="/static/js/scripts.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
+        <script src="/static/assets/demo/chart-area-demo.js"></script>
+        <script src="/static/assets/demo/chart-bar-demo.js"></script>
+        <script src="/https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
+        <script src="/static/js/datatables-simple-demo.js"></script>
+    </body>
+</html>

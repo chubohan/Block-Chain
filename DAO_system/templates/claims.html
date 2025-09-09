@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>DAO 历史理赔记录</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .claim-item { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+    .status-approved { color: green; }
+    .status-rejected { color: red; }
+    .nav { margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <div class="nav">
+    <button id="backButton">返回DAO详情</button>
+    <h1>历史理赔记录</h1>
+    <div>DAO地址: <span id="daoAddressDisplay">-</span></div>
+  </div>
+
+  <div id="historyContainer">
+    <!-- 历史理赔项目将动态生成在这里 -->
+  </div>
+
+  <script>
+    // 从URL获取DAO地址
+    const urlParams = new URLSearchParams(window.location.search);
+    const daoAddress = urlParams.get('address');
+    document.getElementById('daoAddressDisplay').textContent = daoAddress;
+
+    // 合约ABI和初始化代码（与dao-details.html相同）
+    const daoABI = [
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "claimant",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "reason",
+				"type": "string"
+			}
+		],
+		"name": "ClaimCreated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "passed",
+				"type": "bool"
+			}
+		],
+		"name": "ClaimExecuted",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "month",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "PaidPremium",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "support",
+				"type": "bool"
+			}
+		],
+		"name": "Voted",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "claimId",
+				"type": "uint256"
+			}
+		],
+		"name": "canExecute",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "allowed",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "executeAfter",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "claimCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amountInWei",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "_reason",
+				"type": "string"
+			}
+		],
+		"name": "createClaim",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "claimId",
+				"type": "uint256"
+			}
+		],
+		"name": "executeClaim",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "claimId",
+				"type": "uint256"
+			}
+		],
+		"name": "getClaim",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "claimant",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "reason",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "yesVotes",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "noVotes",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "executed",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "createdAt",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getTotalClaims",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "claimId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			}
+		],
+		"name": "hasVoted",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			}
+		],
+		"name": "isMember",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "lastPaidMonth",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "latestClaimId",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "memberPaidTotal",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "monthlyPremium",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "month",
+				"type": "uint256"
+			}
+		],
+		"name": "payPremium",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "claimId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "support",
+				"type": "bool"
+			}
+		],
+		"name": "vote",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"stateMutability": "payable",
+		"type": "receive"
+	}
+];
+
+    let provider;
+    let daoContract;
+
+    async function initApp() {
+      if (window.ethereum) {
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        daoContract = new ethers.Contract(daoAddress, daoABI, provider);
+        await loadHistoryClaims();
+      }
+      
+      // 返回按钮事件
+      document.getElementById("backButton").addEventListener("click", () => {
+        window.location.href = `/dao-details.html?address=${encodeURIComponent(daoAddress)}`;
+      });
+    }
+
+    async function loadHistoryClaims() {
+      try {
+        const totalClaims = await daoContract.getTotalClaims();
+        const historyContainer = document.getElementById("historyContainer");
+        historyContainer.innerHTML = "";
+
+        for (let i = 0; i < totalClaims; i++) {
+          const claim = await daoContract.getClaim(i);
+          if (claim.executed) {
+            await renderClaim(i, claim, historyContainer);
+          }
+        }
+      } catch (err) {
+        console.error("载入历史记录失败:", err);
+      }
+    }
+
+    async function renderClaim(claimId, claim, container) {
+      const isPassed = claim.yesVotes > claim.noVotes;
+      const statusText = isPassed 
+        ? '<span class="status-approved">✓ 已通过</span>' 
+        : '<span class="status-rejected">✗ 已拒绝</span>';
+
+      const claimDiv = document.createElement("div");
+      claimDiv.className = "claim-item";
+      claimDiv.innerHTML = `
+        <h3>理赔 #${claimId + 1}</h3>
+        <div>申请人: ${claim.claimant}</div>
+        <div>申请时间: ${new Date(claim.createdAt * 1000).toLocaleString()}</div>
+        <div>金额: ${ethers.utils.formatEther(claim.amount)} ETH</div>
+        <div>原因: ${claim.reason}</div>
+        <div>状态: ${statusText}</div>
+        <div>投票结果: 
+          <span class="vote-count yes">赞成 ${claim.yesVotes}</span> / 
+          <span class="vote-count no">反对 ${claim.noVotes}</span>
+        </div>
+      `;
+      
+      container.appendChild(claimDiv);
+    }
+
+    document.addEventListener("DOMContentLoaded", initApp);
+  </script>
+</body>
+</html>

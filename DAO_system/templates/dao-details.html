@@ -5,154 +5,154 @@
   <title>DAO 詳細資訊 - 理賠與投票</title>
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <style>
-body.dao-body {
-  background-color: #0d1117;
-  color: #e6edf3;
-  font-family: "Segoe UI", sans-serif;
-  margin: 20px;
-}
+    body.dao-body {
+      background-color: #0d1117;
+      color: #e6edf3;
+      font-family: "Segoe UI", sans-serif;
+      margin: 20px;
+    }
 
-/* 導覽列 */
-.nav-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #161b22;
-  padding: 15px 20px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-}
+    /* 導覽列 */
+    .nav-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #161b22;
+      padding: 15px 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
 
-.dao-title {
-  margin: 0;
-  font-size: 20px;
-  font-weight: bold;
-}
+    .dao-title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: bold;
+    }
 
-.wallet-info {
-  font-size: 14px;
-  color: #8b949e;
-}
+    .wallet-info {
+      font-size: 14px;
+      color: #8b949e;
+    }
 
-/* 卡片樣式 */
-.card {
-  background: #161b22;
-  border: 1px solid #30363d;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 20px;
-}
+    /* 卡片樣式 */
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
 
-.card-title {
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
+    .card-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
 
-/* 按鈕 */
-button {
-  cursor: pointer;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 14px;
-  font-size: 14px;
-  transition: 0.2s;
-}
+    /* 按鈕 */
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 14px;
+      transition: 0.2s;
+    }
 
-.btn-back {
-  background: #21262d;
-  color: #58a6ff;
-}
+    .btn-back {
+      background: #21262d;
+      color: #58a6ff;
+    }
 
-.btn-primary {
-  background: #2ea043;
-  color: white;
-  margin-top: 10px;
-}
+    .btn-primary {
+      background: #2ea043;
+      color: white;
+      margin-top: 10px;
+    }
 
-.btn-primary:hover {
-  background: #238636;
-}
+    .btn-primary:hover {
+      background: #238636;
+    }
 
-.btn-secondary {
-  background: #30363d;
-  color: #c9d1d9;
-}
+    .btn-secondary {
+      background: #30363d;
+      color: #c9d1d9;
+    }
 
-.btn-secondary:hover {
-  background: #484f58;
-}
+    .btn-secondary:hover {
+      background: #484f58;
+    }
 
-/* 表單 */
-.form-group {
-  margin-bottom: 10px;
-}
+    /* 表單 */
+    .form-group {
+      margin-bottom: 10px;
+    }
 
-input {
-  width: 100%;
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #30363d;
-  background: #0d1117;
-  color: #e6edf3;
-}
-
-
-------------------------------
-/* Modal 背景 */
-.modal {
-  display: none; /* 預設隱藏 */
-  position: fixed;
-  z-index: 999;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.6);
-  justify-content: center;
-  align-items: center;
-}
-
-/* Modal 內容 */
-/* 背景遮罩 */
-.modal {
-  display: none; /* 預設隱藏 */
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.6);
-  justify-content: center;
-  align-items: center;
-  z-index: 999;
-}
-
-/* 彈出視窗 */
-.modal-content {
-  background: #161b22;
-  padding: 20px;
-  border-radius: 12px;
-  width: 400px;
-  text-align: center;
-  color: #fff;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-}
-
-.modal-actions {
-  margin-top: 20px;
-  display: flex;
-  justify-content: center; /* 讓兩個按鈕置中 */
-  gap: 15px; /* 按鈕之間的間距 */
-}
-
-.modal-actions button {
-  min-width: 80px; /* 讓按鈕寬度一致，排版更好看 */
-}
+    input {
+      width: 100%;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #30363d;
+      background: #0d1117;
+      color: #e6edf3;
+    }
 
 
+    ------------------------------
+    /* Modal 背景 */
+    .modal {
+      display: none; /* 預設隱藏 */
+      position: fixed;
+      z-index: 999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+    }
 
+    /* Modal 內容 */
+    /* 背景遮罩 */
+    .modal {
+      display: none; /* 預設隱藏 */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
 
+    /* 彈出視窗 */
+    .modal-content {
+      background: #161b22;
+      padding: 20px;
+      border-radius: 12px;
+      width: 400px;
+      text-align: center;
+      color: #fff;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .modal-actions {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center; /* 讓兩個按鈕置中 */
+      gap: 15px; /* 按鈕之間的間距 */
+    }
+
+    .modal-actions button {
+      min-width: 80px; /* 讓按鈕寬度一致，排版更好看 */
+    }
+
+    .wallet-info{
+      margin-right: 250px;
+    }
   </style>
 </head>
 <body class="dao-body">
@@ -179,10 +179,58 @@ input {
   </div>
 
 <!-- 按鈕：申請理賠 -->
- <div class="card">
-  <h2 class="card-title">🔎需要神請理賠?</h2>
-  <button id="openModal" class="btn-primary">申請理賠</button>
-  </div>
+<!-- 右上角浮動圖示 -->
+<!-- 理賠申請卡片 -->
+<!-- 固定在畫面右上角的理賠申請區塊 -->
+<div class="claim-floating">
+  <h2 class="claim-title">🔎 需要申請理賠？</h2>
+  <button id="openModal" class="claim-icon-btn">📝</button>
+</div>
+
+<style>/* 浮動按鈕樣式 */
+  /* 卡片內的 header：左右對齊 */
+  /* 整個區塊固定在右上角 */
+  .claim-floating {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #2270bd;
+    padding: 12px 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 1000;
+  }
+
+  /* 左邊文字 */
+  .claim-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  /* 右邊圓形按鈕 */
+  .claim-icon-btn {
+    background: linear-gradient(135deg, #4a90e2, #357ABD);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    transition: all 0.2s ease-in-out;
+  }
+
+  .claim-icon-btn:hover {
+    transform: scale(1.1) rotate(5deg);
+    background: linear-gradient(135deg, #5aa0f2, #2f6bb5);
+  }
+</style>
 
 <!-- Modal 視窗 -->
 <div id="claimModal" class="modal">
@@ -198,7 +246,7 @@ input {
     </div>
     <div class="modal-actions">
       <button id="closeModal" class="btn-secondary">取消</button>
-      <button id="confirmClaim" class="btn-primary">確認送出</button>
+      <button id="submitClaim" class="btn-primary">確認送出</button>
     </div>
   </div>
 </div>
@@ -220,7 +268,22 @@ input {
     <h2 class="card-title">📜 歷史理賠記錄</h2>
     <div id="historyContainer"></div>
   </div>
+  <!-- 我申请的理赔 -->
+  <h2>我申请的理赔</h2>
+  <div id="myClaimsContainer">
+    <!-- 我申请的理赔将动态生成在这里 -->
+  </div>
 
+  <!-- 所有理赔请求 -->
+  <div id="claimsList">
+    <h2>所有理賠請求</h2>
+    <div id="claimsContainer">
+      <!-- 理賠項目將動態生成在這裡 -->
+    </div>
+  </div>
+
+  <!-- 查看历史记录按钮 -->
+  <button id="viewHistoryButton">查看历史记录</button>
 
   <script>
     // 從URL獲取DAO地址

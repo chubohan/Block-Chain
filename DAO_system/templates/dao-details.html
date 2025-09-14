@@ -7,6 +7,29 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <style>
+    .claim-floating {
+  position: fixed !important; /* 強制固定 */
+  top: 20px;
+  right: 20px;
+  background: #2270bd;
+  padding: 12px 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 2000; /* 確保不會被卡片或 navbar 蓋住 */
+}
+
+    /* 兩個上方卡片：文字一律白色 */
+.card .card-title,
+.card .treasury-amount,
+.card small,
+.card div,
+.card span {
+  color: #fff !important;
+}
+
     body.dao-body {
       background-color: #0d1117;
       color: #e6edf3;
@@ -38,7 +61,7 @@
 
     /* 卡片樣式 */
     .card {
-      background: #afcddb;
+      background: #0d1117;
       border: 1px solid #30363d;
       border-radius: 12px;
       padding: 20px;
@@ -46,6 +69,7 @@
     }
 
     .card-title {
+      color: #fff;
       font-size: 18px;
       font-weight: bold;
       margin-bottom: 10px;
@@ -100,7 +124,7 @@
     }
 
 
-    ------------------------------
+    /*------------------------------*/
     /* Modal 背景 */
     .modal {
       display: none; /* 預設隱藏 */
@@ -155,6 +179,86 @@
     .wallet-info{
       margin-right: 250px;
     }
+
+
+
+    /* ==== 區塊框與藍色標頭（像截圖） ==== */
+.table-block {
+  border: 1px solid #2f3a46;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #0d1117;
+}
+.table-head {
+  background: #3a6ed8;           /* 藍底 */
+  color: #fff;
+  font-weight: 700;
+  padding: 6px 10px;
+  font-size: 14px;
+}
+
+/* ==== 表格列（虛線分隔） ==== */
+.claim-list { margin: 0; padding: 0; }
+.claim-row {
+  display: grid;
+  grid-template-columns: 1.2fr 0.9fr 0.8fr 0.7fr auto; /* 標題｜時間｜狀態｜票數｜操作 */
+  gap: 12px;
+  align-items: center;
+  padding: 10px 10px;
+  border-bottom: 1px dashed rgba(255,255,255,.35);     /* 虛線 */
+}
+.claim-row:first-child{
+  border-top: 1px dashed rgba(255,255,255,.35);
+}
+@media (max-width: 768px){
+  .claim-row{
+    grid-template-columns: 1fr auto;                   /* 手機：上下兩行 */
+    grid-template-areas:
+      "title actions"
+      "meta  actions";
+    gap: 6px 10px;
+  }
+  .col-title{ grid-area: title; }
+  .col-meta{ grid-area: meta; font-size: 12px; color:#8b949e; }
+  .col-actions{ grid-area: actions; justify-self: end; }
+}
+
+/* 標題像連結 */
+.claim-title {
+  color: #58a6ff;
+  text-decoration: none;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.claim-title:hover { text-decoration: underline; }
+
+/* 次要資訊（時間等） */
+.claim-meta { color:#9aa4ae; font-size: 13px; }
+.badge-light { background:#222b33; color:#c9d1d9; border:1px solid #2f3a46; }
+
+/* 狀態顏色 */
+.status-pending  { color:#f0c36d; }
+.status-ready    { color:#2ea043; font-weight:600; }
+.status-approved { color:#2ea043; }
+.status-rejected { color:#ff7b72; }
+
+/* 票數 */
+.vote-count { font-weight:600; }
+.vote-count.yes { color:#67d2ff; }
+.vote-count.no  { color:#ff9aa5; }
+
+/* 按鈕更貼合表格操作列 */
+.claim-actions .btn { padding:4px 10px; line-height:1.1; border-radius:6px; }
+
+.treasury-amount {
+  color: #2ecc71; /* 綠色 */
+  font-weight: bold;
+  font-size: 18px;
+}
+#lastUpdated {
+  color: #8b949e; /* 淺灰 */
+  font-size: 14px;
+}
+
   </style>
 </head>
 <body class="dao-body">
@@ -256,20 +360,19 @@
 
 
 
-  <!-- 理賠列表 -->
-  <div class="card">
-    <div class="card-header">
-      <h2 class="card-title">📌 理賠請求列表</h2>
-      <button id="refreshClaim" class="btn-secondary">刷新</button>
-    </div>
-    <div id="claimsContainer"></div>
+<div class="table-block mb-4">
+  <div class="table-head d-flex justify-content-between align-items-center">
+    <span>📌 理賠請求列表</span>
+    <button id="refreshClaim" class="btn btn-sm btn-secondary">刷新</button>
   </div>
+  <div id="claimsContainer" class="claim-list"></div>
+</div>
 
-  <!-- 歷史紀錄 -->
-  <div class="card">
-    <h2 class="card-title">📜 歷史理賠記錄</h2>
-    <div id="historyContainer"></div>
-  </div>
+<div class="table-block">
+  <div class="table-head">📜 歷史理賠記錄</div>
+  <div id="historyContainer" class="claim-list"></div>
+</div>
+
   <!-- 我申请的理赔 -->
   <h2>我申请的理赔</h2>
   <div id="myClaimsContainer">
@@ -287,1134 +390,323 @@
   <!-- 查看历史记录按钮 -->
   <button id="viewHistoryButton">查看历史记录</button>
 
-  <script>
-    // 從URL獲取DAO地址
+ <script>
+    // 取 URL 中的 DAO 地址
     const urlParams = new URLSearchParams(window.location.search);
     const daoAddress = urlParams.get('address');
-    
-    let provider;
-    let signer;
-    let walletAddress;
-    let daoContract;
-    const daoABI = [
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_monthlyPremium",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "constructor"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "id",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "claimant",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "reason",
-				"type": "string"
-			}
-		],
-		"name": "ClaimCreated",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "id",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "bool",
-				"name": "passed",
-				"type": "bool"
-			}
-		],
-		"name": "ClaimExecuted",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "user",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "month",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			}
-		],
-		"name": "PaidPremium",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "id",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "voter",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "bool",
-				"name": "support",
-				"type": "bool"
-			}
-		],
-		"name": "Voted",
-		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "claimId",
-				"type": "uint256"
-			}
-		],
-		"name": "canExecute",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "allowed",
-				"type": "bool"
-			},
-			{
-				"internalType": "uint256",
-				"name": "executeAfter",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "claims",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "claimant",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "reason",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "yesVotes",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "noVotes",
-				"type": "uint256"
-			},
-			{
-				"internalType": "bool",
-				"name": "executed",
-				"type": "bool"
-			},
-			{
-				"internalType": "uint256",
-				"name": "createdAt",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "amountInWei",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "_reason",
-				"type": "string"
-			}
-		],
-		"name": "createClaim",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "claimId",
-				"type": "uint256"
-			}
-		],
-		"name": "executeClaim",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "claimId",
-				"type": "uint256"
-			}
-		],
-		"name": "getClaim",
-		"outputs": [
-			{
-				"components": [
-					{
-						"internalType": "address",
-						"name": "claimant",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "amount",
-						"type": "uint256"
-					},
-					{
-						"internalType": "string",
-						"name": "reason",
-						"type": "string"
-					},
-					{
-						"internalType": "uint256",
-						"name": "yesVotes",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "noVotes",
-						"type": "uint256"
-					},
-					{
-						"internalType": "bool",
-						"name": "executed",
-						"type": "bool"
-					},
-					{
-						"internalType": "uint256",
-						"name": "createdAt",
-						"type": "uint256"
-					}
-				],
-				"internalType": "struct DAO.Claim",
-				"name": "",
-				"type": "tuple"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getClaimTime",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "pure",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getMemberCount",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getMonthlyPremium",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getTotalClaims",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getTreasuryBalance",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "claimId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "voter",
-				"type": "address"
-			}
-		],
-		"name": "hasVoted",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"name": "hasVotedMap",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "user",
-				"type": "address"
-			}
-		],
-		"name": "isMember",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "memberCount",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"name": "memberPaidTotal",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"name": "members",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "monthlyPremium",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "owner",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "month",
-				"type": "uint256"
-			}
-		],
-		"name": "payPremium",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "claimId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "bool",
-				"name": "support",
-				"type": "bool"
-			}
-		],
-		"name": "vote",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	}
-];
 
-    // 初始化應用
-    async function initApp() {
-      if (!daoAddress) {
-        alert("無效的DAO地址");
-        window.location.href = "index.html";
-        return;
-      }
+    let provider, signer, walletAddress, daoContract;
 
-      await connectWallet();
-      setupContract();
-      loadDAOInfo();
-      loadClaims();
-      setupEventListeners();
-    }
+    // ABI（與你專案一致）
+    const daoABI = [ /* === 省略：使用你原本貼的 ABI；我保持不變 === */ 
+      {"inputs":[{"internalType":"uint256","name":"_monthlyPremium","type":"uint256"}],"stateMutability":"nonpayable","type":"constructor"},
+      {"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":false,"internalType":"address","name":"claimant","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"string","name":"reason","type":"string"}],"name":"ClaimCreated","type":"event"},
+      {"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":false,"internalType":"bool","name":"passed","type":"bool"}],"name":"ClaimExecuted","type":"event"},
+      {"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"month","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"PaidPremium","type":"event"},
+      {"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":false,"internalType":"address","name":"voter","type":"address"},{"indexed":false,"internalType":"bool","name":"support","type":"bool"}],"name":"Voted","type":"event"},
+      {"inputs":[{"internalType":"uint256","name":"claimId","type":"uint256"}],"name":"canExecute","outputs":[{"internalType":"bool","name":"allowed","type":"bool"},{"internalType":"uint256","name":"executeAfter","type":"uint256"}],"stateMutability":"view","type":"function"},
+      {"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"claims","outputs":[{"internalType":"address","name":"claimant","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"string","name":"reason","type":"string"},{"internalType":"uint256","name":"yesVotes","type":"uint256"},{"internalType":"uint256","name":"noVotes","type":"uint256"},{"internalType":"bool","name":"executed","type":"bool"},{"internalType":"uint256","name":"createdAt","type":"uint256"}],"stateMutability":"view","type":"function"},
+      {"inputs":[{"internalType":"uint256","name":"amountInWei","type":"uint256"},{"internalType":"string","name":"_reason","type":"string"}],"name":"createClaim","outputs":[],"stateMutability":"nonpayable","type":"function"},
+      {"inputs":[{"internalType":"uint256","name":"claimId","type":"uint256"}],"name":"executeClaim","outputs":[],"stateMutability":"nonpayable","type":"function"},
+      {"inputs":[{"internalType":"uint256","name":"claimId","type":"uint256"}],"name":"getClaim","outputs":[{"components":[{"internalType":"address","name":"claimant","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"string","name":"reason","type":"string"},{"internalType":"uint256","name":"yesVotes","type":"uint256"},{"internalType":"uint256","name":"noVotes","type":"uint256"},{"internalType":"bool","name":"executed","type":"bool"},{"internalType":"uint256","name":"createdAt","type":"uint256"}],"internalType":"struct DAO.Claim","name":"","type":"tuple"}],"stateMutability":"view","type":"function"},
+      {"inputs":[],"name":"getClaimTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"pure","type":"function"},
+      {"inputs":[],"name":"getMemberCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+      {"inputs":[],"name":"getMonthlyPremium","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+      {"inputs":[],"name":"getTotalClaims","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+      {"inputs":[],"name":"getTreasuryBalance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+      {"inputs":[{"internalType":"uint256","name":"claimId","type":"uint256"},{"internalType":"address","name":"voter","type":"address"}],"name":"hasVoted","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},
+      {"inputs":[{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"address","name":"","type":"address"}],"name":"hasVotedMap","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},
+      {"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"isMember","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},
+      {"inputs":[],"name":"memberCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+      {"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"memberPaidTotal","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+      {"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"members","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},
+      {"inputs":[],"name":"monthlyPremium","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+      {"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
+      {"inputs":[{"internalType":"uint256","name":"month","type":"uint256"}],"name":"payPremium","outputs":[],"stateMutability":"payable","type":"function"},
+      {"inputs":[{"internalType":"uint256","name":"claimId","type":"uint256"},{"internalType":"bool","name":"support","type":"bool"}],"name":"vote","outputs":[],"stateMutability":"nonpayable","type":"function"}
+    ];
 
+    // 連接錢包
     async function connectWallet() {
-      if (window.ethereum) {
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        signer = provider.getSigner();
-        walletAddress = await signer.getAddress();
-        document.getElementById("walletAddress").textContent = walletAddress;
-      } else {
-        alert("請安裝 MetaMask");
-      }
+      if (!window.ethereum) { alert("請安裝 MetaMask"); return; }
+      provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      signer = provider.getSigner();
+      walletAddress = await signer.getAddress();
+      document.getElementById("walletAddress").textContent = walletAddress;
     }
 
-    function setupContract() {
-      daoContract = new ethers.Contract(daoAddress, daoABI, provider);
-    }
+    function setupContract() { daoContract = new ethers.Contract(daoAddress, daoABI, provider); }
 
     async function loadDAOInfo() {
-  try {
-    // 使用 Promise.all 時加入錯誤捕獲
-    const results = await Promise.all([
-      daoContract.getMonthlyPremium().catch(() => 0),
-      daoContract.getMemberCount().catch(() => 0),
-      daoContract.getTotalClaims().catch(() => 0),
-      daoContract.getTreasuryBalance().catch(() => 0)
-    ]);
-
-    // 確保數值有效
-    const [monthlyPremium, memberCount, totalClaims, treasuryBalance] = results.map(val => 
-      typeof val === 'object' && val._hex ? ethers.BigNumber.from(val) : ethers.BigNumber.from(0)
-    );
-
-    // 安全格式化
-    document.getElementById("monthlyPremium").textContent = 
-      ethers.utils.formatEther(monthlyPremium.toString());
-    document.getElementById("memberCount").textContent = memberCount.toString();
-    document.getElementById("totalClaims").textContent = totalClaims.toString();
-    document.getElementById("treasuryBalance").textContent = 
-      ethers.utils.formatEther(treasuryBalance.toString()) + " ETH";
-    
-    document.getElementById("lastUpdated").textContent = new Date().toLocaleString();
-  } catch (err) {
-    console.error("載入DAO資訊失敗:", err);
-    alert("載入數據失敗，請刷新頁面重試");
-  }
-}
-
-    async function loadClaims() {
       try {
-        const totalClaims = await daoContract.getTotalClaims();
-        const claimsContainer = document.getElementById("claimsContainer");
-        claimsContainer.innerHTML = "";
+        const [mp, mc, tc, tb] = await Promise.all([
+          daoContract.getMonthlyPremium(),
+          daoContract.getMemberCount(),
+          daoContract.getTotalClaims(),
+          daoContract.getTreasuryBalance()
+        ]);
+        document.getElementById("monthlyPremium").textContent = ethers.utils.formatEther(mp);
+        document.getElementById("memberCount").textContent = mc.toString();
+        document.getElementById("totalClaims").textContent = tc.toString();
+        document.getElementById("treasuryBalance").textContent = ethers.utils.formatEther(tb) + " ETH";
+        document.getElementById("lastUpdated").textContent = new Date().toLocaleString();
+      } catch (e) { console.error("載入DAO資訊失敗:", e); }
+    }
 
-        for (let i = 0; i < totalClaims; i++) {
-          await loadClaim(i, claimsContainer);
+    async function loadCurrentClaims() {
+      try {
+        const container = document.getElementById("claimsContainer");
+        container.innerHTML = "<div class='p-3 text-muted'>載入中...</div>";
+        const total = await daoContract.getTotalClaims();
+        container.innerHTML = "";
+        for (let i = total - 1; i >= 0; i--) {
+          const claim = await daoContract.getClaim(i);
+          if (!claim.executed) await renderClaim(i, claim, container, false);
         }
-      } catch (err) {
-        console.error("載入理賠列表失敗:", err);
+        if (!container.children.length) container.innerHTML = "<div class='p-3 text-muted'>目前沒有進行中的理賠</div>";
+      } catch (e) {
+        console.error("載入進行中理賠失敗:", e);
+        document.getElementById("claimsContainer").innerHTML = "<div class='p-3 text-danger'>載入失敗，請刷新頁面</div>";
       }
     }
 
-    async function loadClaim(claimId, container) {
+    async function loadMyClaims() {
       try {
-        const claim = await daoContract.getClaim(claimId);
+        const container = document.getElementById("myClaimsContainer");
+        container.innerHTML = "";
+        const total = await daoContract.getTotalClaims();
+        for (let i = total - 1; i >= 0; i--) {
+          const claim = await daoContract.getClaim(i);
+          if (claim.claimant.toLowerCase() === walletAddress.toLowerCase()) {
+            await renderClaim(i, claim, container, true);
+          }
+        }
+        if (!container.children.length) container.innerHTML = "<div class='p-3 text-muted'>您尚未申請任何理賠</div>";
+      } catch (e) {
+        console.error("載入我的理賠失敗:", e);
+        document.getElementById("myClaimsContainer").innerHTML = "<div class='p-3 text-danger'>載入失敗，請刷新頁面</div>";
+      }
+    }
+
+    async function renderClaim(claimId, claim, container, isMyClaim) {
+      try {
         const hasVoted = await daoContract.hasVoted(claimId, walletAddress);
-        
-        const claimDiv = document.createElement("div");
-        claimDiv.className = "claim-item";
-        claimDiv.innerHTML = `
-          <h3>理賠 #${claimId + 1}</h3>
-          <div>申請人: ${claim.claimant}</div>
-          <div>金額: ${ethers.utils.formatEther(claim.amount)} ETH</div>
-          <div>原因: ${claim.reason}</div>
-          <div>狀態: ${claim.executed ? "已執行" : "投票中"}</div>
-          <div>投票結果: 贊成 ${claim.yesVotes} / 反對 ${claim.noVotes}</div>
-          <div class="vote-buttons">
-            <button class="vote-btn vote-yes" data-claim-id="${claimId}" ${hasVoted || claim.executed ? 'disabled' : ''}>贊成</button>
-            <button class="vote-btn vote-no" data-claim-id="${claimId}" ${hasVoted || claim.executed ? 'disabled' : ''}>反對</button>
-            ${hasVoted ? '<span>(已投票)</span>' : ''}
+        const [canExecute, executeAfter] = await daoContract.canExecute(claimId);
+        const remaining = Math.max(0, executeAfter - Math.floor(Date.now()/1000));
+        const isPassed = claim.yesVotes > claim.noVotes;
+        const inVoting = remaining > 0 && !claim.executed;
+
+        let statusText = "";
+        if (claim.executed) {
+          statusText = isPassed ? '<span class="status-approved">✓ 已執行</span>' : '<span class="status-rejected">✗ 已拒絕</span>';
+        } else if (canExecute) {
+          statusText = isPassed ? '<span class="status-ready">✅ 可執行</span>' : '<span class="status-rejected">❌ 投票未通過</span>';
+        } else {
+          statusText = `<span class="status-pending">⌛ 剩餘時間: ${formatDuration(remaining)}</span>`;
+        }
+
+        const voteButtonsHtml = inVoting ? `
+          <button class="btn btn-outline-light vote-btn vote-yes" data-claim-id="${claimId}" ${hasVoted || claim.executed ? 'disabled' : ''}>贊成</button>
+          <button class="btn btn-outline-light vote-btn vote-no"  data-claim-id="${claimId}" ${hasVoted || claim.executed ? 'disabled' : ''}>反對</button>
+          ${hasVoted ? '<span class="badge badge-light ms-2 voted-text">已投票</span>' : ''}
+        ` : '';
+
+        const row = document.createElement("div");
+        row.className = "claim-row";
+        row.setAttribute("data-claim-id", claimId);
+        row.innerHTML = `
+          <div class="col-title">
+            <a class="claim-title" href="javascript:void(0)">理賠 #${claimId + 1}：${ethers.utils.formatEther(claim.amount)} ETH</a>
+            <div class="claim-meta d-none d-md-block">
+              申請人 ${claim.claimant.slice(0,6)}…${claim.claimant.slice(-4)}
+              <span class="badge badge-light ms-2">原因：${claim.reason || '-'}</span>
+            </div>
+          </div>
+          <div class="col-time claim-meta">申請：${new Date(claim.createdAt * 1000).toLocaleString()}</div>
+          <div class="col-status">${statusText}</div>
+          <div class="col-votes">
+            <span class="vote-count yes">贊成 ${claim.yesVotes}</span> /
+            <span class="vote-count no">反對 ${claim.noVotes}</span>
+          </div>
+          <div class="col-actions claim-actions">
+            ${!isMyClaim ? voteButtonsHtml : ''}
+            ${!claim.executed && canExecute && isPassed ? `<button class="btn btn-primary execute-btn" data-claim-id="${claimId}">執行理賠</button>` : ''}
+          </div>
+          <div class="col-meta d-md-none">
+            申請人 ${claim.claimant.slice(0,6)}…${claim.claimant.slice(-4)}
+            <span class="badge badge-light ms-2">原因：${claim.reason || '-'}</span>
           </div>
         `;
-        
-        container.appendChild(claimDiv);
+        container.appendChild(row);
+
+        if (!claim.executed && !canExecute) startCountdown(claimId, executeAfter, isMyClaim);
+      } catch (e) {
+        console.error(`渲染理賠 #${claimId} 失敗:`, e);
+      }
+    }
+
+    function formatDuration(s) {
+      const d = Math.floor(s/86400), h = Math.floor((s%86400)/3600), m = Math.floor((s%3600)/60), sec = s%60;
+      return `${d}天 ${h}小時 ${m}分 ${sec}秒`;
+    }
+
+    function startCountdown(claimId, executeAfter, isMyClaim) {
+      const containerId = isMyClaim ? "myClaimsContainer" : "claimsContainer";
+      const timerEl = document.querySelector(`#${containerId} [data-claim-id="${claimId}"] .status-pending`);
+      if (!timerEl) return;
+
+      const tick = () => {
+        const remaining = executeAfter - Math.floor(Date.now()/1000);
+        if (remaining <= 0) {
+          timerEl.innerHTML = '<span class="status-ready">✅ 可執行</span>';
+          const claimRow = timerEl.closest(".claim-row");
+
+          // 移除投票按鈕
+          claimRow.querySelectorAll(".vote-btn, .voted-text").forEach(el => el.remove());
+
+          // 加上執行按鈕（若尚未存在）
+          const actions = claimRow.querySelector(".claim-actions");
+          if (actions && !actions.querySelector(".execute-btn")) {
+            const btn = document.createElement("button");
+            btn.className = "btn btn-primary execute-btn";
+            btn.dataset.claimId = String(claimId);
+            btn.textContent = "執行理賠";
+            actions.appendChild(btn);
+          }
+          return;
+        }
+        timerEl.textContent = `⌛ 剩餘時間: ${formatDuration(remaining)}`;
+        setTimeout(tick, 1000);
+      };
+      tick();
+    }
+
+    // 送出執行（強韌版：先模擬/預估再送）
+    async function autoExecuteClaim(claimId) {
+      try {
+        const [claim, canExec, treasury] = await Promise.all([
+          daoContract.getClaim(claimId),
+          daoContract.canExecute(claimId),
+          daoContract.getTreasuryBalance()
+        ]);
+        const [allowed, executeAfter] = canExec;
+        const now = Math.floor(Date.now()/1000);
+        const passed = claim.yesVotes > claim.noVotes;
+
+        if (claim.executed) return alert('此理賠已執行過。');
+        if (!allowed)  return alert(`尚未可執行，請再等 ${formatDuration(Math.max(0, executeAfter - now))}。`);
+        if (!passed)   return alert('投票未通過，無法執行付款。');
+        if (treasury.lt(claim.amount)) {
+          return alert(`金庫餘額不足：需 ${ethers.utils.formatEther(claim.amount)} ETH，僅有 ${ethers.utils.formatEther(treasury)} ETH。`);
+        }
+
+        const withSigner = daoContract.connect(signer);
+        // 模擬與預估
+        await withSigner.callStatic.executeClaim(claimId);
+        await withSigner.estimateGas.executeClaim(claimId);
+
+        const tx = await withSigner.executeClaim(claimId);
+        await tx.wait();
+        alert('理賠執行成功！');
+        await Promise.all([loadCurrentClaims(), loadMyClaims(), loadDAOInfo()]);
       } catch (err) {
-        console.error(`載入理賠 #${claimId} 失敗:`, err);
+        const msg = err?.error?.message || err?.data?.message || err?.reason || err?.message || '未知錯誤';
+        alert(`執行失敗：${msg}`);
+        console.error('executeClaim error:', err);
       }
     }
 
     function setupEventListeners() {
-      // 返回按鈕
-      document.getElementById("backButton").addEventListener("click", () => {
-        window.location.href = "/";
+      document.getElementById("backButton").addEventListener("click", () => { window.location.href = "join"; });
 
-		// 快轉時間按鈕
-  		document.getElementById("refreshClaim").addEventListener("click", async () => {
-   		 loadClaims();
-  });
-  //--------------------------------------快轉時間
+      document.getElementById("refreshClaim").addEventListener("click", async () => {
+        await Promise.all([loadCurrentClaims(), loadMyClaims(), loadDAOInfo()]);
       });
 
-      // 提交理賠
+      // 申請理賠 modal
+      document.getElementById("openModal").onclick = () => document.getElementById("claimModal").style.display = "flex";
+      document.getElementById("closeModal").onclick = () => document.getElementById("claimModal").style.display = "none";
+
       document.getElementById("submitClaim").addEventListener("click", async () => {
         const amount = document.getElementById("claimAmount").value;
         const reason = document.getElementById("claimReason").value;
-        
-        if (!amount || !reason) {
-          alert("請填寫所有欄位");
-          return;
-        }
-
+        if (!amount || !reason) return alert("請填寫所有欄位");
         try {
-          const amountWei = ethers.utils.parseEther(amount);
-          const tx = await daoContract.connect(signer).createClaim(amountWei, reason);
+          const wei = ethers.utils.parseEther(amount);
+          const tx = await daoContract.connect(signer).createClaim(wei, reason);
           await tx.wait();
-          alert("理賠申請已提交!");
-          loadClaims(); // 刷新列表
-        } catch (err) {
-          console.error("提交理賠失敗:", err);
-          alert("提交理賠失敗: " + (err.message || "未知錯誤"));
+          alert("理賠申請已提交！");
+          document.getElementById("claimModal").style.display = "none";
+          document.getElementById("claimAmount").value = "";
+          document.getElementById("claimReason").value = "";
+          await Promise.all([loadCurrentClaims(), loadMyClaims()]);
+        } catch (e) {
+          console.error("提交理賠失敗:", e);
+          alert("提交理賠失敗：" + (e.message || "未知錯誤"));
         }
       });
 
-      // 投票按鈕 (事件委託)
+      // 投票（事件委派）
       document.getElementById("claimsContainer").addEventListener("click", async (e) => {
-        if (e.target.classList.contains("vote-btn")) {
-          const claimId = e.target.getAttribute("data-claim-id");
-          const support = e.target.classList.contains("vote-yes");
-          
-          try {
-            e.target.disabled = true;
-            const tx = await daoContract.connect(signer).vote(claimId, support);
-            await tx.wait();
-            alert("投票成功!");
-            loadClaims(); // 刷新列表
-          } catch (err) {
-            console.error("投票失敗:", err);
-            alert("投票失敗: " + (err.message || "未知錯誤"));
-            e.target.disabled = false;
-          }
+        const btn = e.target.closest(".vote-btn");
+        if (!btn) return;
+        const claimId = btn.dataset.claimId;
+        const support = btn.classList.contains("vote-yes");
+        try {
+          btn.disabled = true;
+          const tx = await daoContract.connect(signer).vote(claimId, support);
+          await tx.wait();
+          alert("投票成功！");
+          await loadCurrentClaims();
+        } catch (err) {
+          alert("投票失敗：" + (err.message || "未知錯誤"));
+          btn.disabled = false;
         }
       });
-    }
 
-	 // 新增定期刷新獎金庫功能
-    async function startTreasuryRefresh() {
-      // 初始載入
-      await refreshTreasury();
-      
-      // 每30秒刷新一次
-      setInterval(refreshTreasury, 30000);
+      // 執行理賠（事件委派，全頁）
+      document.addEventListener("click", async (e) => {
+        const btn = e.target.closest(".execute-btn");
+        if (!btn) return;
+        await autoExecuteClaim(btn.dataset.claimId);
+      });
     }
 
     async function refreshTreasury() {
       try {
-        const balance = await daoContract.getTreasuryBalance();
-        document.getElementById("treasuryBalance").textContent = ethers.utils.formatEther(balance) + " ETH";
+        const bal = await daoContract.getTreasuryBalance();
+        document.getElementById("treasuryBalance").textContent = ethers.utils.formatEther(bal) + " ETH";
         document.getElementById("lastUpdated").textContent = new Date().toLocaleString();
-      } catch (err) {
-        console.error("刷新獎金庫失敗:", err);
-      }
+      } catch (e) { console.error("刷新獎金庫失敗:", e); }
     }
 
-    let memberAddresses = []; // 新增：儲存成員地址列表
-
-    // 初始化應用
     async function initApp() {
-      if (!daoAddress) {
-        alert("無效的DAO地址");
-        window.location.href = "index.html";
-        return;
-      }
-
       await connectWallet();
       setupContract();
-      await loadMemberList(); // 新增：載入成員列表
-      loadDAOInfo();
-      loadCurrentClaims();
+      await loadDAOInfo();
+      await loadCurrentClaims();
+      await loadMyClaims();
       setupEventListeners();
-      startTreasuryRefresh();
-	  
-    }
-	
-    // 改進的 loadMemberList 函數
-async function loadMemberList() {
-  try {
-    // 方法1：從合約事件獲取（簡化版）
-    const filter = daoContract.filters.PaidPremium();
-    const events = await daoContract.queryFilter(filter);
-    
-    const uniqueMembers = new Set();
-    events.forEach(event => {
-      if (event.args && event.args.user) {
-        uniqueMembers.add(event.args.user);
-      }
-    });
-    
-    memberAddresses = Array.from(uniqueMembers);
-    console.log("成員列表:", memberAddresses);
-    
-    // 方法2：如果合約有getMembers功能則使用
-    // memberAddresses = await daoContract.getMembers();
-  } catch (err) {
-    console.error("載入成員列表失敗:", err);
-    // 回退到至少包含當前用戶
-    memberAddresses = [walletAddress];
-  }
-}
-
-    // 修改後的 loadCurrentClaims 函數
-    async function loadCurrentClaims() {
-      try {
-        const claimsContainer = document.getElementById("claimsContainer");
-        claimsContainer.innerHTML = "<div class='loading'>載入中...</div>";
-        
-        const totalClaims = await daoContract.getTotalClaims();
-        claimsContainer.innerHTML = "";
-
-        // 逆序顯示，新的在上方
-        for (let i = totalClaims - 1; i >= 0; i--) {
-          const claim = await daoContract.getClaim(i);
-          if (!claim.executed) {
-            await renderClaim(i, claim, claimsContainer);
-          }
-        }
-
-        if (claimsContainer.children.length === 0) {
-          claimsContainer.innerHTML = "<div class='empty'>目前沒有進行中的理賠</div>";
-        }
-      } catch (err) {
-        console.error("載入進行中理賠失敗:", err);
-        document.getElementById("claimsContainer").innerHTML = 
-          "<div class='error'>載入失敗，請刷新頁面</div>";
-      }
+      // 定時刷新金庫
+      setInterval(refreshTreasury, 30000);
     }
 
-    // 新增：載入歷史理賠記錄
-    async function loadHistoryClaims() {
-      try {
-        const totalClaims = await daoContract.getTotalClaims();
-        const historyContainer = document.getElementById("historyContainer");
-        historyContainer.innerHTML = "";
-
-        for (let i = 0; i < totalClaims; i++) {
-          const claim = await daoContract.getClaim(i);
-          if (claim.executed) {
-            await renderClaim(i, claim, historyContainer, true);
-          }
-        }
-      } catch (err) {
-        console.error("載入歷史記錄失敗:", err);
-      }
-    }
-
-    // 修改：統一的理賠渲染函數
-    // 改進的 renderClaim 函數
-    async function renderClaim(claimId, claim, container, isHistory = false) {
-      try {
-        const hasVoted = await daoContract.hasVoted(claimId, walletAddress);
-        const [canExecute, executeAfter] = await daoContract.canExecute(claimId);
-        const remainingTime = Math.max(0, executeAfter - Math.floor(Date.now()/1000));
-        const isPassed = claim.yesVotes > claim.noVotes;
-
-        // 狀態顯示
-        let statusText = "";
-        if (claim.executed) {
-          statusText = isPassed 
-            ? '<span class="status-approved">✓ 已執行</span>' 
-            : '<span class="status-rejected">✗ 已拒絕</span>';
-        } else {
-          if (canExecute) {
-            statusText = isPassed
-              ? '<span class="status-ready">✅ 可執行</span>'
-              : '<span class="status-rejected">❌ 投票未通過</span>';
-          } else {
-            statusText = `<span class="status-pending">⌛ 剩餘時間: ${formatDuration(remainingTime)}</span>`;
-          }
-        }
-
-        const claimDiv = document.createElement("div");
-        claimDiv.className = "claim-item";
-        claimDiv.innerHTML = `
-          <h3>理賠 #${claimId + 1}</h3>
-		  <div>申請人: ${claim.claimant}</div>
-          <div>申請時間: ${new Date(claim.createdAt * 1000).toLocaleString()}</div>
-          <div>金額: ${ethers.utils.formatEther(claim.amount)} ETH</div>
-          <div>原因: ${claim.reason}</div>
-          <div>狀態: ${statusText}</div>
-          <div>投票結果: 
-            <span class="vote-count yes">贊成 ${claim.yesVotes}</span> / 
-            <span class="vote-count no">反對 ${claim.noVotes}</span>
-          </div>
-          <div class="action-buttons">
-            <button class="vote-btn vote-yes" 
-                    data-claim-id="${claimId}" 
-                    ${hasVoted || claim.executed ? 'disabled' : ''}>
-              贊成
-            </button>
-            <button class="vote-btn vote-no" 
-                    data-claim-id="${claimId}" 
-                    ${hasVoted || claim.executed ? 'disabled' : ''}>
-              反對
-            </button>
-			${hasVoted ? '<span class="voted-text">(已投票完畢)</span>' : ''}
-            ${!isHistory && canExecute && isPassed ? `
-              <button class="execute-btn" data-claim-id="${claimId}">執行理賠</button>
-            ` : ''}
-          </div>
-        `;
-        
-        container.appendChild(claimDiv);
-        
-        // 啟動倒數計時
-        if (!claim.executed && !canExecute) {
-          startCountdown(claimId, executeAfter);
-        }
-      } catch (err) {
-        console.error(`渲染理賠 #${claimId} 失敗:`, err);
-      }
-    }
-
-// 新增倒數計時功能
-    function startCountdown(claimId, executeAfter) {
-      const timerElement = document.querySelector(`[data-claim-id="${claimId}"] .status-pending`);
-      if (!timerElement) return;
-
-      const updateTimer = () => {
-        const remaining = executeAfter - Math.floor(Date.now()/1000);
-        if (remaining <= 0) {
-          timerElement.innerHTML = '<span class="status-ready">✅ 可執行</span>';
-          loadCurrentClaims(); // 自動刷新狀態
-          return;
-        }
-        timerElement.textContent = `⌛ 剩餘時間: ${formatDuration(remaining)}`;
-        setTimeout(updateTimer, 1000);
-      };
-      updateTimer();
-    }
-	
-// 時間格式化函數
-function formatDuration(seconds) {
-  const days = Math.floor(seconds / 86400);
-  const hours = Math.floor((seconds % 86400) / 3600);
-  const mins = Math.floor((seconds % 3600) / 60);
-  return `${days}天 ${hours}小時 ${mins}分鐘${seconds}秒`;
-}
-
-    // 新增：檢查是否所有成員已投票
-    async function checkAllVoted(claimId) {
-      if (memberAddresses.length === 0) return false;
-      
-      for (const member of memberAddresses) {
-        const hasVoted = await daoContract.hasVoted(claimId, member);
-        if (!hasVoted) return false;
-      }
-      return true;
-    }
-
-    async function autoExecuteClaim(claimId) {
-  try {
-    // 強化參數驗證
-    const parsedId = Number(claimId);
-    if (isNaN(parsedId)) {
-      throw new Error("無效的理賠ID");
-    }
-
-    // 轉換為 BigNumber
-    const bnClaimId = ethers.BigNumber.from(parsedId);
-
-    // 檢查執行條件
-    const [canExecute] = await daoContract.canExecute(bnClaimId);
-    if (!canExecute) {
-      console.log(`理賠 #${parsedId} 尚未滿足執行條件`);
-      return;
-    }
-
-    // 執行理賠
-    const tx = await daoContract.connect(signer).executeClaim(bnClaimId);
-    await tx.wait();
-    console.log("理賠執行成功");
-    loadCurrentClaims();
-  } catch (err) {
-    console.error("執行失敗:", err);
-    alert(`執行失敗: ${err.reason || err.message}`);
-  }
-}
-
-    // 修改：設置事件監聽器
-    function setupEventListeners() {
-  // 1. 返回按鈕
-  setupBackButton();
-  
-  // 2. 理賠提交表單
-  setupClaimSubmission();
-  
-  // 3. 理賠列表交互（投票+執行）
-  setupClaimsInteraction();
-  
-  // 4. 標籤切換功能
-  setupTabNavigation();
-}
-
-// 1. 返回按鈕處理
-function setupBackButton() {
-  document.getElementById("backButton").addEventListener("click", () => {
-    window.location.href = "/";
-  });
-}
-
-// 2. 理賠提交處理
-function setupClaimSubmission() {
-  document.getElementById("submitClaim").addEventListener("click", async () => {
-  const amount = document.getElementById("claimAmount").value;
-  const reason = document.getElementById("claimReason").value;
-  
-  if (!amount || !reason) {
-    alert("請填寫所有欄位");
-    return;
-  }
-
-  try {
-    const amountWei = ethers.utils.parseEther(amount);
-    // 先在前端創建臨時理賠項目
-    const tempClaim = {
-      claimant: walletAddress,
-      amount: amountWei,
-      reason: reason,
-      yesVotes: 0,
-      noVotes: 0,
-      executed: false,
-      createdAt: Math.floor(Date.now() / 1000) // 使用當前時間
-    };
-    
-    // 渲染臨時項目
-    const claimsContainer = document.getElementById("claimsContainer");
-    const tempId = await daoContract.getTotalClaims(); // 預期的新ID
-    await renderClaim(tempId, tempClaim, claimsContainer);
-    
-    // 提交到區塊鏈
-    const tx = await daoContract.connect(signer).createClaim(amountWei, reason);
-    await tx.wait();
-    
-    // 重新載入確保數據一致
-    await loadCurrentClaims();
-    
-    alert("理賠申請已提交!");
-    document.getElementById("claimAmount").value = "";
-    document.getElementById("claimReason").value = "";
-  } catch (err) {
-    console.error("提交理賠失敗:", err);
-    alert(`提交理賠失敗: ${err.reason || err.message}`);
-  }
-});
-}
-
-// 3. 理賠列表交互處理
-function setupClaimsInteraction() {
-  document.getElementById("claimsContainer").addEventListener("click", async (e) => {
-    // 投票按鈕處理
-    if (e.target.classList.contains("vote-btn")) {
-      await handleVote(e.target);
-    }
-    
-    // 執行按鈕處理
-    if (e.target.classList.contains("execute-btn")) {
-      await handleExecution(e.target);
-    }
-  });
-}
-
-// 修改後的投票處理函數
-async function handleVote(button) {
-  try {
-    const claimId = parseClaimId(button.getAttribute("data-claim-id"));
-    const support = button.classList.contains("vote-yes");
-    
-    button.disabled = true;
-    button.innerHTML = "處理中...";
-    
-    const tx = await daoContract.connect(signer).vote(claimId, support);
-    await tx.wait();
-    
-    // 更新UI而不刷新整個頁面
-    const claimItem = button.closest(".claim-item");
-    if (claimItem) {
-      // 更新投票按鈕狀態
-      const buttons = claimItem.querySelectorAll(".vote-btn");
-      buttons.forEach(btn => {
-        btn.disabled = true;
-        btn.classList.add("voted");
-      });
-      
-      // 添加已投票標記
-      const votedText = document.createElement("span");
-      votedText.className = "voted-text";
-      votedText.textContent = "(已投票完畢)";
-      claimItem.querySelector(".action-buttons").appendChild(votedText);
-      
-      // 更新投票計數
-      const yesVotesEl = claimItem.querySelector(".vote-count.yes");
-      const noVotesEl = claimItem.querySelector(".vote-count.no");
-      if (support) {
-        yesVotesEl.textContent = `贊成 ${parseInt(yesVotesEl.textContent.match(/\d+/)[0]) + 1}`;
-      } else {
-        noVotesEl.textContent = `反對 ${parseInt(noVotesEl.textContent.match(/\d+/)[0]) + 1}`;
-      }
-    }
-  } catch (err) {
-    button.disabled = false;
-    button.innerHTML = button.classList.contains("vote-yes") ? "贊成" : "反對";
-    handleTransactionError("投票失敗", err);
-  }
-}
-
-// 3.2 執行處理
-async function handleExecution(button) {
-  try {
-    const claimId = parseClaimId(button.getAttribute("data-claim-id"));
-    await autoExecuteClaim(claimId);
-  } catch (err) {
-    handleTransactionError("執行失敗", err);
-  }
-}
-
-// 4. 標籤切換處理
-function setupTabNavigation() {
-  document.querySelectorAll(".tab-button").forEach(button => {
-    button.addEventListener("click", () => {
-      // 切換按鈕狀態
-      document.querySelectorAll(".tab-button").forEach(btn => {
-        btn.classList.remove("active");
-      });
-      button.classList.add("active");
-      
-      // 切換內容
-      document.querySelectorAll(".tab-content").forEach(content => {
-        content.classList.remove("active");
-      });
-      document.getElementById(`${button.dataset.tab}Claims`).classList.add("active");
-      
-      // 載入歷史記錄
-      if (button.dataset.tab === "history") {
-        loadHistoryClaims();
-      }
-    });
-  });
-}
-// ===== 工具函數 =====
-function parseClaimId(id) {
-  const parsed = parseInt(id);
-  if (isNaN(parsed)) throw new Error("無效的理賠ID");
-  return parsed;
-}
-
-function handleTransactionError(context, err) {
-  console.error(`${context}:`, err);
-  let message = err.reason || err.message;
-  
-  // 常見錯誤的友好提示
-  if (err.code === 4001) message = "用戶取消交易";
-  if (err.code === -32603) message = "合約執行失敗，請檢查條件";
-  
-  alert(`${context}: ${message}`);
-}
-
-
-    // 啟動應用
     document.addEventListener("DOMContentLoaded", initApp);
 
-
-
-// 開啟視窗
-document.getElementById("openModal").onclick = () => {
-  document.getElementById("claimModal").style.display = "flex";
-};
-
-// 關閉視窗
-document.getElementById("closeModal").onclick = () => {
-  document.getElementById("claimModal").style.display = "none";
-};
-
-// 確認送出
-document.getElementById("confirmClaim").onclick = () => {
-  const amount = document.getElementById("claimAmount").value;
-  const reason = document.getElementById("claimReason").value;
-
-  alert(`已送出理賠申請\n金額: ${amount} ETH\n原因: ${reason}`);
-  document.getElementById("claimModal").style.display = "none";
-};
-
-
-
+          // 查看历史记录按钮
+      document.getElementById('viewHistoryButton').addEventListener('click', function() {
+    // 从URL获取当前DAO地址
+    const urlParams = new URLSearchParams(window.location.search);
+    const daoAddress = urlParams.get('address');
+    
+    if (daoAddress) {
+        // 跳转到理赔历史页面
+        window.location.href = `/claims.html?address=${encodeURIComponent(daoAddress)}`;
+    } else {
+        alert("无法获取DAO地址");
+    }
+});
   </script>
 </body>
 </html>

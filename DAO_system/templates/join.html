@@ -76,80 +76,52 @@
   --muted: #a3b3c6;
 }
 
-/* DAO 列表容器 */
-#daoList{
-  margin-top: 1rem;
-}
-#daoList .dao-list{
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 12px;
+
+/* 列表容器：拿掉卡片底色，改成表格感 */
+#daoList .dao-table{
+  list-style:none; margin:0; padding:0;
+  display:flex; flex-direction:column;
 }
 
-/* 單列樣式：名稱 / 按鈕 / 人數 */
-#daoList .dao-item{
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-  background: rgba(255,255,255,0.03);       /* 比 #15171c 更融合整體背景 */
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
-}
-#daoList .dao-item:hover{
-  transform: translateY(-2px);
-  border-color: var(--border-hover);
-  box-shadow: 0 10px 24px rgba(0,0,0,.28), 0 0 16px rgba(66,153,225,.22);
+/* 每一列 */
+.dao-row{
+  display:grid;
+  grid-template-columns: 1fr auto auto; /* 左：文字｜右：兩顆按鈕 */
+  align-items:center; gap:10px;
+  padding:10px 8px;
+  background: transparent;              /* 不要卡片背景 */
+  border-bottom: 1px dashed rgba(255,255,255,.35);  /* ✅ 虛線分隔 */
 }
 
-/* 文字 */
-#daoList .dao-name{
-  font-weight: 600;
-  color: #e9eef7;
-}
-#daoList .dao-count{
-  color: var(--muted);
-  font-weight: 600;
+/* 第一列上面也畫一條線（像表格） */
+.dao-row:first-child{
+  border-top: 1px dashed rgba(255,255,255,.35);
 }
 
-/* 按鈕沿用你的 .btn .btn-primary（藍色版） */
-#daoList .dao-apply.btn{
-  padding: 8px 16px;
-  border-radius: 999px;              /* 膠囊造型 */
-  box-shadow: 0 0 10px rgba(66,153,225,.35);
-}
-#daoList .dao-apply.btn:hover{
-  box-shadow: 0 0 18px rgba(66,153,225,.55);
+/* 最後一列的下邊線拿掉需要就留著；一般保留更像表格 */
+.dao-row:last-child{
+   border-bottom: none; 
 }
 
-/* RWD：手機堆疊兩行，仍保持按鈕在右側 */
-@media (max-width: 576px){
-  #daoList .dao-item{
+/* 文字單行省略，點到會變色像連結 */
+.dao-title-text{
+  min-width:0;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  color:#e9eef7; font-weight:600;
+}
+.dao-title-text:hover{ color:#a7c7ff; }
+
+/* 按鈕細一點，更像右側操作欄 */
+.dao-row .btn{ padding:4px 10px; line-height:1.1; }
+@media (max-width:576px){
+  .dao-row{
     grid-template-columns: 1fr auto;
     grid-template-areas:
-      "name dao-apply"
-      "count dao-apply";
-    gap: 6px 10px;
-    padding: 12px 14px;
+      "title info"
+      "title action";
   }
-  #daoList .dao-name{ grid-area: name; }
-  #daoList .dao-count{ grid-area: count; }
-  #daoList .dao-apply{ grid-area: dao-apply; }
+  .dao-title-text{ grid-area:title; }
 }
-
-/* 空狀態（若沒有 DAO） */
-#daoList .empty{
-  padding: 18px;
-  text-align: center;
-  color: var(--muted);
-  border: 1px dashed var(--border);
-  border-radius: 12px;
-}
-
 
         /* 發光動畫 */
         @keyframes glowing {
@@ -266,7 +238,7 @@
                     <div class="stars" id="stars"></div>
                     <body class="container py-4">
 
-                    <h2 class="mb-4 fw-bold text-center">🚀 DAO 前端測試</h2>
+                    <h2 class="mb-4 fw-bold text-center">🚀 DAO 服務</h2>
 
                     <!-- 連接錢包 -->
                     <div class="card-dark p-4 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
@@ -282,17 +254,14 @@
 
 
                     <div id="daoList">
-                    <ul class="dao-list">
-                        {% for dao in daos %}
-                        <li class="dao-item">
-                        <div class="dao-name">{{ dao.name }}：</div>
-                        <a href="{{ url_for('apply', id=dao.id) }}" class="btn btn-primary dao-apply">申請加入</a>
-                        <div class="dao-count">{{ dao.members }}人</div>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    </div>
+                    <h2 class="dao-title">📌 現有 DAO 團體：</h2>
+                                    
+  <ul id="daoListUl" class="dao-table">
+    <li class="dao-row"><span class="dao-title">載入中…</span></li>
+  </ul>
 
+                    </div>
+                    
                 <script>
     
                             let provider;
@@ -1150,6 +1119,65 @@
 
                             document.getElementById("connectWallet").addEventListener("click", connectWallet);
                             document.getElementById("createDAO").addEventListener("click", createDAO);
+//
+                            async function loadDAOAddresses() {
+                            const ul = document.getElementById("daoListUl");
+                            ul.innerHTML = `<li class="dao-row"><span class="dao-title">載入中…</span></li>`;
+
+                            try {
+                                const response = await fetch(`${API_URL}/daos`);
+                                const result = await response.json();
+                                if (result.status !== 'success') throw new Error(result.message || "獲取DAOs失敗");
+
+                                const daos = result.data.daos || [];
+                                if (daos.length === 0) {
+                                ul.innerHTML = `<li class="dao-row"><span class="dao-title">尚未創建任何 DAO</span></li>`;
+                                return;
+                                }
+
+                                ul.innerHTML = ""; // 清空
+                                for (let i = 0; i < daos.length; i++) {
+                                const addr = daos[i];
+
+                                // 建 li
+                                const li = document.createElement("li");
+                                li.className = "dao-row";
+
+                                // 左：標題（單行省略）
+                                const title = document.createElement("span");
+                                title.className = "dao-title";
+                                title.textContent = `DAO ${i + 1}：${addr}`;
+                                li.appendChild(title);
+
+                                // 中：詳細資訊
+                                const infoBtn = document.createElement("button");
+                                infoBtn.className = "btn btn-outline-light";
+                                infoBtn.textContent = "詳細資訊";
+                                infoBtn.dataset.address = addr;
+                                infoBtn.onclick = () => showDAOInfo(addr, i);
+                                li.appendChild(infoBtn);
+
+                                // 右：加入/進入
+                                const isMember = await checkMembership(addr);
+                                const actionBtn = document.createElement("button");
+                                actionBtn.className = "btn btn-primary";
+                                actionBtn.textContent = isMember ? "進入DAO" : "加入DAO";
+                                actionBtn.dataset.address = addr;
+                                actionBtn.onclick = isMember ? () => enterDAO(addr) : () => joinDAO(addr);
+                                li.appendChild(actionBtn);
+
+                                ul.appendChild(li);
+                                }
+                            } catch (err) {
+                                console.error("載入DAO列表失敗:", err);
+                                ul.innerHTML = `
+                                <li class="dao-row">
+                                    <span class="dao-title">載入失敗：${err.message}</span>
+                                    <button class="btn btn-primary" onclick="loadDAOAddresses()">重試</button>
+                                </li>`;
+                            }
+                            }
+
                         </script>
                 </main>
                 <footer class="py-4 bg-light mt-auto">

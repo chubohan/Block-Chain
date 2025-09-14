@@ -14,9 +14,8 @@
 </head>
 <body>
   <div class="nav">
-    <button id="backButton">返回DAO详情</button>
-    <h1>历史理赔记录</h1>
-    <div>DAO地址: <span id="daoAddressDisplay">-</span></div>
+    <button id="backButton">回上頁</button>
+    <h1>歷史理賠紀錄</h1>
   </div>
 
   <div id="historyContainer">
@@ -27,21 +26,31 @@
     // 从URL获取DAO地址
     const urlParams = new URLSearchParams(window.location.search);
     const daoAddress = urlParams.get('address');
-    document.getElementById('daoAddressDisplay').textContent = daoAddress;
-
+    
     // 合约ABI和初始化代码（与dao-details.html相同）
     const daoABI = [
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_monthlyPremium",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
 	{
 		"anonymous": false,
 		"inputs": [
 			{
-				"indexed": true,
+				"indexed": false,
 				"internalType": "uint256",
 				"name": "id",
 				"type": "uint256"
 			},
 			{
-				"indexed": true,
+				"indexed": false,
 				"internalType": "address",
 				"name": "claimant",
 				"type": "address"
@@ -66,7 +75,7 @@
 		"anonymous": false,
 		"inputs": [
 			{
-				"indexed": true,
+				"indexed": false,
 				"internalType": "uint256",
 				"name": "id",
 				"type": "uint256"
@@ -85,7 +94,7 @@
 		"anonymous": false,
 		"inputs": [
 			{
-				"indexed": true,
+				"indexed": false,
 				"internalType": "address",
 				"name": "user",
 				"type": "address"
@@ -110,13 +119,13 @@
 		"anonymous": false,
 		"inputs": [
 			{
-				"indexed": true,
+				"indexed": false,
 				"internalType": "uint256",
 				"name": "id",
 				"type": "uint256"
 			},
 			{
-				"indexed": true,
+				"indexed": false,
 				"internalType": "address",
 				"name": "voter",
 				"type": "address"
@@ -156,12 +165,48 @@
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"name": "claimCount",
-		"outputs": [
+		"inputs": [
 			{
 				"internalType": "uint256",
 				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "claims",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "claimant",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "reason",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "yesVotes",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "noVotes",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "executed",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "createdAt",
 				"type": "uint256"
 			}
 		],
@@ -210,38 +255,84 @@
 		"name": "getClaim",
 		"outputs": [
 			{
-				"internalType": "address",
-				"name": "claimant",
-				"type": "address"
-			},
+				"components": [
+					{
+						"internalType": "address",
+						"name": "claimant",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "reason",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "yesVotes",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "noVotes",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bool",
+						"name": "executed",
+						"type": "bool"
+					},
+					{
+						"internalType": "uint256",
+						"name": "createdAt",
+						"type": "uint256"
+					}
+				],
+				"internalType": "struct DAO.Claim",
+				"name": "",
+				"type": "tuple"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getClaimTime",
+		"outputs": [
 			{
 				"internalType": "uint256",
-				"name": "amount",
+				"name": "",
 				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "reason",
-				"type": "string"
-			},
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getMemberCount",
+		"outputs": [
 			{
 				"internalType": "uint256",
-				"name": "yesVotes",
+				"name": "",
 				"type": "uint256"
-			},
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getMonthlyPremium",
+		"outputs": [
 			{
 				"internalType": "uint256",
-				"name": "noVotes",
-				"type": "uint256"
-			},
-			{
-				"internalType": "bool",
-				"name": "executed",
-				"type": "bool"
-			},
-			{
-				"internalType": "uint256",
-				"name": "createdAt",
+				"name": "",
 				"type": "uint256"
 			}
 		],
@@ -251,6 +342,19 @@
 	{
 		"inputs": [],
 		"name": "getTotalClaims",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getTreasuryBalance",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -288,6 +392,30 @@
 	{
 		"inputs": [
 			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "hasVotedMap",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "address",
 				"name": "user",
 				"type": "address"
@@ -305,27 +433,8 @@
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"name": "lastPaidMonth",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
 		"inputs": [],
-		"name": "latestClaimId",
+		"name": "memberCount",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -356,6 +465,25 @@
 		"type": "function"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "members",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [],
 		"name": "monthlyPremium",
 		"outputs": [
@@ -363,6 +491,19 @@
 				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
 			}
 		],
 		"stateMutability": "view",
@@ -398,10 +539,6 @@
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
-	},
-	{
-		"stateMutability": "payable",
-		"type": "receive"
 	}
 ];
 
@@ -415,52 +552,127 @@
         await loadHistoryClaims();
       }
       
-      // 返回按钮事件
-      document.getElementById("backButton").addEventListener("click", () => {
-        window.location.href = `/dao-details.html?address=${encodeURIComponent(daoAddress)}`;
-      });
+      // 在 initApp 函數中修改返回按鈕事件
+document.getElementById("backButton").addEventListener("click", () => {
+  
+  
+  
+  
+  // 或者使用歷史記錄返回
+  window.history.back();
+});
     }
 
-    async function loadHistoryClaims() {
-      try {
-        const totalClaims = await daoContract.getTotalClaims();
-        const historyContainer = document.getElementById("historyContainer");
-        historyContainer.innerHTML = "";
+    // 添加一個函數來檢查理賠ID是否有效
+async function isValidClaimId(claimId) {
+  try {
+    const claim = await daoContract.getClaim(claimId);
+    // 如果申請者地址不是零地址，則認為是有效理賠
+    return claim.claimant !== ethers.constants.AddressZero;
+  } catch (err) {
+    return false;
+  }
+}
 
-        for (let i = 0; i < totalClaims; i++) {
-          const claim = await daoContract.getClaim(i);
-          if (claim.executed) {
-            await renderClaim(i, claim, historyContainer);
-          }
-        }
-      } catch (err) {
-        console.error("载入历史记录失败:", err);
+// 修改後的 loadHistoryClaims 函數
+async function loadHistoryClaims() {
+  try {
+    let totalClaims;
+    
+    // 優先嘗試 getTotalClaims()
+    try {
+      totalClaims = await daoContract.getTotalClaims();
+    } catch (err) {
+      console.log("getTotalClaims() 失敗，嘗試 claimCount");
+      try {
+        totalClaims = await daoContract.claimCount();
+      } catch (err2) {
+        console.log("所有方法都失敗，可能沒有理賠記錄");
+        totalClaims = ethers.BigNumber.from(0);
       }
     }
+    
+    console.log("總理賠數量:", totalClaims.toString());
+    
+    const historyContainer = document.getElementById("historyContainer");
+    historyContainer.innerHTML = "";
+
+    if (totalClaims.eq(0)) {
+      historyContainer.innerHTML = "<p>目前沒有歷史理賠記錄</p>";
+      return;
+    }
+
+    // 加載所有理賠
+    let validClaims = 0;
+    for (let i = 0; i <= totalClaims.toNumber()-1; i++) {
+      try {
+        const claim = await daoContract.getClaim(i);
+        if (claim.executed) {
+          await renderClaim(i+1, claim, historyContainer);
+          validClaims++;
+        }
+      } catch (err) {
+        console.warn(`理賠 #${i} 無效:`, err.message);
+        continue;
+      }
+    }
+    
+    if (validClaims === 0) {
+      historyContainer.innerHTML = "<p>沒有已完成的理賠記錄</p>";
+    }
+    
+  } catch (err) {
+    console.error("載入歷史記錄失敗:", err);
+    showError("無法載入歷史記錄: " + err.message);
+  }
+}
+
+
+
+function showError(message) {
+  const container = document.getElementById("historyContainer");
+  container.innerHTML = `
+    <div style="color: red; padding: 20px; border: 1px solid red; border-radius: 5px;">
+      <h3>錯誤</h3>
+      <p>${message}</p>
+      <button onclick="loadHistoryClaims()" style="margin-top: 10px;">重試</button>
+    </div>
+  `;
+}
 
     async function renderClaim(claimId, claim, container) {
-      const isPassed = claim.yesVotes > claim.noVotes;
-      const statusText = isPassed 
-        ? '<span class="status-approved">✓ 已通过</span>' 
-        : '<span class="status-rejected">✗ 已拒绝</span>';
-
-      const claimDiv = document.createElement("div");
-      claimDiv.className = "claim-item";
-      claimDiv.innerHTML = `
-        <h3>理赔 #${claimId + 1}</h3>
-        <div>申请人: ${claim.claimant}</div>
-        <div>申请时间: ${new Date(claim.createdAt * 1000).toLocaleString()}</div>
-        <div>金额: ${ethers.utils.formatEther(claim.amount)} ETH</div>
-        <div>原因: ${claim.reason}</div>
-        <div>状态: ${statusText}</div>
-        <div>投票结果: 
-          <span class="vote-count yes">赞成 ${claim.yesVotes}</span> / 
-          <span class="vote-count no">反对 ${claim.noVotes}</span>
-        </div>
-      `;
-      
-      container.appendChild(claimDiv);
+  try {
+    // 检查claim数据是否有效
+    if (!claim || claim.claimant === "0x0000000000000000000000000000000000000000") {
+      console.warn(`索赔 #${claimId} 数据无效`);
+      return;
     }
+
+    const isPassed = claim.yesVotes > claim.noVotes;
+    const statusText = isPassed 
+      ? '<span class="status-approved">✓ 已通过</span>' 
+      : '<span class="status-rejected">✗ 已拒绝</span>';
+
+    const claimDiv = document.createElement("div");
+    claimDiv.className = "claim-item";
+    claimDiv.innerHTML = `
+      <h3>理赔 #${claimId}</h3>
+      <div>申请人: ${claim.claimant}</div>
+      <div>申请时间: ${new Date(claim.createdAt * 1000).toLocaleString()}</div>
+      <div>金额: ${ethers.utils.formatEther(claim.amount)} ETH</div>
+      <div>原因: ${claim.reason}</div>
+      <div>状态: ${statusText}</div>
+      <div>投票结果: 
+        <span class="vote-count yes">赞成 ${claim.yesVotes.toString()}</span> / 
+        <span class="vote-count no">反对 ${claim.noVotes.toString()}</span>
+      </div>
+    `;
+    
+    container.appendChild(claimDiv);
+  } catch (err) {
+    console.error(`渲染索赔 #${claimId} 时出错:`, err);
+  }
+}
 
     document.addEventListener("DOMContentLoaded", initApp);
   </script>

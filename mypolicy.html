@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>我的保單 - ChainSure</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* 星空背景效果 */
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background-color: #1a1a2e;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      overflow-x: hidden;
+      position: relative;
+      flex-direction: column;
+    }
+
+    /* 星空背景 */
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -10;
+      pointer-events: none;
+    }
+
+    .star {
+      position: absolute;
+      background-color: white;
+      border-radius: 50%;
+      animation: twinkle 1.5s infinite alternate;
+    }
+
+    @keyframes twinkle {
+      0% { opacity: 0.6; }
+      100% { opacity: 1; }
+    }
+
+    /* Navbar樣式 */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 0.8rem 1.5rem;
+      transition: transform 0.3s ease;
+      background: rgba(26, 26, 46, 0.9) !important;
+      backdrop-filter: blur(10px);
+    }
+
+    .navbar.hidden {
+      transform: translateY(-100%);
+    }
+
+    .navbar-brand {
+      font-weight: bold;
+      font-size: 2rem;
+      color: #ffffff;
+    }
+
+    .nav-link {
+      color: #ffffff;
+      font-size: 1.1rem;
+      padding: 0.5rem 1rem;
+      text-transform: uppercase;
+    }
+
+    .nav-link:hover {
+      color: #f39c12;
+    }
+
+    /* Dropdown Menu */
+    .dropdown-menu {
+      min-width: 200px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      background-color: #333;
+      display: none; /* Default: hide dropdown */
+    }
+
+    .nav-item:hover .dropdown-menu {
+      display: block; /* Show on hover */
+    }
+
+    .dropdown-item {
+      padding: 12px 16px;
+      color: #ffffff;
+      font-size: 1.1rem;
+    }
+
+    .dropdown-item:hover {
+      background-color: #00ff77;
+      color: white;
+    }
+
+    .dropdown-divider {
+      border-top: 1px solid #444;
+    }
+
+    /* 內容區域 */
+    .container {
+      margin-top: 120px;
+      width: 90%;
+      max-width: 1200px;
+      z-index: 10;
+    }
+
+    /* 表格樣式 */
+    .table {
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .table thead th {
+      background-color: #ff6347;
+      color: white;
+      border: none;
+      padding: 15px;
+      font-weight: bold;
+    }
+
+    .table tbody td {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: white;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      vertical-align: middle;
+    }
+
+    .table tbody tr:hover td {
+      background-color: rgba(255, 99, 71, 0.1);
+    }
+
+    /* 按鈕樣式 */
+    .btn {
+      border-radius: 5px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .btn-info {
+      background-color: #17a2b8;
+      border-color: #17a2b8;
+    }
+
+    .btn-info:hover {
+      background-color: #138496;
+      border-color: #117a8b;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-warning {
+      background-color: #ff86f3;
+      border-color: #9364f9;
+      color: white;
+    }
+
+    .btn-warning:hover {
+      background-color: #c0d5ff;
+      border-color: #8ee3ff;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-sm {
+      padding: 8px 15px;
+      font-size: 0.9rem;
+    }
+
+    /* 標題樣式 */
+    h2 {
+      color: #ffffff;
+      font-weight: bold;
+      margin-bottom: 30px;
+      text-align: center;
+      font-size: 2.5rem;
+    }
+
+    h4 {
+      color: #64c1ff;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #ffd28b;
+      font-weight: bold;
+    }
+
+    /* 空狀態提示 */
+    td[colspan] {
+      text-align: center;
+      color: #cccccc;
+      font-style: italic;
+      padding: 30px !important;
+    }
+
+    /* 響應式調整 */
+    @media (max-width: 768px) {
+      .container {
+        margin-top: 100px;
+        width: 95%;
+      }
+      
+      .table thead {
+        display: none;
+      }
+      
+      .table, .table tbody, .table tr, .table td {
+        display: block;
+        width: 100%;
+      }
+      
+      .table tr {
+        margin-bottom: 15px;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+      
+      .table td {
+        text-align: right;
+        padding-left: 50%;
+        position: relative;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      
+      .table td:before {
+        content: attr(data-label);
+        position: absolute;
+        left: 15px;
+        width: calc(50% - 30px);
+        padding-right: 10px;
+        font-weight: bold;
+        text-align: left;
+        color: #9cccff;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 星空背景 -->
+  <div class="stars" id="stars"></div>
+
+  <!-- 導航欄 - 使用您提供的結構 -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/">ChainSure</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="切換導航"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+
+          <li class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle"
+              href="#"
+              id="customerDropdown"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              客戶服務
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="customerDropdown">
+              <li><a class="dropdown-item" href="#">會員中心</a></li>
+              <li><a class="dropdown-item" href="#">聯繫業務員</a></li>
+              <li><a class="dropdown-item" href="#">點數查詢</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle"
+              href="#"
+              id="policyDropdown"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              保單服務
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="policyDropdown">
+              <li><a class="dropdown-item" href="/policy/delete/form">刪除查詢</a></li>
+              <li><a class="dropdown-item" href="/policy/update/form">修改保單</a></li>
+              <li><a class="dropdown-item" href="/policy/read/form">保單查詢</a></li>
+              <li><a class="dropdown-item" href="#">保單內容問題</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle"
+              href="#"
+              id="claimDropdown"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              理賠服務
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="claimDropdown">
+              <li><a class="dropdown-item" href="#">終身壽險</a></li>
+              <li><a class="dropdown-item" href="#">失能照護險</a></li>
+              <li><a class="dropdown-item" href="#">投資型報單</a></li>
+              <li><a class="dropdown-item" href="#">旅遊綜合保險</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle"
+              href="#"
+              id="activityDropdown"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              熱門活動
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="activityDropdown">
+              <li><a class="dropdown-item" href="#">贈品查詢</a></li>
+              <li><a class="dropdown-item" href="#">理賠成功申請案例</a></li>
+            </ul>
+          </li>
+
+          {% if not current_user.is_authenticated %}
+          <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
+                  登入
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="loginDropdown">
+                  <li><a class="dropdown-item" href="/user/login/form">保人登入</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="/user/login/form">業務員登入</a></li>
+              </ul>
+          </li>
+          {% endif %}
+
+          
+          <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
+                  身分證驗證
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="loginDropdown">
+                  <li><a class="dropdown-item" href="/policy/create_ID_image">身分證驗證</a></li>
+              </ul>
+          </li>
+      
+          {% if current_user.is_authenticated %}
+          <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
+                  個人檔案
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="loginDropdown">
+                  <li><a class="dropdown-item" href="/user/profile">個人檔案</a></li>
+              </ul>
+          {% endif %}
+          </li>
+
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 主要內容 -->
+  <div class="container mt-5">
+    <h2 class="mb-4">我的保單</h2>
+
+    <!-- 待確認保單 -->
+    <h4>待確認保單</h4>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>保單編號</th>
+          <th>投保人</th>
+          <th>被保險人</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for policy in pending_policies %}
+          {% if policy.status == 0 %}
+          <tr>
+            <td data-label="保單編號">{{ policy.policy_number }}</td>
+            <td data-label="投保人">{{ policy.policy_holder }}</td>
+            <td data-label="被保險人">{{ policy.insured_person }}</td>
+            <td data-label="操作">
+              <a href="{{ url_for('policy.confirm_policy', policy_number=policy.policy_number) }}" class="btn btn-info btn-sm">詳細資料</a>
+            </td>
+          </tr>
+          {% endif %}
+        {% else %}
+          <tr><td colspan="4">目前沒有待確認保單</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- 已完成保單 -->
+    <h4 class="mt-5">已完成保單</h4>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>保單編號</th>
+          <th>投保人</th>
+          <th>被保險人</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for policy in completed_policies %}
+          {% if policy.status == 1 %}
+          <tr>
+            <td data-label="保單編號">{{ policy.policy_number }}</td>
+            <td data-label="投保人">{{ policy.policy_holder }}</td>
+            <td data-label="被保險人">{{ policy.insured_person }}</td>
+            <td data-label="操作">
+              <a href="{{ url_for('policy.completed_policy_form', policy_number=policy.policy_number) }}" class="btn btn-info btn-sm">詳細資料</a>
+              <a href="{{ url_for('policy.authorization_page', policy_number=policy.policy_number) }}" class="btn btn-warning btn-sm">授權</a>
+            </td>
+          </tr>
+          {% endif %}
+        {% else %}
+          <tr><td colspan="4">目前沒有已完成保單</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    // 生成星空背景
+    function createStars() {
+      const starsContainer = document.getElementById('stars');
+      const starsCount = 150;
+      
+      for (let i = 0; i < starsCount; i++) {
+        const star = document.createElement('div');
+        star.classList.add('star');
+        
+        // 隨機大小 (1-3px)
+        const size = Math.random() * 2 + 1;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        
+        // 隨機位置
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
+        
+        // 隨機動畫延遲
+        star.style.animationDelay = `${Math.random() * 2}s`;
+        
+        starsContainer.appendChild(star);
+      }
+    }
+
+    // 導航欄隱藏/顯示控制
+    let lastScrollTop = 0;
+    window.addEventListener('scroll', function() {
+      const navbar = document.querySelector('.navbar');
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      
+      if (scrollTop > lastScrollTop && scrollTop > 100) {
+        // 向下滾動
+        navbar.classList.add('hidden');
+      } else {
+        // 向上滾動
+        navbar.classList.remove('hidden');
+      }
+      
+      lastScrollTop = scrollTop;
+    });
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', function() {
+      createStars();
+      
+      // 為移動端表格添加數據標籤
+      if (window.innerWidth <= 768) {
+        const tables = document.querySelectorAll('.table');
+        tables.forEach(table => {
+          const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent);
+          const rows = table.querySelectorAll('tbody tr');
+          
+          rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            cells.forEach((cell, index) => {
+              cell.setAttribute('data-label', headers[index]);
+            });
+          });
+        });
+      }
+    });
+
+    // 保單數據加載 (保留原有功能)
+    async function loadPolicies() {
+      const res = await fetch('/policy/my_policies');
+      const data = await res.json();
+
+      const pendingTable = document.getElementById('pendingPolicies');
+      const completedTable = document.getElementById('completedPolicies');
+
+      data.pending.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${p.policy_number}</td>
+          <td>${p.policy_holder}</td>
+          <td>${p.insured_person}</td>
+          <td>
+            <a href="/policy/create_form/${p.policy_number}" class="btn btn-primary btn-sm">詳細資訊</a>
+          </td>
+        `;
+        pendingTable.appendChild(tr);
+      });
+
+      data.completed.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${p.policy_number}</td>
+          <td>${p.policy_holder}</td>
+          <td>${p.insured_person}</td>
+          <td>
+            <a href="/policy/read/${p.policy_number}" class="btn btn-secondary btn-sm">查看</a>
+          </td>
+        `;
+        completedTable.appendChild(tr);
+      });
+    }
+
+    // 根據需要調用loadPolicies
+    // loadPolicies();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -399,6 +399,21 @@
                         </a>
                     </li>
 
+                    {% if not current_user.insurance_officer and current_user.is_authenticated %}
+                    <li class="nav-item dropdown me-3">
+                        <a class="nav-link dropdown-toggle" href="#" id="policyDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-file-invoice me-2"></i>我的保單
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="policyDropdown">
+                            <li>
+                                <a class="dropdown-item" href="/policy/mypolicy">
+                                    <i class="fas fa-file-alt me-2"></i>查看保單
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    {% endif %}
+
                     {% if current_user.insurance_officer %}
                     <li class="nav-item dropdown me-3">
                         <a class="nav-link dropdown-toggle" href="#" id="clientDropdown" role="button" data-bs-toggle="dropdown">

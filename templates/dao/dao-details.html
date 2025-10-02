@@ -1566,54 +1566,7 @@ async function handleExecuteClaim(e) {
     }
 }
 
-    // 設置事件監聽器
-    function setupEventListeners() {
-        // 返回按鈕
-        document.getElementById("backButton").addEventListener("click", () => {
-            window.location.href = "/";
-        });
-
-        // 加入 DAO 按鈕
-        document.getElementById("joinDaoBtn").addEventListener("click", showPremiumPayment);
-        
-        // 從提示訊息加入
-        document.getElementById("joinFromMessageBtn").addEventListener("click", showPremiumPayment);
-        
-        // 支付保費按鈕
-        document.getElementById("payPremiumBtn").addEventListener("click", payPremiumAndJoin);
-        
-        // 取消支付按鈕
-        document.getElementById("cancelPaymentBtn").addEventListener("click", hidePremiumPayment);
-
-        // 刷新按鈕
-        document.getElementById("refreshClaim").addEventListener("click", async () => {
-            await loadDAOInfo();
-            await checkMembershipStatus();
-            if (isMember) {
-                await loadCurrentClaims();
-                await loadMyClaims();
-            }
-        });
-
-        // 提交理賠
-        document.getElementById("submitClaim").addEventListener("click", handleSubmitClaim);
-
-        // 使用事件委託處理投票和執行按鈕
-        document.getElementById("claimsContainer").addEventListener("click", handleVote);
-        document.getElementById("myClaimsContainer").addEventListener("click", handleExecuteClaim);
-
-        // 查看歷史記錄按鈕
-        document.getElementById('viewHistoryButton').addEventListener('click', function() {
-            if (daoAddress) {
-                window.location.href = `claims.html?address=${encodeURIComponent(daoAddress)}`;
-            } else {
-                alert("無法獲取DAO地址");
-            }
-        });
-        
-        // 監聽金額輸入變化
-        document.getElementById("claimAmount").addEventListener("input", checkAndUpdateBalanceHint);
-    }
+    
 
     // 啟動定期刷新獎金庫
     async function startTreasuryRefresh() {
@@ -1737,7 +1690,7 @@ async function checkMembershipStatus() {
 function setupEventListeners() {
     // 返回按鈕
     document.getElementById("backButton").addEventListener("click", () => {
-        window.location.href = "index.html";
+        window.location.href = "/dao/";
     });
 
     // 加入 DAO 按鈕
@@ -1775,7 +1728,7 @@ function setupEventListeners() {
     // 查看歷史記錄按鈕
     document.getElementById('viewHistoryButton').addEventListener('click', function() {
         if (daoAddress) {
-            window.location.href = `claims.html?address=${encodeURIComponent(daoAddress)}`;
+            window.location.href = `/dao/${daoAddress}/claims`;
         } else {
             alert("無法獲取DAO地址");
         }

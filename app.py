@@ -1552,8 +1552,16 @@ def dao_details(dao_address):
     return render_template("dao/dao-details.html", dao_address=dao_address)
 
 @app.route('/dao/<dao_address>/claims')
-def dao_claims(dao_address):
+@app.route('/claims.html')  # 保持向後兼容
+def dao_claims(dao_address=None):
     """DAO理賠歷史頁面"""
+    if not dao_address:
+        # 從查詢參數獲取地址（舊版本兼容）
+        dao_address = request.args.get('address')
+    
+    if not dao_address:
+        return "缺少 DAO 地址", 400
+        
     return render_template("dao/claims.html", dao_address=dao_address)
 
 # ========== API 路由 ==========
@@ -1752,6 +1760,7 @@ def vote_claim(dao_address):
         })
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
 #-----------------------
 # 啟動網站
 #-----------------------

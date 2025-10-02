@@ -118,6 +118,13 @@
                         <ul class="dropdown-menu" aria-labelledby="loginDropdown">
                             <li><a class="dropdown-item" href="/dao/">DAO</a></li>
                         </ul>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
+                            被授權保單
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="loginDropdown">
+                            <li><a class="dropdown-item" href="/policy//authorized_policies">被授權保單</a></li>
+                        </ul>
                     {% endif %}
                     </li>
                     {% if not current_user.insurance_officer  and current_user.is_authenticated %}

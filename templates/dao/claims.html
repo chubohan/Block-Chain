@@ -5,36 +5,56 @@
   <title>DAO 历史理赔记录</title>
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    .claim-item { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
-    .status-approved { color: green; }
-    .status-rejected { color: red; }
-    .nav { margin-bottom: 20px; }
+    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }
+    .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
+    .claim-item { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; background: #f9f9f9; }
+    .status-approved { color: green; font-weight: bold; }
+    .status-rejected { color: red; font-weight: bold; }
+    .nav { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+    .btn { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; }
+    .btn-secondary { background: #6c757d; color: white; }
+    .loading { color: #666; font-style: italic; }
+    .error { color: red; background: #ffe6e6; padding: 15px; border-radius: 5px; }
+    .dao-info { background: #e7f3ff; padding: 10px; border-radius: 5px; margin-bottom: 15px; }
   </style>
 </head>
 <body>
-  <div class="nav">
-    <button id="backButton">回上頁</button>
-    <h1>歷史理賠紀錄</h1>
-  </div>
+  <div class="container">
+    <div class="nav">
+      <button id="backButton" class="btn btn-secondary">返回 DAO 詳情</button>
+      <h1>歷史理賠紀錄</h1>
+      <div id="daoInfo" class="dao-info">載入中...</div>
+    </div>
 
-  <div id="historyContainer">
-    <!-- 历史理赔项目将动态生成在这里 -->
+    <div id="historyContainer">
+      <div class="loading">載入歷史記錄中...</div>
+    </div>
   </div>
 
   <script>
-    // 从URL获取DAO地址
-    const urlParams = new URLSearchParams(window.location.search);
-    const daoAddress = urlParams.get('address');
-    
-    // 合约ABI和初始化代码（与dao-details.html相同）
-    const daoABI = [
+    // 合約 ABI (與 dao-details.html 相同)
+    const daoABI =[
 	{
 		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_daoName",
+				"type": "string"
+			},
 			{
 				"internalType": "uint256",
 				"name": "_monthlyPremium",
 				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "_claimDescription",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_claimPDFHash",
+				"type": "string"
 			}
 		],
 		"stateMutability": "nonpayable",
@@ -66,6 +86,12 @@
 				"internalType": "string",
 				"name": "reason",
 				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "pdfHash",
+				"type": "string"
 			}
 		],
 		"name": "ClaimCreated",
@@ -88,6 +114,19 @@
 			}
 		],
 		"name": "ClaimExecuted",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "member",
+				"type": "address"
+			}
+		],
+		"name": "MemberLeft",
 		"type": "event"
 	},
 	{
@@ -167,6 +206,51 @@
 	{
 		"inputs": [
 			{
+				"internalType": "address",
+				"name": "member",
+				"type": "address"
+			}
+		],
+		"name": "canLeaveDAO",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "claimDescription",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "claimPDFHash",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
@@ -208,6 +292,11 @@
 				"internalType": "uint256",
 				"name": "createdAt",
 				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "pdfHash",
+				"type": "string"
 			}
 		],
 		"stateMutability": "view",
@@ -224,11 +313,29 @@
 				"internalType": "string",
 				"name": "_reason",
 				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_pdfHash",
+				"type": "string"
 			}
 		],
 		"name": "createClaim",
 		"outputs": [],
 		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "daoName",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -290,11 +397,35 @@
 						"internalType": "uint256",
 						"name": "createdAt",
 						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "pdfHash",
+						"type": "string"
 					}
 				],
 				"internalType": "struct DAO.Claim",
 				"name": "",
 				"type": "tuple"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "claimId",
+				"type": "uint256"
+			}
+		],
+		"name": "getClaimPDFHash",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
 			}
 		],
 		"stateMutability": "view",
@@ -315,7 +446,39 @@
 	},
 	{
 		"inputs": [],
+		"name": "getDAOName",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
 		"name": "getMemberCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "member",
+				"type": "address"
+			}
+		],
+		"name": "getMemberPaidTotal",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -434,6 +597,13 @@
 	},
 	{
 		"inputs": [],
+		"name": "leaveDAO",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
 		"name": "memberCount",
 		"outputs": [
 			{
@@ -544,136 +714,225 @@
 
     let provider;
     let daoContract;
+    let daoAddress;
+
+    // 從當前 URL 獲取 DAO 地址
+    function getDaoAddressFromCurrentUrl() {
+        // 方法1: 從路徑參數獲取 (新路由: /dao/0x.../claims)
+        const pathSegments = window.location.pathname.split('/').filter(segment => segment);
+        const daoIndex = pathSegments.indexOf('dao');
+        
+        if (daoIndex !== -1 && daoIndex + 1 < pathSegments.length) {
+            const address = pathSegments[daoIndex + 1];
+            if (ethers.utils.isAddress(address)) {
+                return address;
+            }
+        }
+        
+        // 方法2: 從查詢參數獲取 (舊路由: /claims.html?address=0x...)
+        const urlParams = new URLSearchParams(window.location.search);
+        const addressFromQuery = urlParams.get('address');
+        if (addressFromQuery && ethers.utils.isAddress(addressFromQuery)) {
+            return addressFromQuery;
+        }
+        
+        return null;
+    }
 
     async function initApp() {
-      if (window.ethereum) {
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-        daoContract = new ethers.Contract(daoAddress, daoABI, provider);
-        await loadHistoryClaims();
-      }
-      
-      // 在 initApp 函數中修改返回按鈕事件
-document.getElementById("backButton").addEventListener("click", () => {
-  
-  
-  
-  
-  // 或者使用歷史記錄返回
-  window.history.back();
-});
-    }
-
-    // 添加一個函數來檢查理賠ID是否有效
-async function isValidClaimId(claimId) {
-  try {
-    const claim = await daoContract.getClaim(claimId);
-    // 如果申請者地址不是零地址，則認為是有效理賠
-    return claim.claimant !== ethers.constants.AddressZero;
-  } catch (err) {
-    return false;
-  }
-}
-
-// 修改後的 loadHistoryClaims 函數
-async function loadHistoryClaims() {
-  try {
-    let totalClaims;
-    
-    // 優先嘗試 getTotalClaims()
-    try {
-      totalClaims = await daoContract.getTotalClaims();
-    } catch (err) {
-      console.log("getTotalClaims() 失敗，嘗試 claimCount");
-      try {
-        totalClaims = await daoContract.claimCount();
-      } catch (err2) {
-        console.log("所有方法都失敗，可能沒有理賠記錄");
-        totalClaims = ethers.BigNumber.from(0);
-      }
-    }
-    
-    console.log("總理賠數量:", totalClaims.toString());
-    
-    const historyContainer = document.getElementById("historyContainer");
-    historyContainer.innerHTML = "";
-
-    if (totalClaims.eq(0)) {
-      historyContainer.innerHTML = "<p>目前沒有歷史理賠記錄</p>";
-      return;
-    }
-
-    // 加載所有理賠
-    let validClaims = 0;
-    for (let i = 0; i <= totalClaims.toNumber()-1; i++) {
-      try {
-        const claim = await daoContract.getClaim(i);
-        if (claim.executed) {
-          await renderClaim(i+1, claim, historyContainer);
-          validClaims++;
+        // 獲取 DAO 地址
+        daoAddress = getDaoAddressFromCurrentUrl();
+        
+        console.log("解析到的 DAO 地址:", daoAddress);
+        
+        if (!daoAddress) {
+            showError("未找到有效的 DAO 地址。請從 DAO 詳細頁面訪問此頁面。");
+            return;
         }
-      } catch (err) {
-        console.warn(`理賠 #${i} 無效:`, err.message);
-        continue;
-      }
+        
+        if (!window.ethereum) {
+            showError("請安裝 MetaMask 錢包");
+            return;
+        }
+        
+        try {
+            // 連接錢包
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+            await provider.send("eth_requestAccounts", []);
+            
+            // 使用校驗和地址創建合約實例
+            const checksumAddress = ethers.utils.getAddress(daoAddress);
+            daoContract = new ethers.Contract(checksumAddress, daoABI, provider);
+            
+            // 測試合約連接並獲取 DAO 信息
+            await loadDaoInfo();
+            await loadHistoryClaims();
+            
+        } catch (err) {
+            console.error("初始化失敗:", err);
+            showError("無法連接到 DAO 合約: " + (err.message || "請確認合約地址正確且網絡連接正常"));
+        }
+        
+        // 設置返回按鈕
+        setupEventListeners();
     }
-    
-    if (validClaims === 0) {
-      historyContainer.innerHTML = "<p>沒有已完成的理賠記錄</p>";
+
+    // 加載 DAO 基本信息
+    async function loadDaoInfo() {
+        try {
+            const [daoName, memberCount, totalClaims] = await Promise.all([
+                daoContract.getDAOName(),
+                daoContract.getMemberCount(),
+                daoContract.getTotalClaims()
+            ]);
+            
+            document.getElementById("daoInfo").innerHTML = `
+                <strong>DAO 名稱:</strong> ${daoName} | 
+                <strong>成員數:</strong> ${memberCount.toString()} | 
+                <strong>總理賠數:</strong> ${totalClaims.toString()} |
+                <strong>地址:</strong> ${daoAddress}
+            `;
+            
+        } catch (err) {
+            console.error("載入 DAO 信息失敗:", err);
+            document.getElementById("daoInfo").textContent = `DAO 地址: ${daoAddress} (無法載入詳細信息)`;
+        }
     }
-    
-  } catch (err) {
-    console.error("載入歷史記錄失敗:", err);
-    showError("無法載入歷史記錄: " + err.message);
-  }
-}
 
+    async function loadHistoryClaims() {
+        try {
+            const historyContainer = document.getElementById("historyContainer");
+            historyContainer.innerHTML = "<div class='loading'>正在載入歷史理賠記錄...</div>";
+            
+            let totalClaims;
+            try {
+                totalClaims = await daoContract.getTotalClaims();
+            } catch (err) {
+                console.log("getTotalClaims() 失敗，嘗試其他方法");
+                try {
+                    totalClaims = await daoContract.claimCount();
+                } catch (err2) {
+                    console.log("所有方法都失敗，可能沒有理賠記錄");
+                    totalClaims = ethers.BigNumber.from(0);
+                }
+            }
+            
+            console.log("總理賠數量:", totalClaims.toString());
+            
+            historyContainer.innerHTML = "";
 
+            if (totalClaims.eq(0)) {
+                historyContainer.innerHTML = "<div class='loading'>目前沒有任何理賠記錄</div>";
+                return;
+            }
 
-function showError(message) {
-  const container = document.getElementById("historyContainer");
-  container.innerHTML = `
-    <div style="color: red; padding: 20px; border: 1px solid red; border-radius: 5px;">
-      <h3>錯誤</h3>
-      <p>${message}</p>
-      <button onclick="loadHistoryClaims()" style="margin-top: 10px;">重試</button>
-    </div>
-  `;
-}
+            // 加載所有已完成的理賠
+            let completedClaims = 0;
+            let claimsLoaded = 0;
+            
+            for (let i = 0; i < totalClaims.toNumber(); i++) {
+                try {
+                    const claim = await daoContract.getClaim(i);
+                    claimsLoaded++;
+                    
+                    // 只顯示已執行的理賠
+                    if (claim.executed) {
+                        await renderClaim(i, claim, historyContainer);
+                        completedClaims++;
+                    }
+                } catch (err) {
+                    console.warn(`理賠 #${i} 載入失敗:`, err.message);
+                    continue;
+                }
+            }
+            
+            console.log(`載入完成: ${claimsLoaded} 個理賠，其中 ${completedClaims} 個已完成`);
+            
+            if (completedClaims === 0) {
+                if (claimsLoaded > 0) {
+                    historyContainer.innerHTML = "<div class='loading'>沒有已完成的理賠記錄（所有理賠都在進行中）</div>";
+                } else {
+                    historyContainer.innerHTML = "<div class='loading'>無法載入任何理賠記錄</div>";
+                }
+            }
+            
+        } catch (err) {
+            console.error("載入歷史記錄失敗:", err);
+            showError("載入歷史記錄失敗: " + err.message);
+        }
+    }
 
     async function renderClaim(claimId, claim, container) {
-  try {
-    // 检查claim数据是否有效
-    if (!claim || claim.claimant === "0x0000000000000000000000000000000000000000") {
-      console.warn(`索赔 #${claimId} 数据无效`);
-      return;
+        try {
+            // 檢查理賠數據是否有效
+            if (!claim || claim.claimant === ethers.constants.AddressZero) {
+                return;
+            }
+
+            const isPassed = claim.yesVotes > claim.noVotes;
+            const statusText = isPassed 
+                ? '<span class="status-approved">✓ 已通過並支付</span>' 
+                : '<span class="status-rejected">✗ 已拒絕</span>';
+
+            const claimDiv = document.createElement("div");
+            claimDiv.className = "claim-item";
+            claimDiv.innerHTML = `
+                <h3>理賠 #${claimId + 1}</h3>
+                <div><strong>申請人:</strong> ${claim.claimant}</div>
+                <div><strong>申請時間:</strong> ${new Date(claim.createdAt * 1000).toLocaleString('zh-TW')}</div>
+                <div><strong>金額:</strong> ${ethers.utils.formatEther(claim.amount)} ETH</div>
+                <div><strong>原因:</strong> ${claim.reason || '無說明'}</div>
+                <div><strong>狀態:</strong> ${statusText}</div>
+                <div><strong>投票結果:</strong> 
+                    <span style="color: green; font-weight: bold;">贊成 ${claim.yesVotes.toString()}</span> / 
+                    <span style="color: red; font-weight: bold;">反對 ${claim.noVotes.toString()}</span>
+                </div>
+                ${claim.pdfHash && claim.pdfHash !== "" ? `
+                    <div><strong>相關文件:</strong> 
+                        <a href="https://ipfs.io/ipfs/${claim.pdfHash}" target="_blank" style="color: #007bff;">查看理賠文件</a>
+                    </div>
+                ` : ''}
+            `;
+            
+            container.appendChild(claimDiv);
+        } catch (err) {
+            console.error(`渲染理賠 #${claimId} 時出錯:`, err);
+        }
     }
 
-    const isPassed = claim.yesVotes > claim.noVotes;
-    const statusText = isPassed 
-      ? '<span class="status-approved">✓ 已通过</span>' 
-      : '<span class="status-rejected">✗ 已拒绝</span>';
-
-    const claimDiv = document.createElement("div");
-    claimDiv.className = "claim-item";
-    claimDiv.innerHTML = `
-      <h3>理赔 #${claimId}</h3>
-      <div>申请人: ${claim.claimant}</div>
-      <div>申请时间: ${new Date(claim.createdAt * 1000).toLocaleString()}</div>
-      <div>金额: ${ethers.utils.formatEther(claim.amount)} ETH</div>
-      <div>原因: ${claim.reason}</div>
-      <div>状态: ${statusText}</div>
-      <div>投票结果: 
-        <span class="vote-count yes">赞成 ${claim.yesVotes.toString()}</span> / 
-        <span class="vote-count no">反对 ${claim.noVotes.toString()}</span>
-      </div>
-    `;
-    
-    container.appendChild(claimDiv);
-  } catch (err) {
-    console.error(`渲染索赔 #${claimId} 时出错:`, err);
-  }
+    function setupEventListeners() {
+    // 返回按鈕 - 修正返回路徑
+    document.getElementById("backButton").addEventListener("click", () => {
+        if (daoAddress) {
+            // 使用正確的返回路徑
+            window.location.href = `/dao/dao-details.html?address=${daoAddress}`;
+        } else {
+            // 如果沒有地址，嘗試從當前URL重新獲取
+            const currentDaoAddress = getDaoAddressFromCurrentUrl();
+            if (currentDaoAddress) {
+                window.location.href = `/dao/dao-details.html?address=${currentDaoAddress}`;
+            } else {
+                window.history.back();
+            }
+        }
+    });
 }
 
+    function showError(message) {
+        const container = document.getElementById("historyContainer");
+        container.innerHTML = `
+            <div class="error">
+                <h3>錯誤</h3>
+                <p>${message}</p>
+                <div style="margin-top: 15px;">
+                    <button onclick="location.reload()" class="btn" style="background: #007bff; color: white;">重新載入頁面</button>
+                    <button onclick="window.history.back()" class="btn btn-secondary" style="margin-left: 10px;">返回上頁</button>
+                </div>
+            </div>
+        `;
+    }
+
+    // 頁面載入時初始化
     document.addEventListener("DOMContentLoaded", initApp);
   </script>
 </body>

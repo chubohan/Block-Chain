@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>DAO 平台</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .dao-card { border: 1px solid #ccc; padding: 15px; margin: 10px 0; border-radius: 8px; }
+    .btn { padding: 6px 12px; margin: 5px; border-radius: 5px; border: none; cursor: pointer; }
+    .btn-connect { background: #007bff; color: white; }
+    .btn-create { background: #28a745; color: white; }
+  </style>
+</head>
+<body>
+  <h1>DAO 平台</h1>
+
+  <!-- 錢包區 -->
+  <div id="walletSection">
+    <button id="connectWalletBtn" class="btn btn-connect">連接錢包</button>
+    <span id="walletAddress"></span>
+  </div>
+
+  <hr>
+
+  <!-- 創建 DAO -->
+  <h2>創建 DAO</h2>
+
+  <!-- 🆕 新增 DAO 名稱輸入 -->
+<label>DAO 名稱：</label>
+<input type="text" id="daoName" placeholder="例如：汽車保險 DAO"><br><br>
+
+  <label>月保費 (ETH)：</label>
+  <input type="text" id="monthlyPremium" placeholder="例如：0.01"><br><br>
+
+  <label>理賠內容：</label><br>
+  <textarea id="claimDescription" rows="4" cols="50" placeholder="輸入理賠內容..."></textarea><br><br>
+
+  <label>上傳 PDF 申請表：</label>
+  <input type="file" id="pdfFile" accept="application/pdf"><br><br>
+
+  <button id="createDaoBtn" class="btn btn-create">創建 DAO</button>
+
+  <hr>
+
+  <!-- 已建立的 DAO -->
+  <h2>所有 DAO</h2>
+  <div id="daoList"></div>
+
+  <script>
+    let provider;
+    let signer;
+    let factoryContract;
+
+    const factoryAbi = [
+  // 🆕 修正：更新為 4 個參數的函數簽名
+  "function createDAO(string memory daoName, uint256 monthlyPremium, string memory claimDesc, string memory pdfHash) public",
+  "function getDAOAddresses() public view returns(address[])",
+  "function daoAddresses(uint256) public view returns(address)"
+];
+    const factoryAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // TODO: 換成部署好的 Factory 地址
+
+    async function connectWallet() {
+      if (window.ethereum) {
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+        const address = await signer.getAddress();
+        document.getElementById("walletAddress").innerText = "已連接: " + address;
+
+        factoryContract = new ethers.Contract(factoryAddress, factoryAbi, signer);
+
+        loadDAOs();
+
+        // 連接後自動導向到我的 DAO 頁面按鈕
+        const btn = document.createElement("button");
+        btn.innerText = "查看我的 DAO";
+        btn.className = "btn btn-connect";
+        btn.onclick = () => window.location.href = "my-daos.html";
+        document.getElementById("walletSection").appendChild(btn);
+      } else {
+        alert("請安裝 MetaMask");
+      }
+    }
+
+    async function uploadPDFtoIPFS(file) {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("http://127.0.0.1:5001/api/v0/add", {
+        method: "POST",
+        body: formData
+      });
+
+      const text = await res.text();
+      const match = text.match(/"Hash":"([^"]+)"/);
+      return match ? match[1] : null;
+    }
+
+    async function createDAO() {
+  const daoName = document.getElementById("daoName").value;
+  const premiumInput = document.getElementById("monthlyPremium").value;
+  const claimDesc = document.getElementById("claimDescription").value;
+  const pdfFile = document.getElementById("pdfFile").files[0];
+
+  if (!daoName || !premiumInput || !claimDesc || !pdfFile) {
+    alert("請完整填寫所有欄位並上傳 PDF");
+    return;
+  }
+
+  try {
+    const pdfHash = await uploadPDFtoIPFS(pdfFile);
+    if (!pdfHash) {
+      alert("PDF 上傳 IPFS 失敗");
+      return;
+    }
+
+    const premiumWei = ethers.utils.parseEther(premiumInput);
+    
+    // 🆕 修正：傳遞 4 個參數（daoName, premiumWei, claimDesc, pdfHash）
+    const tx = await factoryContract.createDAO(daoName, premiumWei, claimDesc, pdfHash);
+    await tx.wait();
+
+    alert("DAO 創建成功！");
+    loadDAOs();
+  } catch (err) {
+    console.error(err);
+    alert("創建 DAO 失敗：" + err.message);
+  }
+}
+
+// 🆕 修改加載 DAO 列表的函數，顯示名稱
+async function loadDAOs() {
+  const daoListDiv = document.getElementById("daoList");
+  daoListDiv.innerHTML = "";
+  try {
+    const daos = await factoryContract.getDAOAddresses();
+    
+    // 🆕 為每個 DAO 獲取名稱
+    for (let addr of daos) {
+      const daoContract = new ethers.Contract(addr, [
+        "function getDAOName() public view returns(string)"
+      ], provider);
+      
+      let daoName = "未知 DAO";
+      try {
+        daoName = await daoContract.getDAOName();
+      } catch (err) {
+        console.error("獲取 DAO 名稱失敗:", err);
+      }
+      
+      const div = document.createElement("div");
+      div.className = "dao-card";
+      div.innerHTML = `
+        <h3>${daoName}</h3> <!-- 🆕 顯示名稱 -->
+        <p>地址: ${addr}</p>
+        <button onclick="viewDAODetails('${addr}')">查看 DAO 詳細資料</button>
+      `;
+      daoListDiv.appendChild(div);
+    }
+  } catch (err) {
+    console.error("讀取 DAO 失敗", err);
+  }
+}
+// 添加這個函數到 index.html 的 script 中
+function viewDAODetails(daoAddress) {
+  window.location.href = `dao-details.html?address=${daoAddress}`;
+}
+    document.getElementById("connectWalletBtn").addEventListener("click", connectWallet);
+    document.getElementById("createDaoBtn").addEventListener("click", createDAO);
+  </script>
+</body>
+</html>

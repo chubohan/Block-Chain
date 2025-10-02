@@ -21,8 +21,9 @@ user_bp = Blueprint('user', __name__)
 MAIL_SERVER = 'smtp.gmail.com'
 MAIL_PORT = 587
 MAIL_USE_TLS = True
+MAIL_USE_SSL = False
 MAIL_USERNAME = '11056028@ntub.edu.tw'        # 你自己的發信信箱
-MAIL_PASSWORD = 'illu pozd sgco nfxl'                   # 注意：不是 Gmail 密碼，而是「App 密碼」
+MAIL_PASSWORD = 'rfdaigqbrtnhobye'    #zzjp cahb gwrt dgrm              # 注意：不是 Gmail 密碼，而是「App 密碼」
 MAIL_DEFAULT_SENDER = '11056028@ntub.edu.tw'
 
 # 設定郵件
@@ -111,14 +112,6 @@ def signup():
         password_bytes = password1.encode('utf-8')
         salt = bcrypt.gensalt()
         hashed_password = bcrypt.hashpw(password_bytes, salt).decode('utf-8')
-
-        # Gmail 限制：只允許 @gmail.com 結尾
-        if not re.match(r'^[a-zA-Z0-9._%+-]+@gmail\.com$', gmail):
-            return render_template('user/signup.html', success=False, message="請輸入有效的 Gmail 格式（必須是 @gmail.com）")
-
-        # 密碼強度檢查
-        if not re.match(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$', password1):
-            return render_template('user/signup.html', success=False, message="密碼需包含大小寫英文、數字與特殊符號，且長度至少8位")
 
         # 寫入資料庫
         conn = db.get_connection()

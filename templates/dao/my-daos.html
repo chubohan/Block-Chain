@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>我的 DAO</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .dao-card { border: 1px solid #ccc; padding: 15px; margin: 10px 0; border-radius: 8px; }
+    .btn { padding: 6px 12px; margin: 5px; border-radius: 5px; border: none; cursor: pointer; }
+    .btn-connect { background: #007bff; color: white; }
+  </style>
+</head>
+<body>
+  <h1>我的 DAO</h1>
+
+  <!-- 錢包區 -->
+  <div id="walletSection">
+    <button id="connectWalletBtn" class="btn btn-connect">連接錢包</button>
+    <span id="walletAddress"></span>
+  </div>
+
+  <hr>
+
+  <!-- 已加入的 DAO -->
+  <h2>已加入的 DAO</h2>
+  <div id="myDaoList">請先連接錢包...</div>
+
+  <script>
+    let provider;
+    let signer;
+    let factoryContract;
+    let userAddress;
+
+    const factoryAbi = [
+  "function getDAOAddresses() public view returns(address[])" // 修正方法名
+];
+    const daoAbi = [
+      "function isMember(address user) public view returns(bool)"
+    ];
+    const factoryAddress = "0xYourFactoryAddress"; // TODO: 換成實際部署的 Factory 地址
+
+    async function connectWallet() {
+      if (window.ethereum) {
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+        userAddress = await signer.getAddress();
+        document.getElementById("walletAddress").innerText = "已連接: " + userAddress;
+
+        factoryContract = new ethers.Contract(factoryAddress, factoryAbi, signer);
+
+        loadMyDAOs();
+      } else {
+        alert("請安裝 MetaMask");
+      }
+    }
+
+    async function loadMyDAOs() {
+  const listDiv = document.getElementById("myDaoList");
+  listDiv.innerHTML = "載入中...";
+
+  try {
+    // 使用正確的方法名
+    const daos = await factoryContract.getDAOAddresses();
+    listDiv.innerHTML = "";
+
+    for (let addr of daos) {
+      const daoContract = new ethers.Contract(addr, daoAbi, signer);
+      const isMember = await daoContract.isMember(userAddress);
+
+      if (isMember) {
+        const div = document.createElement("div");
+        div.className = "dao-card";
+        div.innerHTML = `
+          <p>DAO 地址: ${addr}</p>
+          <button onclick="window.location.href='dao-details.html?address=${addr}'">查看 DAO</button>
+        `;
+        listDiv.appendChild(div);
+      }
+    }
+
+    if (listDiv.innerHTML === "") {
+      listDiv.innerHTML = "尚未加入任何 DAO";
+    }
+  } catch (err) {
+    console.error("讀取 DAO 失敗", err);
+    listDiv.innerHTML = "讀取失敗";
+  }
+}
+
+    document.getElementById("connectWalletBtn").addEventListener("click", connectWallet);
+  </script>
+</body>
+</html>

@@ -55,7 +55,7 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # 或其他郵件伺服器
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = '11056028@ntub.edu.tw'  # 你的郵箱
-app.config['MAIL_PASSWORD'] = 'illu pozd sgco nfxl'  # 你的郵箱密碼
+app.config['MAIL_PASSWORD'] = 'rfda igqb rtnh obye'  # 你的郵箱密碼
 app.config['MAIL_DEFAULT_SENDER'] = '11056028@ntub.edu.tw'
 
 mail = Mail(app)
@@ -950,6 +950,808 @@ def update_pdf():
 @app.route('/policy/wallet')
 def wallet():
     return render_template("policy/wallet.html")
+
+FACTORY_ABI_JSON = '''[
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "daoAddress",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "monthlyPremium",
+				"type": "uint256"
+			}
+		],
+		"name": "DAOCreated",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_monthlyPremium",
+				"type": "uint256"
+			}
+		],
+		"name": "createDAO",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "daoAddresses",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getDAOAddresses",
+		"outputs": [
+			{
+				"internalType": "address[]",
+				"name": "",
+				"type": "address[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]'''
+
+DAO_ABI_JSON = '''[
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_monthlyPremium",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "claimant",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "reason",
+				"type": "string"
+			}
+		],
+		"name": "ClaimCreated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "passed",
+				"type": "bool"
+			}
+		],
+		"name": "ClaimExecuted",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "month",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "PaidPremium",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "support",
+				"type": "bool"
+			}
+		],
+		"name": "Voted",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "claimId",
+				"type": "uint256"
+			}
+		],
+		"name": "canExecute",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "allowed",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "executeAfter",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "claims",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "claimant",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "reason",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "yesVotes",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "noVotes",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "executed",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "createdAt",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amountInWei",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "_reason",
+				"type": "string"
+			}
+		],
+		"name": "createClaim",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "claimId",
+				"type": "uint256"
+			}
+		],
+		"name": "executeClaim",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "claimId",
+				"type": "uint256"
+			}
+		],
+		"name": "getClaim",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "claimant",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "reason",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "yesVotes",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "noVotes",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bool",
+						"name": "executed",
+						"type": "bool"
+					},
+					{
+						"internalType": "uint256",
+						"name": "createdAt",
+						"type": "uint256"
+					}
+				],
+				"internalType": "struct DAO.Claim",
+				"name": "",
+				"type": "tuple"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getClaimTime",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getMemberCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getMonthlyPremium",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getTotalClaims",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getTreasuryBalance",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "claimId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			}
+		],
+		"name": "hasVoted",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "hasVotedMap",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			}
+		],
+		"name": "isMember",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "memberCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "memberPaidTotal",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "members",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "monthlyPremium",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "month",
+				"type": "uint256"
+			}
+		],
+		"name": "payPremium",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "claimId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "support",
+				"type": "bool"
+			}
+		],
+		"name": "vote",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+]'''
+
+# 轉換為Python對象
+FACTORY_ABI = json.loads(FACTORY_ABI_JSON)
+DAO_ABI = json.loads(DAO_ABI_JSON)
+
+factory_address = "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+
+# ========== 頁面路由 ==========
+
+
+@app.route('/dao/')
+def dao_list():
+    """DAO列表頁面"""
+    return render_template("dao/index.html")
+
+@app.route('/dao/<dao_address>')
+def dao_details(dao_address):
+    """DAO詳細頁面"""
+    return render_template("dao/dao-details.html", dao_address=dao_address)
+
+@app.route('/dao/<dao_address>/claims')
+def dao_claims(dao_address):
+    """DAO理賠歷史頁面"""
+    return render_template("dao/claims.html", dao_address=dao_address)
+
+# ========== API 路由 ==========
+@app.route('/api/daos', methods=['GET'])
+def get_daos():
+    """獲取所有DAO地址"""
+    try:
+        factory = w3.eth.contract(address=factory_address, abi=FACTORY_ABI)
+        daos = factory.functions.getDAOAddresses().call()
+        return jsonify({
+            'status': 'success',
+            'data': {
+                'daos': daos,
+                'count': len(daos)
+            }
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+@app.route('/api/dao/<dao_address>/info', methods=['GET'])
+def get_dao_info(dao_address):
+    """獲取DAO詳細信息"""
+    try:
+        # 驗證地址格式
+        if not w3.is_address(dao_address):
+            return jsonify({'error': 'Invalid DAO address'}), 400
+        
+        dao_address = w3.to_checksum_address(dao_address)
+        
+        # 檢查合約是否存在
+        code = w3.eth.get_code(dao_address)
+        if code == '0x':
+            return jsonify({'error': 'Contract does not exist'}), 404
+        
+        # 獲取DAO信息
+        dao = w3.eth.contract(address=dao_address, abi=DAO_ABI)
+        info = {
+            'monthly_premium': str(dao.functions.getMonthlyPremium().call()),
+            'member_count': dao.functions.getMemberCount().call(),
+            'total_claims': dao.functions.getTotalClaims().call(),
+            'claim_time': dao.functions.getClaimTime().call(),
+            'treasury_balance': str(dao.functions.getTreasuryBalance().call())
+        }
+        
+        return jsonify({'status': 'success', 'data': info})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/dao/<dao_address>/is_member', methods=['GET'])
+def is_member(dao_address):
+    """檢查用戶是否為DAO成員"""
+    try:
+        user_address = request.args.get('user')
+        if not user_address:
+            return jsonify({'error': 'Missing user parameter'}), 400
+        
+        # 使用正確的方法名驗證地址
+        if not w3.is_address(user_address):
+            return jsonify({'error': f'Invalid user address: {user_address}'}), 400
+        if not w3.is_address(dao_address):
+            return jsonify({'error': f'Invalid DAO address: {dao_address}'}), 400
+        
+        # 格式化地址為校驗和格式
+        user_address = w3.to_checksum_address(user_address)
+        dao_address = w3.to_checksum_address(dao_address)
+        
+        # 檢查DAO合約是否存在
+        code = w3.eth.get_code(dao_address)
+        if code == '0x':
+            return jsonify({'error': 'Contract does not exist at this address'}), 404
+        
+        # 創建合約實例並調用
+        dao = w3.eth.contract(address=dao_address, abi=DAO_ABI)
+        is_member = dao.functions.isMember(user_address).call()
+        
+        return jsonify({
+            'is_member': is_member,
+            'user': user_address,
+            'dao': dao_address
+        })
+        
+    except ValueError as ve:
+        return jsonify({'error': f'Value error: {str(ve)}'}), 400
+    except Exception as e:
+        app.logger.error(f"Error in is_member: {str(e)}")
+        return jsonify({
+            'error': 'Internal server error',
+            'details': str(e)
+        }), 500
+
+@app.route('/api/dao/<dao_address>/join', methods=['POST'])
+def join_dao(dao_address):
+    """加入DAO"""
+    try:
+        data = request.get_json()
+        user_address = data.get('user')
+        
+        if not user_address or not w3.is_address(user_address):
+            return jsonify({'error': 'Invalid user address'}), 400
+        
+        dao = w3.eth.contract(address=dao_address, abi=DAO_ABI)
+        monthly_premium = dao.functions.getMonthlyPremium().call()
+        
+        return jsonify({
+            'monthly_premium': str(monthly_premium),
+            'dao_address': dao_address,
+            'user': user_address
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/dao/<dao_address>/claims', methods=['GET'])
+def get_claims(dao_address):
+    """獲取DAO的所有理賠請求"""
+    try:
+        # 驗證地址
+        if not w3.is_address(dao_address):
+            return jsonify({'error': 'Invalid DAO address'}), 400
+        
+        dao_address = w3.to_checksum_address(dao_address)
+        
+        # 檢查合約是否存在
+        code = w3.eth.get_code(dao_address)
+        if code == '0x':
+            return jsonify({'error': 'Contract does not exist'}), 404
+        
+        dao = w3.eth.contract(address=dao_address, abi=DAO_ABI)
+        total_claims = dao.functions.getTotalClaims().call()
+        
+        claims = []
+        for i in range(total_claims):
+            claim = dao.functions.getClaim(i).call()
+            # 檢查是否可以執行
+            can_execute, execute_after = dao.functions.canExecute(i).call()
+            
+            claims.append({
+                'id': i,
+                'claimant': claim[0],
+                'amount': str(claim[1]),
+                'reason': claim[2],
+                'yesVotes': claim[3],
+                'noVotes': claim[4],
+                'executed': claim[5],
+                'createdAt': claim[6],
+                'canExecute': can_execute,
+                'executeAfter': execute_after
+            })
+        
+        return jsonify({'status': 'success', 'data': claims})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/dao/<dao_address>/create-claim', methods=['POST'])
+def create_claim(dao_address):
+    """創建理賠請求"""
+    try:
+        data = request.get_json()
+        user_address = data.get('user')
+        amount = data.get('amount')
+        reason = data.get('reason')
+        
+        if not all([user_address, amount, reason]):
+            return jsonify({'error': 'Missing required parameters'}), 400
+        
+        # 這裡需要實現實際的創建理賠邏輯
+        # 通常會需要用戶簽名和交易發送
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Claim created successfully'
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/dao/<dao_address>/vote', methods=['POST'])
+def vote_claim(dao_address):
+    """對理賠請求投票"""
+    try:
+        data = request.get_json()
+        user_address = data.get('user')
+        claim_id = data.get('claim_id')
+        support = data.get('support')
+        
+        if not all([user_address, claim_id, support is not None]):
+            return jsonify({'error': 'Missing required parameters'}), 400
+        
+        # 這裡需要實現實際的投票邏輯
+        # 通常會需要用戶簽名和交易發送
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Vote submitted successfully'
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 #-----------------------
 # 啟動網站
 #-----------------------

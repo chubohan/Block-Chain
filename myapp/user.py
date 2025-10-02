@@ -498,7 +498,7 @@ def save_wallet():
     finally:
         conn.close()
 # 登出路由
-@user_bp.route('/logout', methods=['POST'])
+@user_bp.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
     logout_user()

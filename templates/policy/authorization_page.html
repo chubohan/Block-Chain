@@ -1,3 +1,589 @@
+<<<<<<< HEAD
+{% extends "base.html" %}
+
+{% block title %}授權管理 - ChainSure{% endblock %}
+
+{% block extra_css %}
+<style>
+    .authorization-container {
+        max-width: 800px;
+        margin: 80px auto 40px;
+        padding: 40px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+    }
+
+    .authorization-container h1 {
+        color: #4a6ee0;
+        margin-bottom: 30px;
+        font-size: 2.5rem;
+        font-weight: bold;
+        text-align: center;
+        background: linear-gradient(135deg, #4a6ee0, #64c1ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .authorization-container h3 {
+        color: #64c1ff;
+        margin-bottom: 20px;
+        font-weight: bold;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        font-weight: bold;
+        color: #555;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background: white;
+        box-sizing: border-box;
+        margin-bottom: 10px;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: #64c1ff;
+        box-shadow: 0 0 0 3px rgba(100, 193, 255, 0.1);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #8ac6ff, #64c1ff);
+        color: white;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(100, 193, 255, 0.3);
+        margin-right: 10px;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #64c1ff, #4a6ee0);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(74, 110, 224, 0.4);
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+        color: white;
+        padding: 8px 15px;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-left: 10px;
+    }
+
+    .btn-danger:hover {
+        background: linear-gradient(135deg, #ff5252, #ff6b6b);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+    }
+
+    .divider {
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #64c1ff, transparent);
+        margin: 30px 0;
+    }
+
+    .authorized-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .authorized-list li {
+        background: rgba(248, 249, 250, 0.8);
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #e0e0e0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .authorized-list li:hover {
+        background: rgba(232, 240, 254, 0.8);
+        transform: translateY(-1px);
+        transition: all 0.3s ease;
+    }
+
+    /* 響應式設計 */
+    @media (max-width: 768px) {
+        .authorization-container {
+            margin: 60px 20px 20px;
+            padding: 30px 20px;
+        }
+
+        .authorized-list li {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .btn-danger {
+            align-self: flex-end;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="authorization-container">
+    <h1>授權管理</h1>
+
+    <h3>保單編號：{{ policy_number }}</h3>
+
+    <div class="form-group">
+        <label for="authorizedGmail">被授權人 Gmail：</label>
+        <input type="email" id="authorizedGmail" placeholder="輸入 Gmail">
+        
+        <label for="authorizedWallet">或被授權人錢包地址：</label>
+        <input type="text" id="authorizedWallet" placeholder="輸入錢包地址">
+        
+        <label for="relationship">與此保戶的關係：</label>
+        <input type="text" id="relationship" placeholder="例如：配偶、子女、朋友" required>
+        
+        <button class="btn-primary" onclick="addAuthorization()">➕ 新增授權</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <h3>已授權人員</h3>
+    <ul id="authorizedList" class="authorized-list">
+        {% for auth in authorized_list %}
+        <li>
+            <span>{{ auth.authorized_gmail or auth.authorized_wallet }}（{{ auth.relationship }}）</span>
+            <button class="btn-danger" onclick="deleteAuthorization('{{ auth.authorized_gmail }}')">🗑️ 刪除</button>
+        </li>
+        {% else %}
+        <li>尚無授權人</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    let provider;
+    let signer;
+    let insuranceContract;
+    const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+    const contractABI = [
+        // ... 保持原有的 ABI 內容不變
+        {
+            "inputs": [
+                {
+                    "internalType": "string",
+                    "name": "_policyNumber",
+                    "type": "string"
+                },
+                {
+                    "internalType": "string",
+                    "name": "_policyHolder",
+                    "type": "string"
+                },
+                {
+                    "internalType": "string",
+                    "name": "_insuredPerson",
+                    "type": "string"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "_insuranceAmount",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "_premiumPeriod",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "_premiumAmount",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "_startDate",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "string",
+                    "name": "_beneficiary",
+                    "type": "string"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "_growthRate",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "_declaredInterestRate",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "string",
+                    "name": "_pdfHash",
+                    "type": "string"
+                }
+            ],
+            "name": "addPolicy",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "string",
+                    "name": "_policyNumber",
+                    "type": "string"
+                },
+                {
+                    "internalType": "address",
+                    "name": "_wallet",
+                    "type": "address"
+                }
+            ],
+            "name": "authorizePolicyAccess",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "string",
+                    "name": "_policyNumber",
+                    "type": "string"
+                },
+                {
+                    "internalType": "address",
+                    "name": "_wallet",
+                    "type": "address"
+                }
+            ],
+            "name": "revokePolicyAccess",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "string",
+                    "name": "_policyNumber",
+                    "type": "string"
+                }
+            ],
+            "name": "getPolicy",
+            "outputs": [
+                {
+                    "internalType": "string",
+                    "name": "",
+                    "type": "string"
+                },
+                {
+                    "internalType": "string",
+                    "name": "",
+                    "type": "string"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "string",
+                    "name": "",
+                    "type": "string"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "string",
+                    "name": "",
+                    "type": "string"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "string",
+                    "name": "_policyNumber",
+                    "type": "string"
+                }
+            ],
+            "name": "getPolicyOwner",
+            "outputs": [
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "string",
+                    "name": "_policyNumber",
+                    "type": "string"
+                },
+                {
+                    "internalType": "address",
+                    "name": "_wallet",
+                    "type": "address"
+                }
+            ],
+            "name": "isAuthorized",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        }
+    ];
+
+    const policyNumber = "{{ policy_number }}";
+    const clientGmail = "{{ current_user.id }}";
+
+    async function loadContract() {
+        try {
+            if (!window.ethereum) {
+                alert("請先安裝 MetaMask");
+                return;
+            }
+
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+            signer = await provider.getSigner();
+            insuranceContract = new ethers.Contract(contractAddress, contractABI, signer);
+
+            console.log("合約載入完成");
+        } catch (err) {
+            console.error("合約初始化錯誤", err);
+            alert("合約初始化失敗，請稍候或重新整理");
+        }
+    }
+
+    async function addAuthorization() {
+        const gmail = document.getElementById('authorizedGmail').value.trim();
+        const walletInput = document.getElementById('authorizedWallet').value.trim();
+        const relationship = document.getElementById('relationship').value.trim();
+
+        if (!policyNumber || !relationship) {
+            alert("請填寫保單編號與關係");
+            return;
+        }
+
+        let walletAddress = walletInput;
+
+        if (!walletInput && gmail) {
+            try {
+                const res = await fetch('/policy/get-wallet-address', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ gmail: gmail })
+                });
+                const result = await res.json();
+
+                if (result.success) {
+                    walletAddress = result.wallet;
+                } else {
+                    alert("❌ 查無此 Gmail 或對方未註冊錢包");
+                    return;
+                }
+            } catch (err) {
+                console.error("Gmail 查詢失敗:", err);
+                alert("❌ 查詢失敗，請稍後再試");
+                return;
+            }
+        }
+
+        if (!walletAddress || !ethers.utils.isAddress(walletAddress)) {
+            alert("請提供有效的錢包地址或可查到錢包的 Gmail");
+            return;
+        }
+
+        try {
+            if (!insuranceContract) {
+                alert("合約尚未載入，請稍候或重新整理");
+                return;
+            }
+
+            const policy = await insuranceContract.policies(policyNumber);
+            const policyOwner = policy[10];
+            const currentAddress = await signer.getAddress();
+
+            if (currentAddress.toLowerCase() !== policyOwner.toLowerCase()) {
+                alert("❌ 只有保單擁有者可授權");
+                return;
+            }
+
+            const tx = await insuranceContract.authorizePolicyAccess(policyNumber, walletAddress);
+            await tx.wait();
+
+            const res = await fetch('/policy/add-authorization', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    policy_number: policyNumber,
+                    authorized_gmail: gmail,
+                    authorized_wallet: walletAddress,
+                    relationship: relationship,
+                    tx_hash: tx.hash
+                })
+            });
+
+            const result = await res.json();
+            if (result.success) {
+                alert("✅ 授權成功");
+                location.reload();
+            } else {
+                alert("❌ 資料庫寫入失敗：" + result.message);
+            }
+
+        } catch (error) {
+            console.error("授權失敗：", error);
+            alert("❌ 授權失敗：" + (error.reason || error.message));
+        }
+    }
+
+    async function deleteAuthorization(gmail) {
+        if (!confirm("確定要刪除此授權嗎？")) return;
+
+        let walletAddress;
+
+        try {
+            const res = await fetch('/policy/get-wallet-address', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ gmail: gmail })
+            });
+
+            const result = await res.json();
+            if (!result.success) {
+                alert("❌ 查無此 Gmail 對應的錢包地址");
+                return;
+            }
+
+            walletAddress = result.wallet;
+        } catch (err) {
+            console.error("取得錢包地址失敗：", err);
+            alert("❌ 取得錢包地址失敗，請稍後再試");
+            return;
+        }
+
+        if (!walletAddress || !ethers.utils.isAddress(walletAddress)) {
+            alert("❌ 無效的錢包地址");
+            return;
+        }
+
+        try {
+            const policy = await insuranceContract.policies(policyNumber);
+            const policyOwner = policy[10];
+            const currentAddress = await signer.getAddress();
+
+            if (currentAddress.toLowerCase() !== policyOwner.toLowerCase()) {
+                alert("❌ 只有保單擁有者可以刪除授權");
+                return;
+            }
+
+            const tx = await insuranceContract.revokePolicyAccess(policyNumber, walletAddress);
+            await tx.wait();
+
+            const response = await fetch('/policy/delete-authorization', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    policy_number: policyNumber,
+                    authorized_gmail: gmail,
+                    authorized_wallet: walletAddress,
+                    tx_hash: tx.hash
+                })
+            });
+
+            const dbResult = await response.json();
+            if (dbResult.success) {
+                alert("✅ 已成功取消授權");
+                location.reload();
+            } else {
+                alert("❌ 後端刪除失敗：" + dbResult.message);
+            }
+
+        } catch (err) {
+            console.error("取消授權失敗：", err);
+            alert("❌ 取消授權失敗：" + (err.reason || err.message));
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        loadContract().then(() => {
+            console.log("合約初始化完成");
+        }).catch(err => {
+            console.error("合約初始化錯誤", err);
+            alert("❌ 合約初始化失敗，請重新整理頁面");
+        });
+    });
+</script>
+{% endblock %}
+=======
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -380,3 +966,4 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
+>>>>>>> 6741fe914f615ea617347fe8d2c2baf28bf63371

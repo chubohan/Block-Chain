@@ -1,142 +1,182 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-  <meta charset="UTF-8">
-  <title>刪除保單 - ChainSure</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <!-- 字體與樣式 -->
-  <link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="/static/css/base.css" rel="stylesheet">
-  <link href="/static/css/delete_form.css" rel="stylesheet"> <!-- 你剛提供的CSS放這裡 -->
-</head>
-<body>
+{% extends "base.html" %}
 
-<!-- 星空背景 -->
-<div class="stars"></div>
+{% block title %}刪除保單 - ChainSure{% endblock %}
 
-<!-- 導覽列 -->
-<nav class="navbar navbar-expand-lg navbar-light fixed-top">
-    <a class="navbar-brand" href="/">ChainSure</a>
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#navbarNav"
-      aria-controls="navbarNav"
-      aria-expanded="false"
-      aria-label="切換導航"
-    >
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
-      <!-- 客戶服務 -->
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="customerDropdown" role="button" data-bs-toggle="dropdown">
-          客戶服務
-        </a>
-        <ul class="dropdown-menu" aria-labelledby="customerDropdown">
-          <li><a class="dropdown-item" href="#">會員中心</a></li>
-          <li><a class="dropdown-item" href="#">聯繫業務員</a></li>
-          <li><a class="dropdown-item" href="#">點數查詢</a></li>
-        </ul>
-      </li>
-      <!-- 其他功能 -->
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="policyDropdown" data-bs-toggle="dropdown">
-          保單服務
-        </a>
-        <ul class="dropdown-menu" aria-labelledby="policyDropdown">
-        <li><a class="dropdown-item" href="/policy/create/form">新增保單</a></li>
-        <li><a class="dropdown-item" href="/policy/update/form">修改保單</a></li>
-        <li><a class="dropdown-item" href="/policy/read/form">保單查詢</a></li>
-        <li><a class="dropdown-item" href="#">保單內容問題</a></li>
-          </ul>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="claimDropdown" data-bs-toggle="dropdown">
-          理賠服務
-        </a>
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="#">終身壽險</a></li>
-          <li><a class="dropdown-item" href="#">失能照護險</a></li>
-          <li><a class="dropdown-item" href="#">投資型報單</a></li>
-          <li><a class="dropdown-item" href="#">旅遊綜合保險</a></li>
-        </ul>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="activityDropdown" data-bs-toggle="dropdown">
-          熱門活動
-        </a>
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="#">贈品查詢</a></li>
-          <li><a class="dropdown-item" href="#">理賠成功申請案例</a></li>
-        </ul>
-      {% if not current_user.is_authenticated %}
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
-                登入
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="loginDropdown">
-                <li><a class="dropdown-item" href="/user/login/form">保人登入</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="/user/login/form">業務員登入</a></li>
-            </ul>
-        </li>
-        {% endif %}
+{% block extra_css %}
+<link href="/static/css/delete_form.css" rel="stylesheet">
+<style>
+    .delete-container {
+        max-width: 600px;
+        margin: 80px auto 40px;
+        padding: 40px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+    }
 
-        
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
-                身分證驗證
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="loginDropdown">
-                <li><a class="dropdown-item" href="/policy/create_ID_image">身分證驗證</a></li>
-            </ul>
-        </li>
+    .delete-container h2 {
+        color: #4a6ee0;
+        margin-bottom: 30px;
+        font-size: 2.5rem;
+        font-weight: bold;
+        text-align: center;
+        background: linear-gradient(135deg, #4a6ee0, #64c1ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .wallet-info {
+        background: rgba(248, 249, 250, 0.8);
+        padding: 25px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        border: 1px solid #e0e0e0;
+        text-align: center;
+    }
+
+    .btn-warning {
+        background: linear-gradient(135deg, #ffd28b, #ffb347);
+        color: white;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(255, 179, 71, 0.3);
+        margin-bottom: 15px;
+    }
+
+    .btn-warning:hover {
+        background: linear-gradient(135deg, #ffb347, #ff9a00);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 154, 0, 0.4);
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-label {
+        font-weight: bold;
+        color: #555;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background: white;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #64c1ff;
+        box-shadow: 0 0 0 3px rgba(100, 193, 255, 0.1);
+    }
+
+    .submit {
+        background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+        color: white;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 8px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin: 20px auto;
+        width: 100%;
+    }
+
+    .submit:hover {
+        background: linear-gradient(135deg, #ff5252, #ff6b6b);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+    }
+
+    .submit:disabled {
+        background: #cccccc;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    .result {
+        margin-top: 20px;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .success {
+        background: rgba(168, 230, 207, 0.3);
+        color: #2e7d32;
+        border: 1px solid #a8e6cf;
+    }
+
+    .error {
+        background: rgba(255, 205, 210, 0.3);
+        color: #c62828;
+        border: 1px solid #ffcdd2;
+    }
+
+    /* 響應式設計 */
+    @media (max-width: 768px) {
+        .delete-container {
+            margin: 60px 20px 20px;
+            padding: 30px 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="delete-container">
+    <h2>刪除保單</h2>
     
-        {% if current_user.is_authenticated %}
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
-                個人檔案
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="loginDropdown">
-                <li><a class="dropdown-item" href="/user/profile">個人檔案</a></li>
-            </ul>
-        {% endif %}
-        </li>
-    </ul>
-  </div>
-</nav>
+    <div class="wallet-info">
+        <p>當前連接錢包: <span id="walletAddress">未連接</span></p>
+        <button id="connectWallet" class="btn-warning">連接 MetaMask 錢包</button>
+    </div>
 
-<!-- 表單內容 -->
-<div class="container">
-  <h2>刪除保單</h2>
-  <div class="wallet-info text-center mb-4">
-    <p>當前連接錢包: <span id="walletAddress">未連接</span></p>
-    <button id="connectWallet">連接 MetaMask 錢包</button>
-  </div>
+    <div class="form-group">
+        <label for="policyNumber" class="form-label">保單編號:</label>
+        <input type="text" id="policyNumber" class="form-control" placeholder="輸入要刪除的保單編號">
+    </div>
 
-  <div class="form-group mb-3">
-    <label for="policyNumber" class="form-label">保單編號:</label>
-    <input type="text" id="policyNumber" class="form-control" placeholder="輸入要刪除的保單編號">
-  </div>
+    <div class="text-center">
+        <button id="deleteBtn" disabled type="submit" class="submit">
+            <img src="{{ url_for('static', filename='imgs/delete.png') }}" alt="刪除圖示" class="icon">
+            刪除保單
+        </button>
+    </div>
 
-  <div class="text-center">
-    <!-- <button id="deleteBtn" disabled>刪除保單</button> -->
-    <button id="deleteBtn" disabled type="submit" class="submit"><img src="{{ url_for('static', filename='imgs/delete.png') }}" alt="Send Icon" class="icon">刪除保單</button>
-  </div>
-
-  <div id="result" class="result" style="display: none;"></div>
+    <div id="result" class="result" style="display: none;"></div>
 </div>
+{% endblock %}
 
-<!-- 套件 -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
 <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 <script src="/static/js/delete_form.js"></script>
-
-</body>
-</html>
+{% endblock %}

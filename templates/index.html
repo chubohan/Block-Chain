@@ -1,275 +1,510 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChainSure - 智慧保險管理</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link href="/static/css/index.css" rel="stylesheet">
-</head>
+{% extends "base.html" %}
 
-<body>
-    <div class="stars" id="stars"></div>
+{% block title %}ChainSure - 智慧保險管理{% endblock %}
 
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
-        <div class="container">
-            <a class="navbar-brand" href="#">ChainSure</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="切換導航">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="customerDropdown" role="button" aria-expanded="false">
-                            客戶服務
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="customerDropdown">
-                            <li><a class="dropdown-item" href="#">會員中心</a></li>
-                            <li><a class="dropdown-item" href="#">聯繫業務員</a></li>
-                            <li><a class="dropdown-item" href="#">點數查詢</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="policyDropdown" role="button" aria-expanded="false">
-                            保單服務
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="policyDropdown">
-                            <li><a class="dropdown-item" href="/policy/create/form">新增保單</a></li>
-                            <li><a class="dropdown-item" href="/policy/delete/form">刪除查詢</a></li>
-                            <li><a class="dropdown-item" href="/policy/update/form">修改保單</a></li>
-                            <li><a class="dropdown-item" href="/policy/read/form">保單查詢</a></li>
-                            <li><a class="dropdown-item" href="#">保單內容問題</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="claimDropdown" role="button" aria-expanded="false">
-                            理賠服務
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="claimDropdown">
-                            <li><a class="dropdown-item" href="#">終身壽險</a></li>
-                            <li><a class="dropdown-item" href="#">失能照護險</a></li>
-                            <li><a class="dropdown-item" href="#">投資型報單</a></li>
-                            <li><a class="dropdown-item" href="#">旅遊綜合保險</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="activityDropdown" role="button" aria-expanded="false">
-                            熱門活動
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="activityDropdown">
-                            <li><a class="dropdown-item" href="#">贈品查詢</a></li>
-                            <li><a class="dropdown-item" href="#">理賠成功申請案例</a></li>
-                        </ul>
-                    </li>
-                    {% if current_user.insurance_officer %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="activityDropdown" role="button" aria-expanded="false">
-                            我的客戶
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="activityDropdown">
-                            <li><a class="dropdown-item" href="/officer/client-page">我的客戶</a></li>
-                        </ul>
-                    </li>
-                    {% endif %}
-                    {% if not current_user.is_authenticated %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
-                            登入
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="loginDropdown">
-                            <li><a class="dropdown-item" href="/user/login/form">保人登入</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/user/login/form">業務員登入</a></li>
-                        </ul>
-                    </li>
-                    {% endif %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
-                            身分證驗證
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="loginDropdown">
-                            <li><a class="dropdown-item" href="/policy/create_ID_image">身分證驗證</a></li>
-                        </ul>
-                    </li>
-                    {% if not current_user.insurance_officer  and current_user.is_authenticated %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="activityDropdown" role="button" aria-expanded="false">
-                            我的保單
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="activityDropdown">
-                            <li><a class="dropdown-item" href="/policy/mypolicy">我的保單</a></li>
-                        </ul>
-                    </li>
-                    {% endif %}
-                    {% if current_user.is_authenticated %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
-                            個人檔案
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="loginDropdown">
-                            <li><a class="dropdown-item" href="/user/profile">個人檔案</a></li>
-                        </ul>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
-                            DAO
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="loginDropdown">
-                            <li><a class="dropdown-item" href="/dao/">DAO</a></li>
-                        </ul>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
-                            被授權保單
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="loginDropdown">
-                            <li><a class="dropdown-item" href="/policy//authorized_policies">被授權保單</a></li>
-                        </ul>
-                    {% endif %}
-                    </li>
-                    {% if not current_user.insurance_officer  and current_user.is_authenticated %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="/policy/wallet" id="activityDropdown" role="button" aria-expanded="false">
-                            連接錢包
-                        </a>
-                        
-                    </li>
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-    </nav>
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="/static/css/index.css" rel="stylesheet">
+<style>
+    /* 画廊样式 */
+    .gallery {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 100px;
+        width: 60%;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
 
-    <!-- 画廊 -->
-    <div id="gallery" class="carousel slide gallery" data-bs-ride="carousel">
-        <div class="carousel-inner">
-            <div class="carousel-item active">
-                <img src="/static/imgs/dog1.jpg" class="d-block w-100" alt="Image 1">
-            </div>
-            <div class="carousel-item">
-                <img src="/static/imgs/dog5.jpg" class="d-block w-100" alt="Image 2">
-            </div>
-            <div class="carousel-item">
-                <img src="/static/imgs/dog4.jpg" class="d-block w-100" alt="Image 3">
-            </div>
+    .carousel-item {
+        overflow: hidden;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .carousel-item img {
+        object-fit: cover;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 16 / 9;
+        border-radius: 15px;
+    }
+
+    .carousel-indicators button {
+        background-color: rgba(45, 79, 198, 0.5); /* 使用更深的品牌藍色 */
+    }
+
+    .carousel-indicators .active {
+        background-color: #2d4fc6; /* 使用更深的品牌藍色 */
+    }
+
+    /* 主要功能區塊樣式 - 四個一排放置 */
+    .main-features {
+        margin: 50px auto;
+        width: 90%;
+        max-width: 1200px;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 24px;
+        padding: 40px 20px;
+        background: transparent;
+        border-radius: 16px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .feature-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 30px 20px;
+        border-radius: 16px;
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+        transition: all 0.4s ease;
+        border: 2px solid rgba(45, 79, 198, 0.1); /* 使用更深的品牌藍色 */
+        position: relative;
+        overflow: hidden;
+    }
+
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, #2d4fc6, #4a6ee0); /* 使用更深的品牌藍色 */
+    }
+
+    .feature-card:hover {
+        transform: translateY(-8px);
+        border-color: #2d4fc6; /* 使用更深的品牌藍色 */
+        box-shadow: 0 12px 35px rgba(45, 79, 198, 0.15); /* 使用更深的品牌藍色 */
+    }
+
+    .feature-icon {
+        background: linear-gradient(135deg, #2d4fc6, #4a6ee0); /* 使用更深的品牌藍色 */
+        color: white;
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        margin-bottom: 20px;
+        box-shadow: 0 6px 20px rgba(45, 79, 198, 0.3); /* 使用更深的品牌藍色 */
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover .feature-icon {
+        transform: scale(1.1);
+        box-shadow: 0 8px 25px rgba(45, 79, 198, 0.4); /* 使用更深的品牌藍色 */
+    }
+
+    .feature-card h3 {
+        margin: 0 0 12px;
+        font-size: 20px;
+        color: #1e293b;
+        font-weight: 700;
+    }
+
+    .feature-card p {
+        margin: 0 0 20px;
+        font-size: 14px;
+        color: #64748b;
+        line-height: 1.5;
+    }
+
+    .feature-btn {
+        background: linear-gradient(135deg, #2d4fc6, #4a6ee0); /* 使用更深的品牌藍色 */
+        color: white;
+        padding: 10px 24px;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(45, 79, 198, 0.3); /* 使用更深的品牌藍色 */
+    }
+
+    .feature-btn:hover {
+        background: linear-gradient(135deg, #4a6ee0, #2d4fc6); /* 使用更深的品牌藍色 */
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(45, 79, 198, 0.4); /* 使用更深的品牌藍色 */
+        color: white;
+        text-decoration: none;
+    }
+
+    /* 次要功能區塊樣式 */
+    .secondary-features {
+        margin: 40px auto;
+        width: 90%;
+        max-width: 1200px;
+    }
+
+    .secondary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        padding: 30px 20px;
+    }
+
+    .secondary-card {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(45, 79, 198, 0.1); /* 使用更深的品牌藍色 */
+    }
+
+    .secondary-card:hover {
+        transform: translateY(-3px);
+        border-color: #2d4fc6; /* 使用更深的品牌藍色 */
+        box-shadow: 0 6px 20px rgba(45, 79, 198, 0.1); /* 使用更深的品牌藍色 */
+    }
+
+    .secondary-icon {
+        background: linear-gradient(135deg, #2d4fc6, #4a6ee0); /* 使用更深的品牌藍色 */
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(45, 79, 198, 0.3); /* 使用更深的品牌藍色 */
+    }
+
+    .secondary-card h4 {
+        margin: 0 0 4px;
+        font-size: 16px;
+        color: #2d4fc6; /* 使用更深的品牌藍色 */
+        font-weight: 600;
+    }
+
+    .secondary-card p {
+        margin: 0;
+        font-size: 13px;
+        color: #666;
+    }
+
+    .arrow-link {
+        color: #4a6ee0;
+        font-weight: bold;
+        text-decoration: none;
+        margin-top: 8px;
+        display: inline-block;
+        transition: color 0.3s ease;
+    }
+
+    .arrow-link:hover {
+        color: #2d4fc6; /* 使用更深的品牌藍色 */
+        transform: translateX(3px);
+    }
+
+    /* 介紹框樣式 */
+    .intro-box {
+        margin: 60px auto 40px;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 50px 40px;
+        border-radius: 20px;
+        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+        width: 80%;
+        max-width: 900px;
+        text-align: center;
+        border: 1px solid rgba(45, 79, 198, 0.1); /* 使用更深的品牌藍色 */
+    }
+
+    .intro-box h1 {
+        font-size: 36px;
+        font-weight: bold;
+        color: #2d4fc6; /* 使用更深的品牌藍色 */
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, #2d4fc6, #4a6ee0); /* 使用更深的品牌藍色 */
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 0 2px 4px rgba(45, 79, 198, 0.2); /* 添加陰影增強可讀性 */
+    }
+
+    .intro-box p {
+        font-size: 18px;
+        color: #555;
+        line-height: 1.8;
+        margin-bottom: 30px;
+    }
+
+    .intro-box .btn {
+        background: linear-gradient(135deg, #2d4fc6, #4a6ee0); /* 使用更深的品牌藍色 */
+        padding: 15px 35px;
+        font-size: 18px;
+        color: white;
+        border-radius: 12px;
+        text-decoration: none;
+        border: none;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 20px rgba(45, 79, 198, 0.3); /* 使用更深的品牌藍色 */
+    }
+
+    .intro-box .btn:hover {
+        background: linear-gradient(135deg, #4a6ee0, #2d4fc6); /* 使用更深的品牌藍色 */
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(45, 79, 198, 0.4); /* 使用更深的品牌藍色 */
+    }
+
+    /* 立即意見反饋按鈕 */
+    .feedback-button {
+        position: fixed;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        background: linear-gradient(135deg, #2d4fc6, #4a6ee0); /* 使用更深的品牌藍色 */
+        color: white;
+        padding: 12px 18px;
+        border-radius: 20px 0 0 20px;
+        font-size: 14px;
+        text-align: center;
+        writing-mode: vertical-rl;
+        box-shadow: 0 4px 15px rgba(45, 79, 198, 0.3); /* 使用更深的品牌藍色 */
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: bold;
+        border: none;
+        z-index: 1000;
+    }
+
+    .feedback-button:hover {
+        background: linear-gradient(135deg, #4a6ee0, #2d4fc6); /* 使用更深的品牌藍色 */
+        transform: translateY(-50%) translateX(5px);
+        box-shadow: 0 6px 20px rgba(45, 79, 198, 0.4); /* 使用更深的品牌藍色 */
+    }
+
+    /* 響應式設計 */
+    @media (max-width: 1200px) {
+        .features-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .gallery {
+            width: 90%;
+            margin-top: 80px;
+        }
+        
+        .features-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+            padding: 30px 15px;
+        }
+        
+        .intro-box {
+            width: 95%;
+            padding: 30px 20px;
+        }
+        
+        .secondary-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .feedback-button {
+            padding: 10px 15px;
+            font-size: 12px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .feature-card {
+            padding: 25px 15px;
+        }
+        
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+        }
+        
+        .intro-box h1 {
+            font-size: 28px;
+        }
+        
+        .intro-box p {
+            font-size: 16px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- 画廊 -->
+<div id="gallery" class="carousel slide gallery" data-bs-ride="carousel">
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <img src="/static/imgs/ChainSure Cat.png" class="d-block w-100" alt="ChainSure 保險平台">
         </div>
-        <div class="carousel-indicators">
-            <button type="button" data-bs-target="#gallery" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-            <button type="button" data-bs-target="#gallery" data-bs-slide-to="1" aria-label="Slide 2"></button>
-            <button type="button" data-bs-target="#gallery" data-bs-slide-to="2" aria-label="Slide 3"></button>
+        <div class="carousel-item">
+            <img src="/static/imgs/image-32.webp" class="d-block w-100" alt="區塊鏈保險服務">
         </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#gallery" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#gallery" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-        </button>
     </div>
-
-<!-- 功能區塊 -->
-<section class="product-category-grid">
-    <div class="category-card">
-        <div class="icon"><i class="fas fa-file-alt"></i></div>
-        <div>
-            <h3>產品保單</h3>
-            <p>可簽署保單</p>
-            <a href="/policy/create/form" class="arrow-link">➜</a>
-        </div>
+    <div class="carousel-indicators">
+        <button type="button" data-bs-target="#gallery" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+        <button type="button" data-bs-target="#gallery" data-bs-slide-to="1" aria-label="Slide 2"></button>
     </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#gallery" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#gallery" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
+</div>
 
-    <div class="category-card">
-        <div class="icon"><i class="fas fa-id-card-alt"></i></div>
-        <div>
+<!-- 主要功能區塊 - 四個一排放置 -->
+<section class="main-features">
+    <div class="features-grid">
+        <!-- DAO 保險平台 -->
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <h3>DAO 保險平台</h3>
+            <p>加入去中心化自治組織，享受共同保障與民主理賠投票</p>
+            <a href="/dao" class="feature-btn">進入 DAO</a>
+        </div>
+
+        <!-- 創建保單 -->
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-file-contract"></i>
+            </div>
+            <h3>創建保單</h3>
+            <p>快速建立新的保險保單，享受區塊鏈技術帶來的安全保障</p>
+            <a href="/policy/create/form" class="feature-btn">創建保單</a>
+        </div>
+
+        <!-- 我的保單 -->
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-id-card"></i>
+            </div>
             <h3>我的保單</h3>
-            <p>查看已有保單</p>
-            <a href="/policy/read/form" class="arrow-link">➜</a>
+            <p>查看和管理您所有的保險保單，隨時掌握保障狀況</p>
+            <a href="/policy/read/form" class="feature-btn">查看保單</a>
         </div>
-    </div>
 
-    <div class="category-card">
-        <div class="icon"><i class="fas fa-key"></i></div>
-        <div>
-            <h3>保單授權設定</h3>
-            <p>設定保單授權權限。</p>
-            <a href="insSet.html" class="arrow-link">➜</a>
-        </div>
-    </div>
-
-    <div class="category-card">
-        <div class="icon"><i class="fas fa-tasks"></i></div>
-        <div>
-            <h3>保單審理進度</h3>
-            <p>追蹤理賠或審核狀態。</p>
-            <a href="progress.html" class="arrow-link">➜</a>
-        </div>
-    </div>
-
-    <div class="category-card">
-        <div class="icon"><i class="fas fa-bell"></i></div>
-        <div>
-            <h3>系統通知</h3>
-            <p>查看最新系統與政策消息。</p>
-            <a href="systemCall.html" class="arrow-link">➜</a>
-        </div>
-    </div>
-
-    <div class="category-card">
-        <div class="icon"><i class="fas fa-user-friends"></i></div>
-        <div>
-            <h3>聯繫業務員</h3>
-            <p>立即與您的專屬顧問聯繫。</p>
-            <a href="connect.html" class="arrow-link">➜</a>
-        </div>
-    </div>
-
-    <div class="category-card">
-        <div class="icon"><i class="fas fa-coins"></i></div>
-        <div>
-            <h3>會員點數</h3>
-            <p>查詢與使用您的積點回饋。</p>
-            <a href="policy.html" class="arrow-link">➜</a>
-        </div>
-    </div>
-
-    <div class="category-card">
-        <div class="icon"><i class="fas fa-users"></i></div>
-        <div>
-            <h3>家屬查詢</h3>
-            <p>查詢家屬的保障與保單。</p>
-            <a href="family.html" class="arrow-link">➜</a>
-        </div>
-    </div>
-
-    <div class="category-card">
-        <div class="icon"><i class="fas fa-cogs"></i></div>
-        <div>
-            <h3>上傳確認</h3>
-            <p>區塊鏈上鏈最後確認</p>
-            <a href="admin.html" class="arrow-link">➜</a>
+        <!-- 理賠成功案例 -->
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <h3>理賠案例</h3>
+            <p>查看成功理賠案例，了解我們的服務品質與效率</p>
+            <a href="/claims/success-cases" class="feature-btn">查看案例</a>
         </div>
     </div>
 </section>
 
-    <!-- 介紹框 -->
-    <div class="intro-box">
-        <h1>ChainSure - 智慧保險管理</h1>
-        <p>
-            在現代社會，保險資訊透明化至關重要。ChainSure利用區塊鏈技術和智能合約，改變保險數據存儲與管理模式，提供更加安全、便捷、透明的保險服務。
-        </p>
-        <a href="#" class="btn">了解更多</a>
+<!-- 介紹框 -->
+<div class="intro-box">
+    <h1>ChainSure - 智慧保險管理</h1>
+    <p>
+        在現代社會，保險資訊透明化至關重要。ChainSure利用區塊鏈技術和智能合約，改變保險數據存儲與管理模式，提供更加安全、便捷、透明的保險服務。
+    </p>
+    <a href="/dao" class="btn">探索 DAO 保險</a>
+</div>
+
+<!-- 次要功能區塊 -->
+<section class="secondary-features">
+    <div class="secondary-grid">
+        <div class="secondary-card">
+            <div class="secondary-icon"><i class="fas fa-key"></i></div>
+            <div>
+                <h4>保單授權設定</h4>
+                <p>設定保單授權權限</p>
+                <a href="insSet.html" class="arrow-link">➜</a>
+            </div>
+        </div>
+
+        <div class="secondary-card">
+            <div class="secondary-icon"><i class="fas fa-tasks"></i></div>
+            <div>
+                <h4>保單審理進度</h4>
+                <p>追蹤理賠或審核狀態</p>
+                <a href="progress.html" class="arrow-link">➜</a>
+            </div>
+        </div>
+
+        <div class="secondary-card">
+            <div class="secondary-icon"><i class="fas fa-bell"></i></div>
+            <div>
+                <h4>系統通知</h4>
+                <p>查看最新系統與政策消息</p>
+                <a href="systemCall.html" class="arrow-link">➜</a>
+            </div>
+        </div>
+
+        <div class="secondary-card">
+            <div class="secondary-icon"><i class="fas fa-user-friends"></i></div>
+            <div>
+                <h4>聯繫業務員</h4>
+                <p>立即與您的專屬顧問聯繫</p>
+                <a href="connect.html" class="arrow-link">➜</a>
+            </div>
+        </div>
+
+        <div class="secondary-card">
+            <div class="secondary-icon"><i class="fas fa-coins"></i></div>
+            <div>
+                <h4>會員點數</h4>
+                <p>查詢與使用您的積點回饋</p>
+                <a href="policy.html" class="arrow-link">➜</a>
+            </div>
+        </div>
+
+        <div class="secondary-card">
+            <div class="secondary-icon"><i class="fas fa-users"></i></div>
+            <div>
+                <h4>家屬查詢</h4>
+                <p>查詢家屬的保障與保單</p>
+                <a href="family.html" class="arrow-link">➜</a>
+            </div>
+        </div>
+
+        <div class="secondary-card">
+            <div class="secondary-icon"><i class="fas fa-cogs"></i></div>
+            <div>
+                <h4>上傳確認</h4>
+                <p>區塊鏈上鏈最後確認</p>
+                <a href="admin.html" class="arrow-link">➜</a>
+            </div>
+        </div>
     </div>
+</section>
 
-    <!-- 意見反饋按鈕 -->
-    <div class="feedback-button">
-        留下您的意見
-    </div>
+<!-- 意見反饋按鈕 -->
+<div class="feedback-button">
+    留下您的意見
+</div>
+{% endblock %}
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/static/js/index.js"></script>
-</body>
-
-</html>
-
-
+{% block extra_js %}
+<script src="/static/js/index.js"></script>
+{% endblock %}

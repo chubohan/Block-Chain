@@ -1,68 +1,507 @@
-<!-- templates/user/profile.html -->
-<!DOCTYPE html>
-<html>
-<head>
-    <title>使用者資料</title>
-    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="/static/css/profile.css" rel="stylesheet">
-</head>
-<body>
-    <div class="stars"></div>
-    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
-    <a class="navbar-brand" href="/">ChainSure</a>
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#navbarNav"
-      aria-controls="navbarNav"
-      aria-expanded="false"
-      aria-label="切換導航"
-    >
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
+{% extends "base.html" %}
 
-      </ul>
-    </div>
-  </div>
-</nav>
-    <div class="container">
-	
+{% block title %}使用者資料 - ChainSure{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 40px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-container h2 {
+        color: #4a6ee0;
+        font-weight: bold;
+        margin-bottom: 30px;
+        text-align: center;
+        font-size: 2.5rem;
+        border-bottom: 2px solid #64c1ff;
+        padding-bottom: 15px;
+    }
+
+    /* 使用者資料卡片 */
+    .profile-card {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 30px;
+        border-left: 4px solid #64c1ff;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .profile-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-item:last-child {
+        border-bottom: none;
+    }
+
+    .profile-label {
+        font-weight: bold;
+        color: #4a6ee0;
+        font-size: 1.1rem;
+    }
+
+    .profile-value {
+        color: #555;
+        font-size: 1.1rem;
+    }
+
+    /* 錢包區域 */
+    .wallet-section {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 12px;
+        padding: 25px;
+        margin: 25px 0;
+        border-left: 4px solid #88d4ab;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .wallet-address {
+        font-family: monospace;
+        background: rgba(100, 193, 255, 0.1);
+        padding: 10px 15px;
+        border-radius: 8px;
+        word-break: break-all;
+        margin: 15px 0;
+        color: #333;
+        border: 1px solid rgba(100, 193, 255, 0.3);
+    }
+
+    .wallet-status {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+
+    .wallet-connected {
+        background: rgba(136, 212, 171, 0.2);
+        color: #2e7d32;
+        border: 1px solid #88d4ab;
+    }
+
+    .wallet-disconnected {
+        background: rgba(255, 107, 107, 0.2);
+        color: #c62828;
+        border: 1px solid #ff6b6b;
+    }
+
+    /* 按鈕樣式 */
+    .btn-warning {
+        background: linear-gradient(135deg, #a8e6cf, #88d4ab);
+        color: white;
+        border: none;
+    }
+
+    .btn-warning:hover {
+        background: linear-gradient(135deg, #88d4ab, #6bc49c);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(136, 212, 171, 0.3);
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+        color: white;
+        border: none;
+    }
+
+    .btn-danger:hover {
+        background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #8ac6ff, #64c1ff);
+        color: white;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #64c1ff, #4a6ee0);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(74, 110, 224, 0.3);
+    }
+
+    /* 未登入狀態 */
+    .login-prompt {
+        text-align: center;
+        padding: 40px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .login-prompt h1 {
+        color: #4a6ee0;
+        margin-bottom: 20px;
+    }
+
+    .login-prompt p {
+        color: #666;
+        margin-bottom: 20px;
+    }
+
+    /* 響應式調整 */
+    @media (max-width: 768px) {
+        .profile-container {
+            margin: 20px;
+            padding: 20px;
+        }
+        
+        .profile-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        h2 {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
     <h2>使用者資料</h2>
-    <div class="form-wrapper">
-    <div>
-        {% if current_user.is_authenticated %}
-        <p>使用者名稱: {{ user.username }}</p>
-        <p>電子郵件: {{ user.gmail }}</p>
-        <p>年齡: {{ user.age if user.age else '未填寫' }}</p>
-        <p>性別: 
-            {% if user.gender == 'male' %} 男性
-            {% elif user.gender == 'female' %} 女性
-            {% elif user.gender == 'other' %} 其他
-            {% else %} 未填寫
-            {% endif %}
-        </p>
-        <p>身分: {% if current_user.insurance_officer == 1 %} 管理員
-                  {% else %} 客戶
-                  {% endif %}</p>
-        <p>目前錢包:{% if user.wallet %}
-                    {{ user.wallet }}
-                    {% else %}尚未連接
-                    {% endif %}</p><a href="/policy/wallet">我要修改</a></li>          
+    
+    {% if current_user.is_authenticated %}
+    <div class="profile-card">
+        <div class="profile-item">
+            <span class="profile-label">使用者名稱</span>
+            <span class="profile-value">{{ user.username }}</span>
+        </div>
+        <div class="profile-item">
+            <span class="profile-label">電子郵件</span>
+            <span class="profile-value">{{ user.gmail }}</span>
+        </div>
+        <div class="profile-item">
+            <span class="profile-label">年齡</span>
+            <span class="profile-value">{{ user.age if user.age else '未填寫' }}</span>
+        </div>
+        <div class="profile-item">
+            <span class="profile-label">性別</span>
+            <span class="profile-value">
+                {% if user.gender == 'male' %} 男性
+                {% elif user.gender == 'female' %} 女性
+                {% elif user.gender == 'other' %} 其他
+                {% else %} 未填寫
+                {% endif %}
+            </span>
+        </div>
+        <div class="profile-item">
+            <span class="profile-label">身分</span>
+            <span class="profile-value">
+                {% if current_user.insurance_officer == 1 %} 管理員
+                {% else %} 客戶
+                {% endif %}
+            </span>
+        </div>
     </div>
-    <form action="/user/logout" method="POST">
-        <button type="submit">登出</button>
-    </form>
+
+    <div class="wallet-section">
+        <div class="profile-item">
+            <span class="profile-label">目前錢包</span>
+            <span class="profile-value">
+                {% if user.wallet %}
+                <span class="wallet-address" id="walletAddressDisplay">{{ user.wallet }}</span>
+                {% else %}
+                <span id="walletAddressDisplay">尚未連接</span>
+                {% endif %}
+            </span>
+        </div>
+        <div class="profile-item">
+            <span class="profile-label">連接狀態</span>
+            <span class="profile-value">
+                <span id="walletStatusDisplay" class="wallet-status wallet-disconnected">未連接</span>
+            </span>
+        </div>
+        <div class="text-center mt-3">
+            <button id="connectWalletBtn" class="btn btn-primary me-2">
+                <i class="fas fa-plug me-2"></i>連接錢包
+            </button>
+            <button id="disconnectWalletBtn" class="btn btn-danger" disabled>
+                <i class="fas fa-power-off me-2"></i>斷開連接
+            </button>
+        </div>
+        <div class="text-center mt-2">
+            <a href="/policy/wallet" class="btn btn-warning">
+                <i class="fas fa-edit me-2"></i>修改錢包地址
+            </a>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <form action="/user/logout" method="POST" class="d-inline">
+            <button type="submit" class="btn btn-danger">登出系統</button>
+        </form>
+    </div>
     {% else %}
-    <h1>請先登入</h1>
-    <a href="/user/profile">前往登入</a>
+    <div class="login-prompt">
+        <h1>請先登入</h1>
+        <p>您需要登入才能查看使用者資料</p>
+        <a href="/user/login/form" class="btn btn-primary">前往登入</a>
+    </div>
     {% endif %}
-    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/eth-crypto@2.3.0/dist/eth-crypto-browser.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/static/js/profile.js"></script>
-</body>
-</html>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+<script>
+    // 錢包連接功能
+    class ProfileWalletManager {
+        constructor() {
+            this.isConnected = false;
+            this.walletAddress = null;
+            this.init();
+        }
+
+        init() {
+            this.loadWalletState();
+            this.setupEventListeners();
+            this.updateUI();
+        }
+
+        loadWalletState() {
+            // 從 localStorage 讀取錢包狀態
+            const savedState = localStorage.getItem('walletState');
+            if (savedState) {
+                try {
+                    const state = JSON.parse(savedState);
+                    this.isConnected = state.isConnected;
+                    this.walletAddress = state.walletAddress;
+                    console.log('載入錢包狀態:', state);
+                } catch (e) {
+                    console.error('解析錢包狀態失敗:', e);
+                }
+            }
+        }
+
+        saveWalletState() {
+            const state = {
+                isConnected: this.isConnected,
+                walletAddress: this.walletAddress,
+                timestamp: Date.now()
+            };
+            localStorage.setItem('walletState', JSON.stringify(state));
+            console.log('保存錢包狀態:', state);
+        }
+
+        async connectWallet() {
+            if (typeof window.ethereum === 'undefined') {
+                alert('請安裝 MetaMask 錢包擴展');
+                return;
+            }
+
+            try {
+                // 請求帳戶訪問
+                const accounts = await window.ethereum.request({ 
+                    method: 'eth_requestAccounts' 
+                });
+                
+                if (accounts && accounts.length > 0) {
+                    this.walletAddress = accounts[0];
+                    this.isConnected = true;
+                    
+                    // 保存狀態
+                    this.saveWalletState();
+                    
+                    // 更新 UI
+                    this.updateUI();
+                    
+                    // 發送全局事件
+                    this.dispatchWalletChange();
+                    
+                    // 發送到伺服器保存
+                    await this.saveToServer(this.walletAddress);
+                    
+                    alert('錢包連接成功！');
+                }
+            } catch (error) {
+                console.error('連接錢包失敗:', error);
+                if (error.code === 4001) {
+                    alert('使用者拒絕了錢包連接請求');
+                } else {
+                    alert('連接錢包失敗: ' + error.message);
+                }
+            }
+        }
+
+        disconnectWallet() {
+            this.isConnected = false;
+            this.walletAddress = null;
+            
+            // 保存狀態
+            this.saveWalletState();
+            
+            // 更新 UI
+            this.updateUI();
+            
+            // 發送全局事件
+            this.dispatchWalletChange();
+            
+            alert('錢包已斷開連接');
+        }
+
+        updateUI() {
+            const addressDisplay = document.getElementById('walletAddressDisplay');
+            const statusDisplay = document.getElementById('walletStatusDisplay');
+            const connectBtn = document.getElementById('connectWalletBtn');
+            const disconnectBtn = document.getElementById('disconnectWalletBtn');
+
+            if (this.isConnected && this.walletAddress) {
+                // 已連接狀態
+                const shortAddress = `${this.walletAddress.substring(0, 6)}...${this.walletAddress.substring(38)}`;
+                addressDisplay.textContent = this.walletAddress;
+                addressDisplay.className = 'wallet-address';
+                addressDisplay.title = '點擊複製錢包地址';
+                
+                statusDisplay.textContent = '已連接';
+                statusDisplay.className = 'wallet-status wallet-connected';
+                
+                connectBtn.disabled = true;
+                connectBtn.innerHTML = '<i class="fas fa-check me-2"></i>已連接';
+                connectBtn.classList.remove('btn-primary');
+                connectBtn.classList.add('btn-success');
+                
+                disconnectBtn.disabled = false;
+            } else {
+                // 未連接狀態
+                addressDisplay.textContent = '尚未連接';
+                addressDisplay.className = '';
+                addressDisplay.title = '';
+                
+                statusDisplay.textContent = '未連接';
+                statusDisplay.className = 'wallet-status wallet-disconnected';
+                
+                connectBtn.disabled = false;
+                connectBtn.innerHTML = '<i class="fas fa-plug me-2"></i>連接錢包';
+                connectBtn.classList.remove('btn-success');
+                connectBtn.classList.add('btn-primary');
+                
+                disconnectBtn.disabled = true;
+            }
+        }
+
+        setupEventListeners() {
+            // 連接按鈕
+            document.getElementById('connectWalletBtn').addEventListener('click', () => {
+                this.connectWallet();
+            });
+
+            // 斷開連接按鈕
+            document.getElementById('disconnectWalletBtn').addEventListener('click', () => {
+                if (confirm('確定要斷開錢包連接嗎？')) {
+                    this.disconnectWallet();
+                }
+            });
+
+            // 複製錢包地址
+            document.getElementById('walletAddressDisplay').addEventListener('click', () => {
+                if (this.walletAddress) {
+                    navigator.clipboard.writeText(this.walletAddress).then(() => {
+                        const originalText = this.walletAddress;
+                        document.getElementById('walletAddressDisplay').textContent = '已複製！';
+                        setTimeout(() => {
+                            document.getElementById('walletAddressDisplay').textContent = originalText;
+                        }, 2000);
+                    });
+                }
+            });
+
+            // 監聽全局錢包狀態變化
+            document.addEventListener('walletStateChanged', (e) => {
+                const { isConnected, walletAddress } = e.detail;
+                this.isConnected = isConnected;
+                this.walletAddress = walletAddress;
+                this.updateUI();
+            });
+
+            // 監聽 MetaMask 帳戶變化
+            if (window.ethereum) {
+                window.ethereum.on('accountsChanged', (accounts) => {
+                    if (accounts.length === 0) {
+                        this.disconnectWallet();
+                    } else {
+                        this.walletAddress = accounts[0];
+                        this.isConnected = true;
+                        this.saveWalletState();
+                        this.updateUI();
+                        this.dispatchWalletChange();
+                    }
+                });
+
+                window.ethereum.on('chainChanged', () => {
+                    window.location.reload();
+                });
+            }
+        }
+
+        dispatchWalletChange() {
+            const event = new CustomEvent('walletStateChanged', {
+                detail: {
+                    isConnected: this.isConnected,
+                    walletAddress: this.walletAddress
+                }
+            });
+            document.dispatchEvent(event);
+        }
+
+        async saveToServer(walletAddress) {
+            try {
+                const response = await fetch('/api/save-wallet-address', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        wallet_address: walletAddress
+                    })
+                });
+                
+                if (response.ok) {
+                    console.log('錢包地址已保存到伺服器');
+                } else {
+                    console.error('保存錢包地址失敗');
+                }
+            } catch (error) {
+                console.error('保存錢包地址失敗:', error);
+            }
+        }
+    }
+
+    // 頁面載入時初始化
+    document.addEventListener('DOMContentLoaded', function() {
+        // 初始化錢包管理器
+        const walletManager = new ProfileWalletManager();
+        
+        // 檢查是否有預設的錢包地址
+        const defaultWallet = '{{ user.wallet if user.wallet else "" }}';
+        if (defaultWallet && !walletManager.walletAddress) {
+            // 如果有資料庫中的錢包地址，自動連接
+            walletManager.walletAddress = defaultWallet;
+            walletManager.isConnected = true;
+            walletManager.saveWalletState();
+            walletManager.updateUI();
+            walletManager.dispatchWalletChange();
+        }
+        
+        console.log('使用者資料頁面載入完成，錢包狀態:', {
+            isConnected: walletManager.isConnected,
+            walletAddress: walletManager.walletAddress
+        });
+    });
+</script>
+{% endblock %}

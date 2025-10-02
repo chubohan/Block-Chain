@@ -1,146 +1,31 @@
+{% extends "base.html" %}
 
+{% block title %}ChainSure - 智慧保險管理{% endblock %}
 
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChainSure - 智慧保險管理</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link href="/static/css/index.css" rel="stylesheet">
-</head>
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="/static/css/index.css" rel="stylesheet">
+{% endblock %}
 
-<body>
-    <div class="stars" id="stars"></div>
+{% block content %}
+<button id="connectBtn" class="btn btn-warning" onclick="connectWallet()">連接錢包</button>
+<p>當前錢包地址：<span id="walletAddress">尚未連接</span></p>
 
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
-        <div class="container">
-            <a class="navbar-brand" href="/">ChainSure</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="切換導航">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="customerDropdown" role="button" aria-expanded="false">
-                            客戶服務
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="customerDropdown">
-                            <li><a class="dropdown-item" href="#">會員中心</a></li>
-                            <li><a class="dropdown-item" href="#">聯繫業務員</a></li>
-                            <li><a class="dropdown-item" href="#">點數查詢</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="policyDropdown" role="button" aria-expanded="false">
-                            保單服務
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="policyDropdown">
-                            <li><a class="dropdown-item" href="/policy/create/form">新增保單</a></li>
-                            <li><a class="dropdown-item" href="/policy/delete/form">刪除查詢</a></li>
-                            <li><a class="dropdown-item" href="/policy/update/form">修改保單</a></li>
-                            <li><a class="dropdown-item" href="/policy/read/form">保單查詢</a></li>
-                            <li><a class="dropdown-item" href="#">保單內容問題</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="claimDropdown" role="button" aria-expanded="false">
-                            理賠服務
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="claimDropdown">
-                            <li><a class="dropdown-item" href="#">終身壽險</a></li>
-                            <li><a class="dropdown-item" href="#">失能照護險</a></li>
-                            <li><a class="dropdown-item" href="#">投資型報單</a></li>
-                            <li><a class="dropdown-item" href="#">旅遊綜合保險</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="activityDropdown" role="button" aria-expanded="false">
-                            熱門活動
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="activityDropdown">
-                            <li><a class="dropdown-item" href="#">贈品查詢</a></li>
-                            <li><a class="dropdown-item" href="#">理賠成功申請案例</a></li>
-                        </ul>
-                    </li>
-                    {% if current_user.insurance_officer %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="activityDropdown" role="button" aria-expanded="false">
-                            我的客戶
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="activityDropdown">
-                            <li><a class="dropdown-item" href="/officer/client-page">我的客戶</a></li>
-                        </ul>
-                    </li>
-                    {% endif %}
-                    {% if not current_user.is_authenticated %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
-                            登入
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="loginDropdown">
-                            <li><a class="dropdown-item" href="/user/login/form">保人登入</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/user/login/form">業務員登入</a></li>
-                        </ul>
-                    </li>
-                    {% endif %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
-                            身分證驗證
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="loginDropdown">
-                            <li><a class="dropdown-item" href="/policy/create_ID_image">身分證驗證</a></li>
-                        </ul>
-                    </li>
-                    {% if not current_user.insurance_officer  and current_user.is_authenticated %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="activityDropdown" role="button" aria-expanded="false">
-                            我的保單
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="activityDropdown">
-                            <li><a class="dropdown-item" href="/policy/mypolicy">我的保單</a></li>
-                        </ul>
-                    </li>
-                    {% endif %}
-                    {% if current_user.is_authenticated %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
-                            個人檔案
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="loginDropdown">
-                            <li><a class="dropdown-item" href="/user/profile">個人檔案</a></li>
-                        </ul>
-                    {% endif %}
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+<button id="confirmButton" onclick="confirmConnection()">✅ 確認連接</button>
 
-    <button id="connectBtn" class="btn btn-warning" onclick="connectWallet()">連接錢包</button>
-    <p>當前錢包地址：<span id="walletAddress">尚未連接</span></p>
+<p class="mt-4 text-white" style="font-size: 14px;">
+    我是聲明
+</p>
 
-    <button id="confirmButton"  onclick="confirmConnection()">✅ 確認連接</button>
+<div class="form-check mt-3">
+    <input class="form-check-input" type="checkbox" id="agreeCheckbox" />
+    <label class="form-check-label text-white" for="agreeCheckbox">
+        我已閱讀並同意上述聲明
+    </label>
+</div>
+{% endblock %}
 
-    <p class="mt-4 text-white" style="font-size: 14px;">
-            我是聲明
-        </p>
-
-      <div class="form-check mt-3">
-        <input class="form-check-input" type="checkbox" id="agreeCheckbox" />
-        <label class="form-check-label text-white" for="agreeCheckbox">
-          我已閱讀並同意上述聲明
-        </label>
-      </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
-    <script src="/static/js/wallet.js"></script>
-</body>
-
-</html>
-
-
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+<script src="/static/js/wallet.js"></script>
+{% endblock %}

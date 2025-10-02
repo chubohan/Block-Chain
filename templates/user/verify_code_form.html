@@ -1,239 +1,181 @@
-<!-- templates/user/verify_code_form.html -->
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-    <meta charset="UTF-8">
-    <title>輸入驗證碼</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <div class="container">
-        <h1>請輸入您收到的驗證碼</h1>
+{% extends "base.html" %}
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            <ul class="flashes">
-              {% for category, message in messages %}
-                <li class="flash-{{ category }}">{{ message }}</li>
-              {% endfor %}
-            </ul>
-          {% endif %}
-        {% endwith %}
+{% block title %}輸入驗證碼 - ChainSure{% endblock %}
 
-        <form action="{{ url_for('user.verify_code') }}" method="POST">
-            <label for="code">驗證碼：</label>
-            <input type="text" id="code" name="code" required pattern="\d{6}" placeholder="請輸入6位數驗證碼">
-            <button type="submit">驗證</button>
-        </form>
-    </div>
-</body>
-<script>
-        // 星星動畫生成
-        function createStars() {
-            const numStars = 200;
-            for (let i = 0; i < numStars; i++) {
-                const star = document.createElement('div');
-                star.classList.add('star');
-                const x = Math.random() * 100;
-                const y = Math.random() * 100;
-                const duration = Math.random() * 2 + 1;
-                const delay = Math.random() * 5;
-                star.style.top = `${y}vh`;
-                star.style.left = `${x}vw`;
-                star.style.animationDuration = `${duration}s`;
-                star.style.animationDelay = `${delay}s`;
-                document.body.appendChild(star);
-            }
-        }
-        createStars();
-    </script>
+{% block extra_css %}
 <style>
-/* 你的基底設定 */
-body {
-  margin: 0;
-  padding-top: 120px;
-  min-height: 100vh;
-  background: #1a1a2e;
-  color: white;
-  font-family: 'Noto Sans TC', Arial, sans-serif;
-  overflow-x: hidden;
-  overflow-y: auto;
-  position: relative;
-}
+    .verify-container {
+        max-width: 500px;
+        margin: 40px auto;
+        padding: 40px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
 
-.stars {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%; /* 固定覆蓋整個視窗 */
-  background: url('https://cdn.pixabay.com/photo/2017/08/30/02/18/starry-night-2695563_960_720.jpg') repeat; /* 可以改 repeat-y */
-  background-size: cover;
-  z-index: -999;
-  pointer-events: none;
-}
+    .verify-container h1 {
+        color: #4a6ee0;
+        margin-bottom: 30px;
+        font-size: 28px;
+        font-weight: bold;
+    }
 
-/* 閃爍小星星 */
-.star {
-  position: absolute;
-  border-radius: 50%;
-  width: 2px;
-  height: 2px;
-  background-color: white;
-  animation: twinkle 1.5s infinite alternate;
-}
+    .verify-form {
+        text-align: left;
+    }
 
-@keyframes twinkle {
-  0% { opacity: 0.6; transform: scale(1); }
-  100% { opacity: 1; transform: scale(1.5); }
-}
+    .form-group {
+        margin-bottom: 25px;
+    }
 
-.navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  background: transparent;
-  padding: 0.8rem 1.5rem;
-  transition: transform 0.3s ease;
-}
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #555;
+        font-weight: bold;
+        font-size: 16px;
+    }
 
-.navbar.hidden {
-  transform: translateY(-100%);
-}
+    .form-group input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background: white;
+    }
 
-.navbar-brand {
-  font-weight: bold;
-  font-size: 2rem;
-  color: #ffffff;
-}
+    .form-group input:focus {
+        outline: none;
+        border-color: #64c1ff;
+        box-shadow: 0 0 0 3px rgba(100, 193, 255, 0.1);
+    }
 
-.nav-link {
-  color: #ffffff;
-  font-size: 1.1rem;
-  padding: 0.5rem 1rem;
-  text-transform: uppercase;
-}
+    .verify-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #8ac6ff, #64c1ff);
+        color: white;
+        padding: 15px;
+        border: none;
+        border-radius: 8px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(100, 193, 255, 0.3);
+    }
 
-.nav-link:hover {
-  color: #f39c12;
-}
+    .verify-btn:hover {
+        background: linear-gradient(135deg, #64c1ff, #4a6ee0);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(74, 110, 224, 0.4);
+    }
 
-/* Dropdown Menu */
-.dropdown-menu {
-  min-width: 200px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
-  background-color: #222;
-  display: none;
-}
+    .flashes {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 25px;
+    }
 
-.nav-item:hover .dropdown-menu {
-  display: block;
-}
+    .flash-success {
+        background: linear-gradient(135deg, #a8e6cf, #88d4ab);
+        color: white;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
 
-.dropdown-item {
-  padding: 12px 16px;
-  color: #fff;
-  font-size: 1.1rem;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
+    .flash-error {
+        background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+        color: white;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
 
-.dropdown-item:hover {
-  background-color: #f39c12;
-  color: #222;
-}
+    .flash-warning {
+        background: linear-gradient(135deg, #ffd89b, #ffb347);
+        color: white;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
 
-.dropdown-divider {
-  border-top: 1px solid #444;
-}
+    .code-input {
+        text-align: center;
+        font-size: 18px;
+        font-weight: bold;
+        letter-spacing: 8px;
+    }
 
-/* 容器 */
-.container {
-  max-width: 600px;
-  margin: 40px auto 0 auto;
-  padding: 50px 20px 40px 20px;
-  z-index: 1;
-  background: rgba(0, 0, 0, 0.5);
-  border-radius: 12px;
-  box-shadow: 0 0 15px rgba(0,0,0,0.6);
-  color: #f0f0f5;
-  font-weight: 500;
-  letter-spacing: 0.03em;
-  position: relative;  /* ✅ 要加這個才能讓 z-index 生效 */
-  background: rgba(0, 0, 0, 0.85);  /* ✅ 更不透明一點，遮擋星星 */
-}
-body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            background: #1a1a2e;
-            color: white;
-            font-family: 'Noto Sans TC', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            position: relative;
-        }
+    .code-input::placeholder {
+        letter-spacing: normal;
+        font-weight: normal;
+    }
 
-        .stars {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url('https://cdn.pixabay.com/photo/2017/08/30/02/18/starry-night-2695563_960_720.jpg') no-repeat center center fixed;
-            background-size: cover;
-            z-index: -1;
-        }
-
-        .star {
-            position: absolute;
-            border-radius: 50%;
-            width: 2px;
-            height: 2px;
-            background-color: white;
-            animation: twinkle 1.5s infinite alternate;
-        }
-
-        @keyframes twinkle {
-            0% { opacity: 0.8; transform: scale(1); }
-            100% { opacity: 0.2; transform: scale(1.5); }
-        }
-
-        .login-box {
-            background: rgba(0, 0, 0, 0.6);
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            width: 100%;
-            max-width: 450px;
-            text-align: center;
-            z-index: 10;
-        }
-
-        .btn-custom {
-            background-color: #ff6347;
-            border: none;
-            color: white;
-            padding: 12px 24px;
-            font-size: 18px;
-            border-radius: 5px;
-            text-decoration: none;
-            display: inline-block;
-            margin-top: 20px;
-        }
-
-        .btn-custom:hover {
-            background-color: #ff4500;
-        }
-
-        .footer {
-            margin-top: 20px;
-            font-size: 14px;
-            color: #aaa;
-        }
+    .instructions {
+        color: #666;
+        font-size: 14px;
+        margin-top: 8px;
+        text-align: center;
+    }
 </style>
-</html>
+{% endblock %}
+
+{% block content %}
+<div class="verify-container">
+    <h1>請輸入您收到的驗證碼</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for category, message in messages %}
+            <li class="flash-{{ category }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <form class="verify-form" action="{{ url_for('user.verify_code') }}" method="POST">
+        <div class="form-group">
+            <label for="code">驗證碼：</label>
+            <input type="text" 
+                   id="code" 
+                   name="code" 
+                   required 
+                   pattern="\d{6}" 
+                   placeholder="請輸入6位數驗證碼"
+                   class="code-input"
+                   maxlength="6">
+            <div class="instructions">請輸入發送到您信箱的6位數驗證碼</div>
+        </div>
+        <button type="submit" class="verify-btn">驗證</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 自動聚焦到驗證碼輸入框
+    document.addEventListener('DOMContentLoaded', function() {
+        const codeInput = document.getElementById('code');
+        if (codeInput) {
+            codeInput.focus();
+        }
+    });
+
+    // 限制只能輸入數字
+    document.getElementById('code').addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
+
+    // 自動跳轉到下一個輸入框（如果有多個輸入框的話）
+    document.getElementById('code').addEventListener('input', function(e) {
+        if (this.value.length === 6) {
+            this.blur();
+        }
+    });
+</script>
+{% endblock %}

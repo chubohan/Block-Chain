@@ -1,217 +1,223 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-    <meta charset="UTF-8">
-    <title>補全資料</title>
-    <style>
-        /* 星空背景效果 */
-body {
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
-    background-color: #1a1a2e;
-    color: white;
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    position: relative;
-    flex-direction: column;
-}
+{% extends "base.html" %}
 
-/* 星空背景圖片層 */
-.stars {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: url('https://cdn.pixabay.com/photo/2017/08/30/02/18/starry-night-2695563_960_720.jpg') no-repeat center center fixed;
-    background-size: cover;
-    z-index: -10;
-    pointer-events: none;
-}
+{% block title %}補全資料 - ChainSure{% endblock %}
 
-/* 小星星動畫（隨機生成星點） */
-.star {
-    position: absolute;
-    border-radius: 50%;
-    width: 2px;
-    height: 2px;
-    background-color: white;
-    animation: twinkle 1.5s infinite alternate;
-}
-
-@keyframes twinkle {
-    0% {
-        opacity: 0.6;
-        transform: scale(1);
+{% block extra_css %}
+<style>
+    .profile-form-container {
+        max-width: 500px;
+        margin: 40px auto;
+        padding: 40px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        text-align: center;
     }
-    100% {
-        opacity: 1;
-        transform: scale(1.5);
+
+    .profile-form-container h1 {
+        color: #4a6ee0;
+        text-align: center;
+        font-size: 32px;
+        font-weight: bold;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #64c1ff;
+        padding-bottom: 15px;
     }
-}
 
+    .form-group {
+        margin-bottom: 25px;
+        text-align: left;
+    }
 
-        /* 中央卡片 */
-        .form-container {
-            max-width: 500px;
-            margin: 100px auto;
-            background-color: #111;
-            border-radius: 15px;
-            box-shadow: 0 0 15px rgba(255, 140, 0, 0.5);
-            padding: 30px;
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #555;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background: white;
+        box-sizing: border-box;
+        color: #333;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #64c1ff;
+        box-shadow: 0 0 0 3px rgba(100, 193, 255, 0.1);
+    }
+
+    .submit-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #8ac6ff, #64c1ff);
+        color: white;
+        padding: 15px;
+        border: none;
+        border-radius: 8px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(100, 193, 255, 0.3);
+    }
+
+    .submit-btn:hover {
+        background: linear-gradient(135deg, #64c1ff, #4a6ee0);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(74, 110, 224, 0.4);
+    }
+
+    .instructions {
+        color: #666;
+        font-size: 14px;
+        margin-top: 8px;
+        text-align: center;
+        line-height: 1.5;
+    }
+
+    .form-note {
+        background: rgba(100, 193, 255, 0.1);
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+        border-left: 4px solid #64c1ff;
+    }
+
+    .form-note p {
+        margin: 0;
+        color: #555;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    /* 響應式設計 */
+    @media (max-width: 768px) {
+        .profile-form-container {
+            margin: 20px;
+            padding: 30px 20px;
         }
+    }
+</style>
+{% endblock %}
 
-        /* 發光標題 */
-        .form-container h1 {
-            text-align: center;
-            font-size: 32px;
-            color: #FFA500;
-            text-shadow: 0 0 10px #FFA500, 0 0 20px #ff8c00;
-            margin-bottom: 30px;
-        }
-
-        /* 表單欄位 */
-        .form-container label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        .form-container input,
-        .form-container select {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            border: none;
-            border-radius: 8px;
-            background-color: #333;
-            color: white;
-            font-size: 16px;
-        }
-
-        /* 提交按鈕 */
-        .form-container button {
-            width: 100%;
-            padding: 12px;
-            background-color: #FFA500;
-            color: black;
-            border: none;
-            border-radius: 10px;
-            font-size: 18px;
-            cursor: pointer;
-            box-shadow: 0 0 10px #FFA500;
-            transition: background-color 0.3s;
-        }
-
-        .form-container button:hover {
-            background-color: #ff8c00;
-        }
-    </style>
-</head>
-<body>
-    <div class="form-container">
-        <h1>請補全您的資料</h1>
-        <form id="profileForm">
-            <div>
-                <label>年齡:</label>
-                <input type="number" name="age" min="18" max="120" required>
-            </div>
-            <div>
-                <label>性別:</label>
-                <select name="gender" required>
-                    <option value="">請選擇</option>
-                    <option value="male">男性</option>
-                    <option value="female">女性</option>
-                </select>
-            </div>
-            <button type="submit">提交</button>
-        </form>
+{% block content %}
+<div class="profile-form-container">
+    <h1>請補全您的資料</h1>
+    
+    <div class="form-note">
+        <p>為了提供更好的服務體驗，請填寫以下基本資料</p>
     </div>
 
-    <script>
-        document.getElementById('profileForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const formData = {
-                age: e.target.age.value,
-                gender: e.target.gender.value
-            };
+    <form id="profileForm">
+        <div class="form-group">
+            <label for="age">年齡：</label>
+            <input type="number" id="age" name="age" min="18" max="120" required placeholder="請輸入您的年齡">
+            <div class="instructions">請輸入18-120歲之間的數字</div>
+        </div>
+        
+        <div class="form-group">
+            <label for="gender">性別：</label>
+            <select id="gender" name="gender" required>
+                <option value="">請選擇性別</option>
+                <option value="male">男性</option>
+                <option value="female">女性</option>
+            </select>
+        </div>
+        
+        <button type="submit" class="submit-btn">提交資料</button>
+    </form>
+</div>
+{% endblock %}
 
-            try {
-                const response = await fetch('/user/complete-profile', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(formData)
-                });
+{% block extra_js %}
+<script>
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = {
+            age: e.target.age.value,
+            gender: e.target.gender.value
+        };
 
-                const result = await response.json();
-                if (result.success) {
-                    window.location.href = result.redirect;
-                } else {
-                    alert('錯誤: ' + result.error);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('提交失敗，請重試');
+        // 表單驗證
+        if (!formData.age || !formData.gender) {
+            alert('請填寫所有必填欄位');
+            return;
+        }
+
+        if (formData.age < 18 || formData.age > 120) {
+            alert('請輸入有效的年齡（18-120歲）');
+            return;
+        }
+
+        try {
+            const response = await fetch('/user/complete-profile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                // 顯示成功訊息
+                const submitBtn = document.querySelector('.submit-btn');
+                submitBtn.textContent = '提交成功！';
+                submitBtn.style.background = 'linear-gradient(135deg, #a8e6cf, #88d4ab)';
+                
+                // 延遲跳轉
+                setTimeout(() => {
+                    if (result.redirect) {
+                        window.location.href = result.redirect;
+                    } else {
+                        window.location.href = '/';
+                    }
+                }, 1500);
+            } else {
+                alert('錯誤: ' + (result.error || '提交失敗，請重試'));
             }
-        });
-    </script>
-    <script>        const starContainer = document.querySelector('.stars');
-
-        // 產生閃爍小星星
-        const starCount = 150;
-        for (let i = 0; i < starCount; i++) {
-            const star = document.createElement('div');
-            star.classList.add('star');
-            const size = Math.random() * 2 + 1;
-            star.style.width = `${size}px`;
-            star.style.height = `${size}px`;
-            star.style.top = `${Math.random() * 100}vh`;
-            star.style.left = `${Math.random() * 100}vw`;
-            star.style.animationDuration = `${1 + Math.random() * 3}s`;
-            star.style.opacity = Math.random();
-            starContainer.appendChild(star);
+        } catch (error) {
+            console.error('Error:', error);
+            alert('提交失敗，請檢查網路連線後重試');
         }
-
-        // 定時產生流星
-        function createShootingStar() {
-            const star = document.createElement('div');
-            star.classList.add('shooting-star');
-            star.style.top = `${Math.random() * 30 + 10}vh`; // 頂部範圍
-            star.style.left = `${Math.random() * 100}vw`;
-            starContainer.appendChild(star);
-
-            setTimeout(() => {
-                star.remove();
-            }, 1000);
-        }
-
-        setInterval(createShootingStar, 3000);
-
-        const starsContainer = document.querySelector('.stars');
-
-  // 生成流星
-  function createShootingStar() {
-    const shootingStar = document.createElement('div');
-    shootingStar.classList.add('shooting-star');
-    shootingStar.style.top = `${Math.random()*50}vh`;
-    shootingStar.style.left = `${Math.random()*80}vw`;
-    starsContainer.appendChild(shootingStar);
-
-    shootingStar.addEventListener('animationend', () => {
-      shootingStar.remove();
     });
-  }
 
-  // 每3-6秒生成一顆流星
-  setInterval(() => {
-    createShootingStar();
-  }, 3000 + Math.random()*3000);</script>
-</body>
-</html>
+    // 自動聚焦到年齡輸入框
+    document.addEventListener('DOMContentLoaded', function() {
+        const ageInput = document.getElementById('age');
+        if (ageInput) {
+            ageInput.focus();
+        }
+    });
+
+    // 即時驗證
+    document.getElementById('age').addEventListener('input', function() {
+        const age = parseInt(this.value);
+        if (age < 18 || age > 120) {
+            this.style.borderColor = '#ff6b6b';
+        } else {
+            this.style.borderColor = '#88d4ab';
+        }
+    });
+
+    document.getElementById('gender').addEventListener('change', function() {
+        if (this.value) {
+            this.style.borderColor = '#88d4ab';
+        } else {
+            this.style.borderColor = '#e0e0e0';
+        }
+    });
+</script>
+{% endblock %}

@@ -1,272 +1,313 @@
-<!doctype html>
-<html lang="zh-TW">
-<head>
-<meta charset="utf-8" />
-<title>測試樣板</title>
-<!-- 連結思源中文及css -->
-<link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet" />
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-<link href="/static/base.css" rel="stylesheet" />
-<link href="/static/css/create_form.css" rel="stylesheet" />
-</head>
+{% extends "base.html" %}
 
-<body>
+{% block title %}確認保單資料 - ChainSure{% endblock %}
 
-<div class="stars"></div>
+{% block extra_css %}
+<link href="/static/css/create_form.css" rel="stylesheet">
+<style>
+    .confirm-container {
+        max-width: 800px;
+        margin: 80px auto 40px;
+        padding: 40px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+    }
 
-<nav class="navbar navbar-expand-lg navbar-light fixed-top">
-    <a class="navbar-brand" href="/">ChainSure</a>
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#navbarNav"
-      aria-controls="navbarNav"
-      aria-expanded="false"
-      aria-label="切換導航"
-    >
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
+    .confirm-container h2 {
+        color: #4a6ee0;
+        margin-bottom: 30px;
+        font-size: 2.5rem;
+        font-weight: bold;
+        text-align: center;
+        background: linear-gradient(135deg, #4a6ee0, #64c1ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
 
-        <li class="nav-item dropdown">
-          <a
-            class="nav-link dropdown-toggle"
-            href="#"
-            id="customerDropdown"
-            role="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          >
-            客戶服務
-          </a>
-          <ul class="dropdown-menu" aria-labelledby="customerDropdown">
-            <li><a class="dropdown-item" href="#">會員中心</a></li>
-            <li><a class="dropdown-item" href="#">聯繫業務員</a></li>
-            <li><a class="dropdown-item" href="#">點數查詢</a></li>
-          </ul>
-        </li>
+    .wallet-section {
+        background: rgba(248, 249, 250, 0.8);
+        padding: 25px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        border: 1px solid #e0e0e0;
+        text-align: center;
+    }
 
-        <li class="nav-item dropdown">
-          <a
-            class="nav-link dropdown-toggle"
-            href="#"
-            id="policyDropdown"
-            role="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          >
-            保單服務
-          </a>
-          <ul class="dropdown-menu" aria-labelledby="policyDropdown">
-            
-                <li><a class="dropdown-item" href="/policy/delete/form">刪除查詢</a></li>
-                <li><a class="dropdown-item" href="/policy/update/form">修改保單</a></li>
-                <li><a class="dropdown-item" href="/policy/read/form">保單查詢</a></li>
-                <li><a class="dropdown-item" href="#">保單內容問題</a></li>
-          </ul>
-        </li>
+    .btn-warning {
+        background: linear-gradient(135deg, #ffd28b, #ffb347);
+        color: white;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(255, 179, 71, 0.3);
+        margin-bottom: 15px;
+    }
 
-        <li class="nav-item dropdown">
-          <a
-            class="nav-link dropdown-toggle"
-            href="#"
-            id="claimDropdown"
-            role="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          >
-            理賠服務
-          </a>
-          <ul class="dropdown-menu" aria-labelledby="claimDropdown">
-            <li><a class="dropdown-item" href="#">終身壽險</a></li>
-            <li><a class="dropdown-item" href="#">失能照護險</a></li>
-            <li><a class="dropdown-item" href="#">投資型報單</a></li>
-            <li><a class="dropdown-item" href="#">旅遊綜合保險</a></li>
-          </ul>
-        </li>
+    .btn-warning:hover {
+        background: linear-gradient(135deg, #ffb347, #ff9a00);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 154, 0, 0.4);
+    }
 
-        <li class="nav-item dropdown">
-          <a
-            class="nav-link dropdown-toggle"
-            href="#"
-            id="activityDropdown"
-            role="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          >
-            熱門活動
-          </a>
-          <ul class="dropdown-menu" aria-labelledby="activityDropdown">
-            <li><a class="dropdown-item" href="#">贈品查詢</a></li>
-            <li><a class="dropdown-item" href="#">理賠成功申請案例</a></li>
-          </ul>
-        </li>
+    .divider {
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #64c1ff, transparent);
+        margin: 30px 0;
+    }
 
-        {% if not current_user.is_authenticated %}
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
-                登入
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="loginDropdown">
-                <li><a class="dropdown-item" href="/user/login/form">保人登入</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="/user/login/form">業務員登入</a></li>
-            </ul>
-        </li>
-        {% endif %}
+    .form-row {
+        margin-bottom: 20px;
+    }
 
-        
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
-                身分證驗證
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="loginDropdown">
-                <li><a class="dropdown-item" href="/policy/create_ID_image">身分證驗證</a></li>
-            </ul>
-        </li>
-    
-        {% if current_user.is_authenticated %}
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
-                個人檔案
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="loginDropdown">
-                <li><a class="dropdown-item" href="/user/profile">個人檔案</a></li>
-            </ul>
-        {% endif %}
-        </li>
+    .form-row label {
+        font-weight: bold;
+        color: #555;
+        margin-bottom: 8px;
+        display: block;
+    }
 
-      </ul>
+    .required-label {
+        color: #ff6b6b;
+    }
+
+    .form-row input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background: #f8f9fa;
+        box-sizing: border-box;
+        color: #666;
+    }
+
+    .form-row input:read-only {
+        background: #f8f9fa;
+        color: #666;
+        cursor: not-allowed;
+    }
+
+    .upload-section {
+        text-align: center;
+        margin: 20px 0;
+        padding: 20px;
+        background: rgba(248, 249, 250, 0.8);
+        border-radius: 10px;
+        border: 1px solid #e0e0e0;
+    }
+
+    .upload-section a {
+        color: #4a6ee0;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .upload-section a:hover {
+        color: #64c1ff;
+        text-decoration: underline;
+    }
+
+    .submit {
+        background: linear-gradient(135deg, #8ac6ff, #64c1ff);
+        color: white;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 8px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(100, 193, 255, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin: 0 auto 15px;
+    }
+
+    .submit:hover {
+        background: linear-gradient(135deg, #64c1ff, #4a6ee0);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(74, 110, 224, 0.4);
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, #a8e6cf, #88d4ab);
+        color: white;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(136, 212, 171, 0.3);
+        margin-left: 15px;
+    }
+
+    .btn-secondary:hover {
+        background: linear-gradient(135deg, #88d4ab, #6bc49c);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(107, 196, 156, 0.4);
+    }
+
+    .icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    #status {
+        text-align: center;
+        font-weight: bold;
+        padding: 15px;
+        border-radius: 8px;
+    }
+
+    /* 響應式設計 */
+    @media (max-width: 768px) {
+        .confirm-container {
+            margin: 60px 20px 20px;
+            padding: 30px 20px;
+        }
+
+        .submit, .btn-secondary {
+            width: 100%;
+            margin: 10px 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="confirm-container">
+    <h2>確認保單資料</h2>
+
+    <div class="form-wrapper">
+        <form id="policyForm">
+            <div class="wallet-section">
+                <button type="button" class="btn-warning" onclick="connectWallet()">
+                    連接錢包
+                </button>
+                <p>當前連接錢包: <span id="walletAddress">未連接</span></p>
+            </div>
+
+            <div class="divider"></div>
+
+            <input type="hidden" id="clientGmail" value="{{ current_user.id }}">
+            <input type="hidden" id="officerGmail" value="{{ policy.officer_gmail }}">
+            <input type="hidden" id="pdfHash" value="{{ policy.pdf_hash }}">
+
+            <div class="form-row">
+                <label for="policyNumber">保單編號 <span class="required-label">*</span></label>
+                <input type="text" id="policyNumber" required readonly />
+            </div>
+
+            <div class="form-row">
+                <label for="insuranceCompany">保險公司名稱 <span class="required-label">*</span></label>
+                <input type="text" id="insuranceCompany" required readonly />
+            </div>
+
+            <div class="form-row">
+                <label for="policyHolder">投保人姓名 <span class="required-label">*</span></label>
+                <input type="text" id="policyHolder" required readonly />
+            </div>
+
+            <div class="form-row">
+                <label for="insuredPerson">被保險人姓名 <span class="required-label">*</span></label>
+                <input type="text" id="insuredPerson" required readonly />
+            </div>
+
+            <div class="form-row">
+                <label for="insuranceAmount">保險金額 (NTD) <span class="required-label">*</span></label>
+                <input type="number" id="insuranceAmount" step="0.01" required readonly />
+            </div>
+
+            <div class="form-row">
+                <label for="premiumPeriod">繳費期間 (年) <span class="required-label">*</span></label>
+                <input type="number" id="premiumPeriod" required readonly />
+            </div>
+
+            <div class="form-row">
+                <label for="premiumAmount">保費金額 (NTD) <span class="required-label">*</span></label>
+                <input type="number" id="premiumAmount" step="0.01" required readonly />
+            </div>
+
+            <div class="form-row">
+                <label for="startDate">生效日期 <span class="required-label">*</span></label>
+                <input type="date" id="startDate" required readonly />
+            </div>
+
+            <div class="form-row">
+                <label for="beneficiary">受益人 <span class="required-label">*</span></label>
+                <input type="text" id="beneficiary" required readonly />
+            </div>
+
+            <div class="form-row">
+                <label for="growthRate">增額比例 (%) <span class="required-label">*</span></label>
+                <input type="number" id="growthRate" required readonly />
+            </div>
+
+            <div class="form-row">
+                <label for="declaredInterestRate">宣告利率 (%) <span class="required-label">*</span></label>
+                <input type="number" id="declaredInterestRate" required readonly />
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="upload-section">
+                <label>
+                    已上傳 PDF 文件：
+                    {% if policy.pdf_hash %}
+                        <a href="http://127.0.0.1:8080/ipfs/{{ policy.pdf_hash }}" target="_blank">查看 PDF</a>
+                    {% else %}
+                        無文件
+                    {% endif %}
+                </label>
+            </div>
+
+            <div class="mt-4 text-center">
+                <button type="submit" class="submit">
+                    <img src="{{ url_for('static', filename='imgs/send.png') }}" alt="Send Icon" class="icon">確認上鏈
+                </button>
+                <button type="button" class="btn-secondary" onclick="modifyPolicy()">我要修改</button>
+            </div>
+
+            <div id="status" class="mt-3"></div>
+        </form>
     </div>
-  </div>
-</nav>
-
-<div class="container">
-  <h2 class="mt-5">確認保單資料</h2>
-
-  <div class="form-wrapper">
-    <form id="policyForm">
-
-      <button type="button" class="btn btn-warning mb-3" onclick="connectWallet()">
-        連接錢包
-      </button>
-      <p>當前連接錢包: <span id="walletAddress">未連接</span></p>
-      <div class="divider"></div>
-
-      <input type="hidden" id="clientGmail" value="{{ current_user.id }}">
-      <input type="hidden" id="officerGmail" value="{{ policy.officer_gmail }}">
-      <input type="hidden" id="pdfHash" value="{{ policy.pdf_hash }}">
-
-      <div class="form-row">
-        <label for="policyNumber">保單編號 <span class="required-label">*</span></label>
-        <input type="text" id="policyNumber" required readonly />
-      </div>
-
-      <div class="form-row">
-        <label for="insuranceCompany">保險公司名稱 <span class="required-label">*</span></label>
-        <input type="text" id="insuranceCompany" required readonly />
-      </div>
-
-      <div class="form-row">
-        <label for="policyHolder">投保人姓名 <span class="required-label">*</span></label>
-        <input type="text" id="policyHolder" required readonly />
-      </div>
-
-      <div class="form-row">
-        <label for="insuredPerson">被保險人姓名 <span class="required-label">*</span></label>
-        <input type="text" id="insuredPerson" required readonly />
-      </div>
-
-      <div class="form-row">
-        <label for="insuranceAmount">保險金額 (NTD) <span class="required-label">*</span></label>
-        <input type="number" id="insuranceAmount" step="0.01" required readonly />
-      </div>
-
-      <div class="form-row">
-        <label for="premiumPeriod">繳費期間 (年) <span class="required-label">*</span></label>
-        <input type="number" id="premiumPeriod" required readonly />
-      </div>
-
-      <div class="form-row">
-        <label for="premiumAmount">保費金額 (NTD) <span class="required-label">*</span></label>
-        <input type="number" id="premiumAmount" step="0.01" required readonly />
-      </div>
-
-      <div class="form-row">
-        <label for="startDate">生效日期 <span class="required-label">*</span></label>
-        <input type="date" id="startDate" required readonly />
-      </div>
-
-      <div class="form-row">
-        <label for="beneficiary">受益人 <span class="required-label">*</span></label>
-        <input type="text" id="beneficiary" required readonly />
-      </div>
-
-      <div class="form-row">
-        <label for="growthRate">增額比例 (%) <span class="required-label">*</span></label>
-        <input type="number" id="growthRate" required readonly />
-      </div>
-
-      <div class="form-row">
-        <label for="declaredInterestRate">宣告利率 (%) <span class="required-label">*</span></label>
-        <input type="number" id="declaredInterestRate" required readonly />
-      </div>
-
-
-      <div class="divider"></div>
-
-      <div class="upload-section" style="display: flex; justify-content: center">
-      <label style="margin: 0;">
-        已上傳 PDF 文件：
-        {% if policy.pdf_hash %}
-          <a href="http://127.0.0.1:8080/ipfs/{{ policy.pdf_hash }}" target="_blank">查看 PDF</a>
-        {% else %}
-          無文件
-        {% endif %}
-      </label>
-    </div>
-      <div class="mt-4 text-center">
-        <button type="submit" class="submit"><img src="{{ url_for('static', filename='imgs/send.png') }}" alt="Send Icon" class="icon">確認上鏈</button>
-        <button type="button" class="btn btn-secondary" onclick="modifyPolicy()">我要修改</button>
-      </div>
-
-      <div id="status" class="mt-3"></div>
-
-    </form>
-  </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/eth-crypto@2.3.0/dist/eth-crypto-browser.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <script src="/static/js/create_form.js"></script>
 
 <script>
-  //若沒有資料則會出錯policy not defined!!!
-// 自動填值 (假設後端會渲染資料到這裡)
-window.onload = function() {
-  document.getElementById("policyNumber").value = "{{ policy.policy_number }}";
-  document.getElementById("insuranceCompany").value = "{{ policy.insurance_company }}";
-  document.getElementById("policyHolder").value = "{{ policy.policy_holder }}";
-  document.getElementById("insuredPerson").value = "{{ policy.insured_person }}";
-  document.getElementById("insuranceAmount").value = "{{ policy.insurance_amount }}";
-  document.getElementById("premiumPeriod").value = "{{ policy.premium_period }}";
-  document.getElementById("premiumAmount").value = "{{ policy.premium_amount }}";
-  document.getElementById("startDate").value = "{{ policy.start_date }}";
-  document.getElementById("beneficiary").value = "{{ policy.beneficiary }}";
-  document.getElementById("growthRate").value = "{{ policy.growth_rate }}";
-  document.getElementById("declaredInterestRate").value = "{{ policy.declared_interest_rate }}";
-}
+    // 自動填值 (假設後端會渲染資料到這裡)
+    window.onload = function() {
+        document.getElementById("policyNumber").value = "{{ policy.policy_number }}";
+        document.getElementById("insuranceCompany").value = "{{ policy.insurance_company }}";
+        document.getElementById("policyHolder").value = "{{ policy.policy_holder }}";
+        document.getElementById("insuredPerson").value = "{{ policy.insured_person }}";
+        document.getElementById("insuranceAmount").value = "{{ policy.insurance_amount }}";
+        document.getElementById("premiumPeriod").value = "{{ policy.premium_period }}";
+        document.getElementById("premiumAmount").value = "{{ policy.premium_amount }}";
+        document.getElementById("startDate").value = "{{ policy.start_date }}";
+        document.getElementById("beneficiary").value = "{{ policy.beneficiary }}";
+        document.getElementById("growthRate").value = "{{ policy.growth_rate }}";
+        document.getElementById("declaredInterestRate").value = "{{ policy.declared_interest_rate }}";
+    }
 
-function modifyPolicy() {
-  window.location.href = '/policy/update/form?policy_number={{ policy.policy_number }}';
-}
-
+    function modifyPolicy() {
+        window.location.href = '/policy/update/form?policy_number={{ policy.policy_number }}';
+    }
 </script>
-
-</body>
-</html>
-
+{% endblock %}

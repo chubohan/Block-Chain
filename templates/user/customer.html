@@ -1,44 +1,131 @@
-<!doctype html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>測試樣板</title>
-<!-- 連結思源中文及css -->
-<link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
-<link href="/static/imgs/icon.jpg" rel="shortcut icon">
-<link href="/static/css/menu.css" rel="stylesheet"/>  
-<link href="/static/css/main.css" rel="stylesheet"/>      
-<!------------------------->
-</head>
-   
-<body>
-    <!--**************************-->
-    <div class="container">    
-        <!--~~~~~~~~~~~~~~~~~-->
-        <div class="header">           
-        </div>        
-        
-        <!--~~~~~~~~~~~~~~~~~-->        
-        <ul id="navigation">        
-            <li><a href="/">返回主頁</a></li> 
-        </ul>
-        
-        <!--~~~~~~~~~~~~~~~~~--> 
-        <div class="content">
-            <h2>樣板畫面</h2>
+{% extends "base.html" %}
 
-            <p>
-                            
-            </p>       
-            
-        </div>       
+{% block title %}樣板畫面 - ChainSure{% endblock %}
+
+{% block extra_css %}
+<style>
+    .template-container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 40px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    .template-container h2 {
+        color: #4a6ee0;
+        margin-bottom: 30px;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .template-content {
+        text-align: left;
+        background: rgba(255, 255, 255, 0.8);
+        padding: 30px;
+        border-radius: 10px;
+        margin: 20px 0;
+        border-left: 4px solid #64c1ff;
+    }
+
+    .template-content p {
+        color: #555;
+        font-size: 16px;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-top: 20px;
+        color: #64c1ff;
+        text-decoration: none;
+        font-weight: bold;
+        transition: color 0.3s ease;
+        padding: 10px 20px;
+        border: 2px solid #64c1ff;
+        border-radius: 8px;
+    }
+
+    .back-link:hover {
+        color: #4a6ee0;
+        background-color: rgba(100, 193, 255, 0.1);
+        text-decoration: none;
+    }
+
+    .footer {
+        text-align: center;
+        margin-top: 40px;
+        font-size: 0.9em;
+        color: #888;
+    }
+
+    .placeholder-text {
+        color: #999;
+        font-style: italic;
+        text-align: center;
+        padding: 40px 0;
+    }
+
+    /* 響應式設計 */
+    @media (max-width: 768px) {
+        .template-container {
+            margin: 20px;
+            padding: 30px 20px;
+        }
         
-        <!--~~~~~~~~~~~~~~~~~--> 
-        <div class="footer">
-            NTUB imd, 2023.    
-        </div>  
+        .template-content {
+            padding: 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="template-container">
+    <h2>樣板畫面</h2>
+    
+    <div class="template-content">
+        <div class="placeholder-text">
+            <p>這裡是內容區域</p>
+            <p>您可以在此處添加您的頁面內容</p>
+        </div>
+        
+        <!-- 這裡可以添加您的具體內容 -->
+        <p>
+            <!-- 您的內容會出現在這裡 -->
+        </p>
     </div>
-    <!--**************************-->    
-</body>
-   
-</html>
+
+    <a href="/" class="back-link">← 返回主頁</a>
+
+    <div class="footer">
+        <p>ChainSure &copy; 2024</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 頁面載入完成後的初始化
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('樣板頁面載入完成');
+        
+        // 這裡可以添加頁面特定的 JavaScript 功能
+        // 例如：動態內容載入、互動效果等
+        
+        // 範例：添加一個簡單的互動效果
+        const contentArea = document.querySelector('.template-content');
+        if (contentArea) {
+            contentArea.addEventListener('click', function() {
+                this.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+            });
+        }
+    });
+</script>
+{% endblock %}

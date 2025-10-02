@@ -1,286 +1,258 @@
-<!doctype html>
-<html lang="zh-TW">
-<head>
-<meta charset="utf-8" />
-<title>測試樣板</title>
-<!-- 連結思源中文及css -->
-<script src="https://cdn.jsdelivr.net/npm/ipfs-http-client/dist/index.min.js"></script>
-<link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet" />
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-<link href="/static/css/create_form.css" rel="stylesheet" />
-</head>
+{% extends "base.html" %}
 
-<body>
+{% block title %}新增保單 - ChainSure{% endblock %}
 
-<div class="stars"></div>
-
-<nav class="navbar navbar-expand-lg navbar-light fixed-top">
-    <a class="navbar-brand" href="/">ChainSure</a>
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#navbarNav"
-      aria-controls="navbarNav"
-      aria-expanded="false"
-      aria-label="切換導航"
-    >
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
-
-        <li class="nav-item dropdown">
-          <a
-            class="nav-link dropdown-toggle"
-            href="#"
-            id="customerDropdown"
-            role="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          >
-            客戶服務
-          </a>
-          <ul class="dropdown-menu" aria-labelledby="customerDropdown">
-            <li><a class="dropdown-item" href="#">會員中心</a></li>
-            <li><a class="dropdown-item" href="#">聯繫業務員</a></li>
-            <li><a class="dropdown-item" href="#">點數查詢</a></li>
-          </ul>
-        </li>
-
-        <li class="nav-item dropdown">
-          <a
-            class="nav-link dropdown-toggle"
-            href="#"
-            id="policyDropdown"
-            role="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          >
-            保單服務
-          </a>
-          <ul class="dropdown-menu" aria-labelledby="policyDropdown">
-            
-                <li><a class="dropdown-item" href="/policy/delete/form">刪除查詢</a></li>
-                <li><a class="dropdown-item" href="/policy/update/form">修改保單</a></li>
-                <li><a class="dropdown-item" href="/policy/read/form">保單查詢</a></li>
-                <li><a class="dropdown-item" href="#">保單內容問題</a></li>
-          </ul>
-        </li>
-
-        <li class="nav-item dropdown">
-          <a
-            class="nav-link dropdown-toggle"
-            href="#"
-            id="claimDropdown"
-            role="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          >
-            理賠服務
-          </a>
-          <ul class="dropdown-menu" aria-labelledby="claimDropdown">
-            <li><a class="dropdown-item" href="#">終身壽險</a></li>
-            <li><a class="dropdown-item" href="#">失能照護險</a></li>
-            <li><a class="dropdown-item" href="#">投資型報單</a></li>
-            <li><a class="dropdown-item" href="#">旅遊綜合保險</a></li>
-          </ul>
-        </li>
-
-        <li class="nav-item dropdown">
-          <a
-            class="nav-link dropdown-toggle"
-            href="#"
-            id="activityDropdown"
-            role="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          >
-            熱門活動
-          </a>
-          <ul class="dropdown-menu" aria-labelledby="activityDropdown">
-            <li><a class="dropdown-item" href="#">贈品查詢</a></li>
-            <li><a class="dropdown-item" href="#">理賠成功申請案例</a></li>
-          </ul>
-        </li>
-
-        {% if not current_user.is_authenticated %}
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
-                登入
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="loginDropdown">
-                <li><a class="dropdown-item" href="/user/login/form">保人登入</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="/user/login/form">業務員登入</a></li>
-            </ul>
-        </li>
-        {% endif %}
-
-        
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
-                身分證驗證
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="loginDropdown">
-                <li><a class="dropdown-item" href="/policy/create_ID_image">身分證驗證</a></li>
-            </ul>
-        </li>
-    
-        {% if current_user.is_authenticated %}
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" aria-expanded="false">
-                個人檔案
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="loginDropdown">
-                <li><a class="dropdown-item" href="/user/profile">個人檔案</a></li>
-            </ul>
-        {% endif %}
-        </li>
-
-      </ul>
-    </div>
-  </div>
-</nav>
-
-<div class="container">
-	
-  <h2>新增保單</h2>
-  <div class="form-wrapper">
-
-    <form id="policyForm">
-      <label>
-        客戶 Gmail <span class="required-label">*</span>
-        <input type="email" id="clientGmail" value="{{ client_gmail }}" required />
-
-        </label> 
-      <label>
-        保單編號 <span class="required-label">*</span>
-        <input type="text" id="policyNumber" required />
-      </label>
-
-      <label>
-        保險公司名稱 <span class="required-label">*</span>
-        <input type="text" id="insuranceCompany" required />
-      </label>
-
-      <label>
-        投保人姓名 <span class="required-label">*</span>
-        <input type="text" id="policyHolder" required />
-      </label>
-
-      <label>
-        被保險人姓名 <span class="required-label">*</span>
-        <input type="text" id="insuredPerson" required />
-      </label>
-
-      <label>
-        保險金額 (NTD) <span class="required-label">*</span>
-        <input type="number" id="insuranceAmount" step="0.01" required />
-      </label>
-
-      <label>
-        繳費期間 (年) <span class="required-label">*</span>
-        <input type="number" id="premiumPeriod" required />
-      </label>
-
-      <label>
-        保費金額 (NTD) <span class="required-label">*</span>
-        <input type="number" id="premiumAmount" step="0.01" required />
-      </label>
-
-      <label>
-        生效日期 <span class="required-label">*</span>
-        <input type="date" id="startDate" required />
-      </label>
-
-      <label>
-        受益人 <span class="required-label">*</span>
-        <input type="text" id="beneficiary" required />
-      </label>
-
-      <label>
-        增額比例 (%) <span class="required-label">*</span>
-        <input type="number" id="growthRate" required />
-      </label>
-
-      <label>
-        宣告利率 (%) <span class="required-label">*</span>
-        <input type="number" id="declaredInterestRate" required />
-      </label>
-
-      <div class="divider"></div>
-
-      <div class="upload-section"  style="display: flex; justify-content: center">
-        <label style="margin: 0;">
-          上傳 PDF 文件 <span class="required-label">*</span>
-          <input type="file" id="pdfUpload" accept=".pdf" required />
-        </label>
-        <input type="hidden" id="ipfsHash" name="ipfsHash" />
-        {% if current_user.insurance_officer %}
-        <button type="button" onclick="submitPolicy()">上傳並發送簡訊</button>
-        {% endif %}
-      </div>
-
-      <div class="form-footer">
-        <div style="display: flex; justify-content: center"></div>
-        
-        <div id="status"></div>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-      </div>
-    </form>
-  </div>
-</div>
-<script>
-async function submitPolicy() {
-    const formData = new FormData();
-
-    formData.append('clientGmail', document.getElementById('clientGmail').value.trim());
-    formData.append('policyNumber', document.getElementById('policyNumber').value.trim());
-    formData.append('insuranceCompany', document.getElementById('insuranceCompany').value.trim());
-    formData.append('policyHolder', document.getElementById('policyHolder').value.trim());
-    formData.append('insuredPerson', document.getElementById('insuredPerson').value.trim());
-    formData.append('insuranceAmount', document.getElementById('insuranceAmount').value.trim());
-    formData.append('premiumPeriod', document.getElementById('premiumPeriod').value.trim());
-    formData.append('premiumAmount', document.getElementById('premiumAmount').value.trim());
-    formData.append('startDate', document.getElementById('startDate').value.trim());
-    formData.append('beneficiary', document.getElementById('beneficiary').value.trim());
-    formData.append('growthRate', document.getElementById('growthRate').value.trim());
-    formData.append('declaredInterestRate', document.getElementById('declaredInterestRate').value.trim());
-    const file = document.getElementById('pdfUpload').files[0];
-    const ipfs = window.IpfsHttpClient.create({ url: "http://127.0.0.1:5001/api/v0" });
-    const result = await ipfs.add(file);
-    console.log(result.path);   // 會印出：QmXXXX...
-
-    document.getElementById("ipfsHash").value = result.path;
-
-    formData.append('pdfUpload', file);
-    formData.append('ipfsHash', result.path);
-    try {
-        const response = await fetch('/officer/upload-policy', {
-            method: 'POST',
-            body: formData,
-            credentials: 'include'
-        });
-
-        const result = await response.json();
-        if (result.success) {
-            alert('保單已暫存並發送簡訊');
-            window.location.href = '/officer/client-page';
-        } else {
-            alert('操作失敗：' + result.message);
-        }
-    } catch (error) {
-        console.error(error);
-        alert('伺服器錯誤：' + error.message);
+{% block extra_css %}
+<link href="/static/css/create_form.css" rel="stylesheet">
+<style>
+    .create-container {
+        max-width: 800px;
+        margin: 80px auto 40px;
+        padding: 40px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
     }
-}
+
+    .create-container h2 {
+        color: #4a6ee0;
+        margin-bottom: 30px;
+        font-size: 2.5rem;
+        font-weight: bold;
+        text-align: center;
+        background: linear-gradient(135deg, #4a6ee0, #64c1ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .form-wrapper label {
+        font-weight: bold;
+        color: #555;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .required-label {
+        color: #ff6b6b;
+    }
+
+    .form-wrapper input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background: white;
+        box-sizing: border-box;
+        margin-bottom: 20px;
+    }
+
+    .form-wrapper input:focus {
+        outline: none;
+        border-color: #64c1ff;
+        box-shadow: 0 0 0 3px rgba(100, 193, 255, 0.1);
+    }
+
+    .divider {
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #64c1ff, transparent);
+        margin: 30px 0;
+    }
+
+    .upload-section {
+        text-align: center;
+        margin: 20px 0;
+        padding: 20px;
+        background: rgba(248, 249, 250, 0.8);
+        border-radius: 10px;
+        border: 1px solid #e0e0e0;
+    }
+
+    .upload-section input[type="file"] {
+        margin: 10px 0;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #8ac6ff, #64c1ff);
+        color: white;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(100, 193, 255, 0.3);
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #64c1ff, #4a6ee0);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(74, 110, 224, 0.4);
+    }
+
+    .form-footer {
+        margin-top: 30px;
+        text-align: center;
+    }
+
+    #status {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 8px;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    /* 響應式設計 */
+    @media (max-width: 768px) {
+        .create-container {
+            margin: 60px 20px 20px;
+            padding: 30px 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="create-container">
+    <h2>新增保單</h2>
+    
+    <div class="form-wrapper">
+        <form id="policyForm">
+            <label>
+                客戶 Gmail <span class="required-label">*</span>
+                <input type="email" id="clientGmail" value="{{ client_gmail }}" required />
+            </label> 
+            
+            <label>
+                保單編號 <span class="required-label">*</span>
+                <input type="text" id="policyNumber" required />
+            </label>
+
+            <label>
+                保險公司名稱 <span class="required-label">*</span>
+                <input type="text" id="insuranceCompany" required />
+            </label>
+
+            <label>
+                投保人姓名 <span class="required-label">*</span>
+                <input type="text" id="policyHolder" required />
+            </label>
+
+            <label>
+                被保險人姓名 <span class="required-label">*</span>
+                <input type="text" id="insuredPerson" required />
+            </label>
+
+            <label>
+                保險金額 (NTD) <span class="required-label">*</span>
+                <input type="number" id="insuranceAmount" step="0.01" required />
+            </label>
+
+            <label>
+                繳費期間 (年) <span class="required-label">*</span>
+                <input type="number" id="premiumPeriod" required />
+            </label>
+
+            <label>
+                保費金額 (NTD) <span class="required-label">*</span>
+                <input type="number" id="premiumAmount" step="0.01" required />
+            </label>
+
+            <label>
+                生效日期 <span class="required-label">*</span>
+                <input type="date" id="startDate" required />
+            </label>
+
+            <label>
+                受益人 <span class="required-label">*</span>
+                <input type="text" id="beneficiary" required />
+            </label>
+
+            <label>
+                增額比例 (%) <span class="required-label">*</span>
+                <input type="number" id="growthRate" required />
+            </label>
+
+            <label>
+                宣告利率 (%) <span class="required-label">*</span>
+                <input type="number" id="declaredInterestRate" required />
+            </label>
+
+            <div class="divider"></div>
+
+            <div class="upload-section">
+                <label>
+                    上傳 PDF 文件 <span class="required-label">*</span>
+                    <input type="file" id="pdfUpload" accept=".pdf" required />
+                </label>
+                <input type="hidden" id="ipfsHash" name="ipfsHash" />
+                
+                {% if current_user.insurance_officer %}
+                <button type="button" class="btn-primary" onclick="submitPolicy()">上傳並發送簡訊</button>
+                {% endif %}
+            </div>
+
+            <div class="form-footer">
+                <div id="status"></div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/ipfs-http-client/dist/index.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+<script>
+    async function submitPolicy() {
+        const formData = new FormData();
+
+        formData.append('clientGmail', document.getElementById('clientGmail').value.trim());
+        formData.append('policyNumber', document.getElementById('policyNumber').value.trim());
+        formData.append('insuranceCompany', document.getElementById('insuranceCompany').value.trim());
+        formData.append('policyHolder', document.getElementById('policyHolder').value.trim());
+        formData.append('insuredPerson', document.getElementById('insuredPerson').value.trim());
+        formData.append('insuranceAmount', document.getElementById('insuranceAmount').value.trim());
+        formData.append('premiumPeriod', document.getElementById('premiumPeriod').value.trim());
+        formData.append('premiumAmount', document.getElementById('premiumAmount').value.trim());
+        formData.append('startDate', document.getElementById('startDate').value.trim());
+        formData.append('beneficiary', document.getElementById('beneficiary').value.trim());
+        formData.append('growthRate', document.getElementById('growthRate').value.trim());
+        formData.append('declaredInterestRate', document.getElementById('declaredInterestRate').value.trim());
+        
+        const file = document.getElementById('pdfUpload').files[0];
+        const ipfs = window.IpfsHttpClient.create({ url: "http://127.0.0.1:5001/api/v0" });
+        const result = await ipfs.add(file);
+        console.log(result.path);
+
+        document.getElementById("ipfsHash").value = result.path;
+
+        formData.append('pdfUpload', file);
+        formData.append('ipfsHash', result.path);
+        
+        try {
+            const response = await fetch('/officer/upload-policy', {
+                method: 'POST',
+                body: formData,
+                credentials: 'include'
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                alert('保單已暫存並發送簡訊');
+                window.location.href = '/officer/client-page';
+            } else {
+                alert('操作失敗：' + result.message);
+            }
+        } catch (error) {
+            console.error(error);
+            alert('伺服器錯誤：' + error.message);
+        }
+    }
 </script>
-
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/eth-crypto@2.3.0/dist/eth-crypto-browser.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-</body>
-</html>
+{% endblock %}

@@ -41,13 +41,21 @@ class User(UserMixin):
         self.insurance_officer = insurance_officer 
 
 def send_verification_email(email, verify_url):
-    msg = Message('帳號驗證', sender='your_email@gmail.com', recipients=[email])
+    # 不要手動寫 sender，讓它自動使用 MAIL_DEFAULT_SENDER
+    msg = Message('帳號驗證', recipients=[email])
+    
+    # 建議改用 HTML 模板（看起來更專業），如果暫時要用純文字也可以
     msg.body = f'請點擊以下連結驗證您的帳戶：\n{verify_url}'
+    
     mail.send(msg)
 
 def send_reset_email(email, reset_link):
-    html_content = render_template('email/reset_password.html', reset_link=reset_link)
-    msg = Message('重設密碼請求', sender='your_email@gmail.com', recipients=[email])
+    # ✅ 注意這裡改成 reset_url
+    html_content = render_template('email/reset_password.html', reset_url=reset_link)
+
+    # ✅ sender 改成用預設，不要寫死 Gmail
+    msg = Message('重設密碼請求', recipients=[email])
+
     msg.html = html_content
     mail.send(msg)
 
@@ -192,6 +200,37 @@ def login():
 
 
 # 忘記密碼路由
+@user_bp.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form.get('email')  # 對應表單欄位
+        if not email:
+            flash('請輸入電子郵件', 'danger')
+            return redirect(url_for('user.forgot_password'))
+
+        # 查詢使用者
+        conn = db.get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT gmail FROM user WHERE gmail = %s", (email,))
+        user = cursor.fetchone()
+        conn.close()
+
+        if not user:
+            flash('此電子郵件尚未註冊', 'danger')
+            return redirect(url_for('user.forgot_password'))
+
+        # 產生重設密碼 token
+        s = TimedSerializer('secret_key')  # 建議使用 app.secret_key
+        token = s.dumps(email, salt='password-reset')
+        ngrok_url = "https://nonscaling-ocellar-brian.ngrok-free.dev"
+        reset_link = f"{ngrok_url}{url_for('user.reset_password', token=token)}"
+
+        # 寄送重設信件
+        send_reset_email(email, reset_link)
+        flash('重設密碼信件已寄送，請檢查您的電子郵件', 'success')
+        return redirect(url_for('user.login_form_index'))
+
+    return render_template('user/forgot_password.html')
 
 # 重設密碼路由
 @user_bp.route('/reset_password/<token>', methods=['GET', 'POST'])
@@ -216,7 +255,7 @@ def reset_password(token):
         flash('密碼已成功重設！', 'success')
         return redirect(url_for('user.login_form_index'))
     
-    return render_template('/user/reset_password.html')
+    return render_template('user/reset_password.html')
 
 @user_bp.route('/verify/<token>')
 def verify_email(token):

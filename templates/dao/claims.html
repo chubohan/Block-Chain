@@ -1,37 +1,366 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-  <meta charset="UTF-8">
-  <title>DAO 历史理赔记录</title>
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }
-    .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
-    .claim-item { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; background: #f9f9f9; }
-    .status-approved { color: green; font-weight: bold; }
-    .status-rejected { color: red; font-weight: bold; }
-    .nav { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
-    .btn { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; }
-    .btn-secondary { background: #6c757d; color: white; }
-    .loading { color: #666; font-style: italic; }
-    .error { color: red; background: #ffe6e6; padding: 15px; border-radius: 5px; }
-    .dao-info { background: #e7f3ff; padding: 10px; border-radius: 5px; margin-bottom: 15px; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="nav">
-      <button id="backButton" class="btn btn-secondary">返回 DAO 詳情</button>
-      <h1>歷史理賠紀錄</h1>
-      <div id="daoInfo" class="dao-info">載入中...</div>
+{% extends "base.html" %}
+
+{% block title %}DAO 歷史理賠記錄 - ChainSure{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* 主要內容區域樣式 */
+    .dao-history-container {
+        margin-top: 120px;
+        width: 90%;
+        max-width: 1200px;
+        z-index: 10;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 12px 40px rgba(74, 110, 224, 0.15);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* 導航區域 */
+    .dao-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid rgba(74, 110, 224, 0.1);
+    }
+
+    .dao-title {
+        color: #2d4fc6;
+        font-weight: bold;
+        margin: 0;
+        font-size: 2.2rem;
+        text-shadow: 0 2px 4px rgba(45, 79, 198, 0.1);
+    }
+
+    /* DAO 信息卡片 */
+    .dao-info-card {
+        background: linear-gradient(135deg, rgba(74, 110, 224, 0.1), rgba(100, 193, 255, 0.1));
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 30px;
+        border: 1px solid rgba(74, 110, 224, 0.2);
+        box-shadow: 0 4px 15px rgba(74, 110, 224, 0.1);
+    }
+
+    .dao-info-content {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        color: #2d4fc6;
+        font-weight: 500;
+    }
+
+    .dao-info-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .dao-info-item i {
+        color: #64c1ff;
+        font-size: 1.1rem;
+    }
+
+    /* 理賠項目樣式 */
+    .claims-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .claim-item {
+        background: linear-gradient(135deg, #ffffff, #f8faff);
+        border-radius: 15px;
+        padding: 25px;
+        border: 1px solid rgba(74, 110, 224, 0.15);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .claim-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 5px;
+        height: 100%;
+        background: linear-gradient(135deg, #4a6ee0, #64c1ff);
+    }
+
+    .claim-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(74, 110, 224, 0.2);
+    }
+
+    .claim-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 15px;
+    }
+
+    .claim-title {
+        color: #2d4fc6;
+        font-weight: bold;
+        font-size: 1.4rem;
+        margin: 0;
+    }
+
+    .claim-status {
+        padding: 6px 15px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-approved {
+        background: linear-gradient(135deg, #a8e6cf, #88d4ab);
+        color: #059669;
+    }
+
+    .status-rejected {
+        background: linear-gradient(135deg, #ffb8b8, #ff9a9a);
+        color: #dc2626;
+    }
+
+    .claim-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .claim-detail {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .detail-label {
+        color: #666;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .detail-value {
+        color: #333;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .claim-amount {
+        color: #2d4fc6;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+
+    .claim-votes {
+        display: flex;
+        gap: 20px;
+        margin-top: 10px;
+    }
+
+    .vote-count {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-weight: 600;
+    }
+
+    .vote-yes {
+        background: rgba(16, 185, 129, 0.1);
+        color: #059669;
+    }
+
+    .vote-no {
+        background: rgba(220, 38, 38, 0.1);
+        color: #dc2626;
+    }
+
+    .claim-file {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid rgba(74, 110, 224, 0.1);
+    }
+
+    .file-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #4a6ee0;
+        text-decoration: none;
+        font-weight: 500;
+        padding: 8px 15px;
+        border-radius: 8px;
+        background: rgba(74, 110, 224, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .file-link:hover {
+        background: rgba(74, 110, 224, 0.2);
+        color: #2d4fc6;
+        transform: translateY(-1px);
+    }
+
+    /* 載入和錯誤狀態 */
+    .loading-state, .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #666;
+    }
+
+    .loading-state i, .empty-state i {
+        font-size: 3rem;
+        color: #64c1ff;
+        margin-bottom: 20px;
+    }
+
+    .loading-state h3, .empty-state h3 {
+        color: #2d4fc6;
+        margin-bottom: 10px;
+    }
+
+    .error-state {
+        background: linear-gradient(135deg, #ffe6e6, #ffcccc);
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+        border: 1px solid rgba(220, 38, 38, 0.2);
+    }
+
+    .error-state h3 {
+        color: #dc2626;
+        margin-bottom: 15px;
+    }
+
+    .error-state p {
+        color: #666;
+        margin-bottom: 20px;
+    }
+
+    /* 按鈕樣式 */
+    .btn-back {
+        background: linear-gradient(135deg, #8ac6ff, #64c1ff);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-back:hover {
+        background: linear-gradient(135deg, #64c1ff, #4a6ee0);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(100, 193, 255, 0.3);
+        color: white;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    /* 響應式設計 */
+    @media (max-width: 768px) {
+        .dao-history-container {
+            margin-top: 100px;
+            width: 95%;
+            padding: 25px;
+        }
+
+        .dao-nav {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+
+        .dao-title {
+            font-size: 1.8rem;
+        }
+
+        .dao-info-content {
+            grid-template-columns: 1fr;
+        }
+
+        .claim-header {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .claim-details {
+            grid-template-columns: 1fr;
+        }
+
+        .claim-votes {
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .dao-history-container {
+            padding: 20px;
+        }
+
+        .claim-item {
+            padding: 20px;
+        }
+
+        .btn-group {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dao-history-container">
+    <!-- 導航區域 -->
+    <div class="dao-nav">
+        <button id="backButton" class="btn-back">
+            <i class="fas fa-arrow-left"></i>返回 DAO 詳情
+        </button>
+        <h1 class="dao-title">歷史理賠紀錄</h1>
     </div>
 
-    <div id="historyContainer">
-      <div class="loading">載入歷史記錄中...</div>
+    <!-- DAO 信息卡片 -->
+    <div id="daoInfo" class="dao-info-card">
+        <div class="dao-info-content">
+            <div class="dao-info-item">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span>載入中...</span>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <script>
+    <!-- 歷史理賠容器 -->
+    <div id="historyContainer" class="claims-container">
+        <div class="loading-state">
+            <i class="fas fa-spinner fa-spin"></i>
+            <h3>載入歷史記錄中...</h3>
+            <p>正在從區塊鏈獲取理賠數據</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
     // 合約 ABI (與 dao-details.html 相同)
     const daoABI =[
 	{
@@ -934,6 +1263,6 @@
 
     // 頁面載入時初始化
     document.addEventListener("DOMContentLoaded", initApp);
-  </script>
-</body>
-</html>
+</script>
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+{% endblock %}

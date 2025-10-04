@@ -1,95 +1,400 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-  <meta charset="UTF-8">
-  <title>我的 DAO</title>
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    .dao-card { border: 1px solid #ccc; padding: 15px; margin: 10px 0; border-radius: 8px; }
-    .btn { padding: 6px 12px; margin: 5px; border-radius: 5px; border: none; cursor: pointer; }
-    .btn-connect { background: #007bff; color: white; }
-  </style>
-</head>
-<body>
-  <h1>我的 DAO</h1>
+{% extends "base.html" %}
 
-  <!-- 錢包區 -->
-  <div id="walletSection">
-    <button id="connectWalletBtn" class="btn btn-connect">連接錢包</button>
-    <span id="walletAddress"></span>
-  </div>
+{% block title %}我的 DAO - ChainSure{% endblock %}
 
-  <hr>
+{% block extra_css %}
+<style>
+    /* 主要內容區域樣式 */
+    .my-daos-container {
+        margin-top: 120px;
+        width: 90%;
+        max-width: 1200px;
+        z-index: 10;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 12px 40px rgba(74, 110, 224, 0.15);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
 
-  <!-- 已加入的 DAO -->
-  <h2>已加入的 DAO</h2>
-  <div id="myDaoList">請先連接錢包...</div>
+    /* 錢包區域 */
+    .wallet-section {
+        background: linear-gradient(135deg, rgba(74, 110, 224, 0.1), rgba(100, 193, 255, 0.1));
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        border: 1px solid rgba(74, 110, 224, 0.2);
+        text-align: center;
+    }
 
-  <script>
+    .wallet-info {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .wallet-address {
+        background: rgba(255, 255, 255, 0.8);
+        padding: 10px 20px;
+        border-radius: 25px;
+        color: #2d4fc6;
+        font-weight: 600;
+        border: 1px solid rgba(74, 110, 224, 0.3);
+    }
+
+    /* 標題樣式 */
+    .section-title {
+        color: #2d4fc6;
+        font-weight: bold;
+        margin-bottom: 25px;
+        font-size: 1.8rem;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    /* DAO 列表 */
+    .dao-list-section {
+        margin-top: 30px;
+    }
+
+    .dao-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .dao-card {
+        background: linear-gradient(135deg, #ffffff, #f8faff);
+        border-radius: 15px;
+        padding: 25px;
+        border: 1px solid rgba(74, 110, 224, 0.15);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+    }
+
+    .dao-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 5px;
+        height: 100%;
+        background: linear-gradient(135deg, #4a6ee0, #64c1ff);
+    }
+
+    .dao-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(74, 110, 224, 0.2);
+    }
+
+    .dao-icon {
+        font-size: 2.5rem;
+        color: #4a6ee0;
+        margin-bottom: 15px;
+    }
+
+    .dao-address {
+        color: #666;
+        font-size: 0.9rem;
+        font-family: monospace;
+        background: rgba(74, 110, 224, 0.05);
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin: 15px 0;
+        word-break: break-all;
+    }
+
+    .member-badge {
+        background: linear-gradient(135deg, #a8e6cf, #88d4ab);
+        color: #059669;
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 15px;
+    }
+
+    /* 按鈕樣式 */
+    .btn-connect {
+        background: linear-gradient(135deg, #4a6ee0, #64c1ff);
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 10px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-connect:hover {
+        background: linear-gradient(135deg, #64c1ff, #4a6ee0);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(100, 193, 255, 0.3);
+        color: white;
+    }
+
+    .btn-view {
+        background: linear-gradient(135deg, #ffd28b, #ffb347);
+        color: #333;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        width: 100%;
+        justify-content: center;
+        margin-top: 15px;
+    }
+
+    .btn-view:hover {
+        background: linear-gradient(135deg, #ffb347, #ff9a02);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(255, 179, 71, 0.3);
+        color: #333;
+    }
+
+    /* 分隔線 */
+    .divider {
+        height: 2px;
+        background: linear-gradient(135deg, rgba(74, 110, 224, 0.1), rgba(100, 193, 255, 0.1));
+        margin: 30px 0;
+        border: none;
+    }
+
+    /* 載入和空狀態 */
+    .loading-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #666;
+    }
+
+    .loading-state i {
+        font-size: 3rem;
+        color: #64c1ff;
+        margin-bottom: 20px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #666;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: #ffd28b;
+        margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+        color: #2d4fc6;
+        margin-bottom: 10px;
+    }
+
+    .error-state {
+        background: linear-gradient(135deg, #ffe6e6, #ffcccc);
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+        border: 1px solid rgba(220, 38, 38, 0.2);
+    }
+
+    .error-state h3 {
+        color: #dc2626;
+        margin-bottom: 15px;
+    }
+
+    /* 響應式設計 */
+    @media (max-width: 768px) {
+        .my-daos-container {
+            margin-top: 100px;
+            width: 95%;
+            padding: 25px;
+        }
+
+        .wallet-info {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .dao-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .my-daos-container {
+            padding: 20px;
+        }
+
+        .wallet-section {
+            padding: 20px;
+        }
+
+        .dao-card {
+            padding: 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="my-daos-container">
+    <!-- 錢包區域 -->
+    <div class="wallet-section">
+        <h2 class="section-title">
+            <i class="fas fa-wallet"></i>錢包連接
+        </h2>
+        <div class="wallet-info">
+            <button id="connectWalletBtn" class="btn-connect">
+                <i class="fas fa-plug"></i>連接錢包
+            </button>
+            <span id="walletAddress" class="wallet-address">未連接錢包</span>
+        </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- 已加入的 DAO -->
+    <div class="dao-list-section">
+        <h2 class="section-title">
+            <i class="fas fa-users"></i>已加入的 DAO
+        </h2>
+        <div id="myDaoList" class="dao-grid">
+            <div class="loading-state">
+                <i class="fas fa-info-circle"></i>
+                <h3>請先連接錢包</h3>
+                <p>連接錢包後將顯示您已加入的 DAO</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 所有原有的 JavaScript 代碼保持完全一樣
     let provider;
     let signer;
     let factoryContract;
     let userAddress;
 
     const factoryAbi = [
-  "function getDAOAddresses() public view returns(address[])" // 修正方法名
-];
+        "function getDAOAddresses() public view returns(address[])"
+    ];
     const daoAbi = [
-      "function isMember(address user) public view returns(bool)"
+        "function isMember(address user) public view returns(bool)"
     ];
     const factoryAddress = "0xYourFactoryAddress"; // TODO: 換成實際部署的 Factory 地址
 
     async function connectWallet() {
-      if (window.ethereum) {
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        signer = provider.getSigner();
-        userAddress = await signer.getAddress();
-        document.getElementById("walletAddress").innerText = "已連接: " + userAddress;
+        if (window.ethereum) {
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+            await provider.send("eth_requestAccounts", []);
+            signer = provider.getSigner();
+            userAddress = await signer.getAddress();
+            document.getElementById("walletAddress").innerText = "已連接: " + userAddress;
 
-        factoryContract = new ethers.Contract(factoryAddress, factoryAbi, signer);
+            factoryContract = new ethers.Contract(factoryAddress, factoryAbi, signer);
 
-        loadMyDAOs();
-      } else {
-        alert("請安裝 MetaMask");
-      }
+            loadMyDAOs();
+        } else {
+            alert("請安裝 MetaMask");
+        }
     }
 
     async function loadMyDAOs() {
-  const listDiv = document.getElementById("myDaoList");
-  listDiv.innerHTML = "載入中...";
-
-  try {
-    // 使用正確的方法名
-    const daos = await factoryContract.getDAOAddresses();
-    listDiv.innerHTML = "";
-
-    for (let addr of daos) {
-      const daoContract = new ethers.Contract(addr, daoAbi, signer);
-      const isMember = await daoContract.isMember(userAddress);
-
-      if (isMember) {
-        const div = document.createElement("div");
-        div.className = "dao-card";
-        div.innerHTML = `
-          <p>DAO 地址: ${addr}</p>
-          <button onclick="window.location.href='dao-details.html?address=${addr}'">查看 DAO</button>
+        const listDiv = document.getElementById("myDaoList");
+        listDiv.innerHTML = `
+            <div class="loading-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <h3>載入中...</h3>
+                <p>正在檢查您的 DAO 會員資格</p>
+            </div>
         `;
-        listDiv.appendChild(div);
-      }
+
+        try {
+            const daos = await factoryContract.getDAOAddresses();
+            listDiv.innerHTML = "";
+
+            let memberCount = 0;
+
+            for (let addr of daos) {
+                const daoContract = new ethers.Contract(addr, daoAbi, signer);
+                const isMember = await daoContract.isMember(userAddress);
+
+                if (isMember) {
+                    memberCount++;
+                    const div = document.createElement("div");
+                    div.className = "dao-card";
+                    div.innerHTML = `
+                        <div class="dao-icon">
+                            <i class="fas fa-landmark"></i>
+                        </div>
+                        <div class="member-badge">
+                            <i class="fas fa-check-circle"></i> 已加入
+                        </div>
+                        <div class="dao-address">${addr}</div>
+                        <button class="btn-view" onclick="viewDAODetails('${addr}')">
+                            <i class="fas fa-external-link-alt"></i>查看 DAO 詳細資料
+                        </button>
+                    `;
+                    listDiv.appendChild(div);
+                }
+            }
+
+            if (memberCount === 0) {
+                listDiv.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-user-plus"></i>
+                        <h3>尚未加入任何 DAO</h3>
+                        <p>您還沒有加入任何 DAO，請前往 DAO 平台頁面加入或創建 DAO</p>
+                        <button class="btn-connect" onclick="window.location.href='/'" style="margin-top: 20px;">
+                            <i class="fas fa-arrow-left"></i>前往 DAO 平台
+                        </button>
+                    </div>
+                `;
+            }
+        } catch (err) {
+            console.error("讀取 DAO 失敗", err);
+            listDiv.innerHTML = `
+                <div class="error-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>讀取失敗</h3>
+                    <p>無法載入 DAO 列表，請確認網絡連接和合約地址</p>
+                    <button class="btn-connect" onclick="loadMyDAOs()" style="margin-top: 15px;">
+                        <i class="fas fa-redo"></i>重新載入
+                    </button>
+                </div>
+            `;
+        }
     }
 
-    if (listDiv.innerHTML === "") {
-      listDiv.innerHTML = "尚未加入任何 DAO";
+    function viewDAODetails(daoAddress) {
+        window.location.href = `dao-details.html?address=${daoAddress}`;
     }
-  } catch (err) {
-    console.error("讀取 DAO 失敗", err);
-    listDiv.innerHTML = "讀取失敗";
-  }
-}
 
+    // 事件監聽器
     document.getElementById("connectWalletBtn").addEventListener("click", connectWallet);
-  </script>
-</body>
-</html>
+</script>
+{% endblock %}

@@ -93,21 +93,24 @@ def signup():
     try:
         # 取得使用者的輸入值
         username = request.form.get('username')
-        age=request.form.get('age')
-        gender=request.form.get('gender')
+        age = request.form.get('age')
+        gender = request.form.get('gender')
         gmail = request.form.get('gmail')
         password1 = request.form.get('password1')
         password2 = request.form.get('password2')
-        print(username,age,gender,gmail,password1,password2)
+        insurance_officer = request.form.get('insurance_officer', 0)  # 預設 0
+        wallet = request.form.get('wallet')
+
+        print(username, age, gender, gmail, password1, password2, insurance_officer, wallet)
 
         # 檢查必填字段
-        if not all([username, gmail, password1, password2]):
+        if not all([username, gmail, password1, password2, insurance_officer, wallet]):
             return render_template('user/signup.html', success=False, message="所有欄位皆為必填")
 
         # 驗證密碼一致性
         if password1 != password2:
             return render_template('user/signup.html', success=False, message="密碼不一致")
-        
+
         # 生成密碼哈希
         password_bytes = password1.encode('utf-8')
         salt = bcrypt.gensalt()
@@ -119,14 +122,16 @@ def signup():
             return render_template('user/signup.html', success=False, message="資料庫連接失敗")
 
         cursor = conn.cursor()
-        # 检查 gmail 是否已存在
+        # 檢查 gmail 是否已存在
         cursor.execute("SELECT gmail FROM user WHERE gmail = %s", (gmail,))
         if cursor.fetchone():
             return render_template('user/signup.html', success=False, message="此 Gmail 已被注冊")
 
-        cursor.execute("INSERT INTO user (username, age, gender, password, gmail) VALUES (%s, %s, %s,%s,%s)",
-            (username,age,gender ,hashed_password, gmail)
-        )
+        cursor.execute("""
+            INSERT INTO user (username, age, gender, password, gmail, insurance_officer, wallet)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (username, age, gender, hashed_password, gmail, int(insurance_officer), wallet))
+
         conn.commit()
         conn.close()
 
@@ -139,11 +144,9 @@ def signup():
         flash('註冊成功，請到 Gmail 完成驗證後再登入。', 'info')
         return render_template('user/signup.html', success=True)
 
-
     except Exception as e:
         print(f"Database connection error: {str(e)}")
         return render_template('user/signup.html', success=False, message="資料庫連接失敗")
-
     
 @user_bp.route('/login/form')
 def login_form_index():
@@ -477,26 +480,6 @@ def profile():
 
     return render_template('user/profile.html', user=user_data)
 
-@user_bp.route('/save-wallet', methods=['POST'])
-@login_required
-def save_wallet():
-    data = request.get_json()
-    wallet = data.get('wallet')
-
-    if not wallet:
-        return jsonify({'success': False, 'message': '錢包地址缺失'}), 400
-
-    try:
-        conn = db.get_connection()
-        with conn.cursor() as cursor:
-            sql = "UPDATE user SET wallet = %s WHERE gmail = %s"
-            cursor.execute(sql, (wallet, current_user.id))
-        conn.commit()
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
-    finally:
-        conn.close()
 # 登出路由
 @user_bp.route('/logout', methods=['GET', 'POST'])
 @login_required

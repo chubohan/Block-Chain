@@ -191,214 +191,378 @@
     let insuranceContract;
     const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
     const contractABI = [
-        // ... 保持原有的 ABI 內容不變
-        {
-            "inputs": [
-                {
-                    "internalType": "string",
-                    "name": "_policyNumber",
-                    "type": "string"
-                },
-                {
-                    "internalType": "string",
-                    "name": "_policyHolder",
-                    "type": "string"
-                },
-                {
-                    "internalType": "string",
-                    "name": "_insuredPerson",
-                    "type": "string"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "_insuranceAmount",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "_premiumPeriod",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "_premiumAmount",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "_startDate",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "string",
-                    "name": "_beneficiary",
-                    "type": "string"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "_growthRate",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "_declaredInterestRate",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "string",
-                    "name": "_pdfHash",
-                    "type": "string"
-                }
-            ],
-            "name": "addPolicy",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "string",
-                    "name": "_policyNumber",
-                    "type": "string"
-                },
-                {
-                    "internalType": "address",
-                    "name": "_wallet",
-                    "type": "address"
-                }
-            ],
-            "name": "authorizePolicyAccess",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "string",
-                    "name": "_policyNumber",
-                    "type": "string"
-                },
-                {
-                    "internalType": "address",
-                    "name": "_wallet",
-                    "type": "address"
-                }
-            ],
-            "name": "revokePolicyAccess",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "string",
-                    "name": "_policyNumber",
-                    "type": "string"
-                }
-            ],
-            "name": "getPolicy",
-            "outputs": [
-                {
-                    "internalType": "string",
-                    "name": "",
-                    "type": "string"
-                },
-                {
-                    "internalType": "string",
-                    "name": "",
-                    "type": "string"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "string",
-                    "name": "",
-                    "type": "string"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "string",
-                    "name": "",
-                    "type": "string"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "string",
-                    "name": "_policyNumber",
-                    "type": "string"
-                }
-            ],
-            "name": "getPolicyOwner",
-            "outputs": [
-                {
-                    "internalType": "address",
-                    "name": "",
-                    "type": "address"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "string",
-                    "name": "_policyNumber",
-                    "type": "string"
-                },
-                {
-                    "internalType": "address",
-                    "name": "_wallet",
-                    "type": "address"
-                }
-            ],
-            "name": "isAuthorized",
-            "outputs": [
-                {
-                    "internalType": "bool",
-                    "name": "",
-                    "type": "bool"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-        }
-    ];
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_policyHolder",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_insuredPerson",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_insuranceAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_premiumPeriod",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_premiumAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_startDate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "_beneficiary",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_growthRate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_declaredInterestRate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "_pdfHash",
+				"type": "string"
+			}
+		],
+		"name": "addPolicy",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "_wallet",
+				"type": "address"
+			}
+		],
+		"name": "authorizePolicyAccess",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			}
+		],
+		"name": "deletePolicy",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			}
+		],
+		"name": "getPolicy",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getPolicyCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			}
+		],
+		"name": "getPolicyOwner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "_wallet",
+				"type": "address"
+			}
+		],
+		"name": "isAuthorized",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"name": "policies",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "policyHolder",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "insuredPerson",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "insuranceAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "premiumPeriod",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "premiumAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "startDate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "beneficiary",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "growthRate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "declaredInterestRate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "pdfHash",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "policyNumbers",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "_wallet",
+				"type": "address"
+			}
+		],
+		"name": "revokePolicyAccess",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_policyHolder",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_insuredPerson",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_beneficiary",
+				"type": "string"
+			}
+		],
+		"name": "updatePolicy",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_policyNumber",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_pdfHash",
+				"type": "string"
+			}
+		],
+		"name": "updatePolicyPDF",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+];
 
     const policyNumber = "{{ policy_number }}";
     const clientGmail = "{{ current_user.id }}";
@@ -580,387 +744,20 @@
             alert("❌ 合約初始化失敗，請重新整理頁面");
         });
     });
-</script>
-{% endblock %}
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-  <meta charset="UTF-8">
-  <title>我被授權的保單</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-  <style>
-    .card {
-      transition: transform 0.2s;
-      margin-bottom: 1rem;
-      border: 1px solid #e3f2fd;
-    }
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    .badge-relationship {
-      background-color: #2196F3;
-      color: white;
-    }
-    .empty-state {
-      text-align: center;
-      padding: 3rem;
-      color: #6c757d;
-    }
-    .policy-header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 2rem 0;
-      margin-bottom: 2rem;
-      border-radius: 0 0 20px 20px;
-    }
-    .grantor-info {
-      background-color: #f8f9fa;
-      border-left: 4px solid #2196F3;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      border-radius: 4px;
-    }
-    .debug-info {
-      background-color: #fff3cd;
-      border: 1px solid #ffeaa7;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      border-radius: 4px;
-      font-family: monospace;
-      font-size: 0.9em;
-    }
-  </style>
-</head>
-<body>
 
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="/">ChainSure</a>
-    <div class="collapse navbar-collapse">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a class="nav-link" href="/">首頁</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/policy/mypolicy">我的保單</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link active" href="/policy/authorized_policies">被授權保單</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/logout">登出</a>
-        </li>
-      </ul>
-    </div>
-  </div>
-</nav>
 
-<div class="policy-header">
-  <div class="container">
-    <h1><i class="fas fa-user-check me-3"></i>我被授權的保單</h1>
-    <p class="lead mb-0">查看他人授權給您管理的保單資料</p>
-  </div>
-</div>
 
-<div class="container">
-  {% if error %}
-  <div class="alert alert-danger alert-dismissible fade show" role="alert">
-    <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-  </div>
-  {% endif %}
 
-  <!-- 除錯資訊 -->
-  <div class="row mb-3">
-    <div class="col-12">
-      <button class="btn btn-outline-info btn-sm me-2" onclick="checkDebugInfo()">
-        <i class="fas fa-bug me-1"></i>檢查授權狀態
-      </button>
-      <button class="btn btn-outline-warning btn-sm" onclick="checkDBStructure()">
-        <i class="fas fa-database me-1"></i>檢查資料庫結構
-      </button>
-      <div id="debugInfo" class="debug-info mt-2" style="display: none;">
-        <!-- 除錯資訊將在這裡顯示 -->
-      </div>
-    </div>
-  </div>
 
-  <!-- 用戶資訊 -->
-  <div class="row mb-4">
-    <div class="col-md-8">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title"><i class="fas fa-user me-2"></i>我的資訊</h5>
-          <div class="row">
-            <div class="col-md-6">
-              <p class="mb-2"><strong>姓名:</strong> {{ user_name or '未設定' }}</p>
-              <p class="mb-2"><strong>Gmail:</strong> {{ user_email }}</p>
-            </div>
-            <div class="col-md-6">
-              <p class="mb-2"><strong>錢包地址:</strong></p>
-              <p class="mb-0">
-                <small class="text-muted">{{ user_wallet or '未綁定錢包' }}</small>
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="card bg-primary text-white">
-        <div class="card-body text-center">
-          <h3 class="mb-1">{{ authorized_policies|length }}</h3>
-          <p class="mb-0">被授權保單數量</p>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- 保單列表 -->
-  <div class="row">
-    <div class="col-12">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3>授權保單列表</h3>
-        <span class="badge bg-secondary">共 {{ authorized_policies|length }} 筆</span>
-      </div>
-      
-      {% if authorized_policies %}
-        <div class="row">
-          {% for auth in authorized_policies %}
-          <div class="col-lg-6 col-xl-4">
-            <div class="card h-100">
-              <div class="card-header d-flex justify-content-between align-items-center">
-                <span class="badge bg-primary">
-                  <i class="fas fa-file-contract me-1"></i>{{ auth.policy_number }}
-                </span>
-                <span class="badge badge-relationship">
-                  <i class="fas fa-handshake me-1"></i>{{ auth.relationship }}
-                </span>
-              </div>
-              
-              <div class="card-body">
-                <!-- 授權人資訊 -->
-                <div class="grantor-info">
-                  <h6 class="mb-2">
-                    <i class="fas fa-user-tie me-1"></i>授權人
-                  </h6>
-                  <p class="mb-1 small">
-                    <strong>{{ auth.grantor_name or auth.grantor_gmail }}</strong>
-                  </p>
-                  <p class="mb-0 small text-muted">
-                    {{ auth.grantor_gmail }}
-                  </p>
-                </div>
-
-                <!-- 保單基本資訊 -->
-                <h6 class="card-title text-truncate">{{ auth.policyHolder }}</h6>
-                <p class="card-text small">
-                  <i class="fas fa-user me-1 text-muted"></i>被保險人: {{ auth.insuredPerson }}<br>
-                  <i class="fas fa-building me-1 text-muted"></i>保險公司: {{ auth.company or '未設定' }}<br>
-                  <i class="fas fa-dollar-sign me-1 text-muted"></i>保額: {{ auth.insuranceAmount or '未設定' }}<br>
-                  {% if auth.tx_hash %}
-                  <i class="fas fa-link me-1 text-muted"></i>交易: {{ auth.tx_hash[:10] }}...
-                  {% endif %}
-                </p>
-              </div>
-              
-              <div class="card-footer bg-transparent">
-                <button class="btn btn-outline-primary btn-sm w-100" 
-                        onclick="viewPolicyDetail('{{ auth.policy_number }}')">
-                  <i class="fas fa-eye me-1"></i>查看詳細資料
-                </button>
-              </div>
-            </div>
-          </div>
-          {% endfor %}
-        </div>
-      {% else %}
-        <div class="empty-state">
-          <i class="fas fa-folder-open fa-4x mb-3 text-muted"></i>
-          <h4>尚無被授權的保單</h4>
-          <p class="text-muted">當有人將保單授權給您管理時，相關保單會顯示在此處</p>
-          <div class="mt-4">
-            <button class="btn btn-outline-secondary me-2" onclick="checkDebugInfo()">
-              <i class="fas fa-search me-1"></i>檢查授權狀態
-            </button>
-            <a href="/policy/mypolicy" class="btn btn-primary">
-              <i class="fas fa-arrow-left me-2"></i>返回我的保單
-            </a>
-          </div>
-        </div>
-      {% endif %}
-    </div>
-  </div>
-</div>
-
-<!-- 保單詳細資料 Modal -->
-<div class="modal fade" id="policyDetailModal" tabindex="-1">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">
-          <i class="fas fa-file-contract me-2"></i>保單詳細資料
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body" id="policyDetailContent">
-        <!-- 內容由 JavaScript 動態載入 -->
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-          <i class="fas fa-times me-1"></i>關閉
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-// 檢查授權狀態
-async function checkDebugInfo() {
-  const debugInfo = document.getElementById('debugInfo');
-  debugInfo.style.display = 'block';
-  debugInfo.innerHTML = `
-    <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
-      <span class="visually-hidden">載入中...</span>
-    </div>
-    檢查授權狀態中...
-  `;
-
-  try {
-    const response = await fetch('/policy/debug_authorizations');
-    const result = await response.json();
-    
-    let debugHtml = `<strong>授權狀態檢查：</strong><br>`;
-    debugHtml += `<strong>當前用戶:</strong> ${result.user_email}<br>`;
-    debugHtml += `<strong>用戶錢包:</strong> ${result.user_wallet || '未綁定'}<br>`;
-    debugHtml += `<strong>授權記錄數量:</strong> ${result.auth_count}<br>`;
-    
-    if (result.auth_count > 0) {
-      debugHtml += `<strong>授權記錄:</strong><br>`;
-      result.authorization_records.forEach(auth => {
-        debugHtml += `- 保單: ${auth.policy_number}, 授權人: ${auth.gmail}, 關係: ${auth.relationship}<br>`;
-      });
-    } else {
-      debugHtml += `<strong>⚠️ 未找到任何授權記錄</strong><br>`;
-      debugHtml += `<em>可能原因：</em><br>`;
-      debugHtml += `• 沒有人授權保單給您<br>`;
-      debugHtml += `• 授權記錄中的 Gmail 或錢包不匹配<br>`;
-      debugHtml += `• 資料庫連接問題<br>`;
-    }
-    
-    debugInfo.innerHTML = debugHtml;
-  } catch (error) {
-    debugInfo.innerHTML = `<strong>檢查錯誤:</strong> ${error.message}`;
-  }
-}
-
-// 檢查資料庫結構
-async function checkDBStructure() {
-  const debugInfo = document.getElementById('debugInfo');
-  debugInfo.style.display = 'block';
-  debugInfo.innerHTML = `
-    <div class="spinner-border spinner-border-sm text-warning me-2" role="status">
-      <span class="visually-hidden">載入中...</span>
-    </div>
-    檢查資料庫結構中...
-  `;
-
-  try {
-    const response = await fetch('/policy/check_db_structure');
-    const result = await response.json();
-    
-    let debugHtml = `<strong>資料庫結構檢查：</strong><br>`;
-    
-    // 顯示 authorization 表結構
-    debugHtml += `<strong>authorization 表欄位:</strong><br>`;
-    result.authorization_structure.forEach(col => {
-      debugHtml += `- ${col.Field} (${col.Type})<br>`;
-    });
-    
-    // 顯示範例資料
-    debugHtml += `<strong>範例授權資料:</strong><br>`;
-    if (result.sample_authorization_data && result.sample_authorization_data.length > 0) {
-      result.sample_authorization_data.forEach(auth => {
-        debugHtml += `- 保單: ${auth.policy_number}, 授權人: ${auth.gmail}, 被授權人: ${auth.authorized_gmail}<br>`;
-      });
-    } else {
-      debugHtml += `- 無授權資料<br>`;
-    }
-    
-    debugInfo.innerHTML = debugHtml;
-  } catch (error) {
-    debugInfo.innerHTML = `<strong>檢查錯誤:</strong> ${error.message}`;
-  }
-}
-
-// 查看保單詳細資料
-async function viewPolicyDetail(policyNumber) {
-  try {
-    document.getElementById('policyDetailContent').innerHTML = `
-      <div class="text-center py-4">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">載入中...</span>
-        </div>
-        <p class="mt-2 text-muted">載入保單資料中...</p>
-      </div>
-    `;
-    
-    const modal = new bootstrap.Modal(document.getElementById('policyDetailModal'));
-    modal.show();
-
-    const response = await fetch(`/policy/get_authorized_policy_detail/${policyNumber}`);
-    const result = await response.json();
-    
-    if (result.success) {
-      const policy = result.policy;
-      
-      const detailHtml = `
-        <div class="row mb-3">
-          <div class="col-md-6">
-            <h6><i class="fas fa-info-circle me-2"></i>基本資訊</h6>
-            <p><strong>保單編號:</strong> ${policy.policy_number}</p>
-            <p><strong>投保人:</strong> ${policy.policy_holder}</p>
-            <p><strong>被保險人:</strong> ${policy.insured_person}</p>
-            <p><strong>保險公司:</strong> ${policy.company}</p>
-          </div>
-          <div class="col-md-6">
-            <h6><i class="fas fa-user-tie me-2"></i>授權資訊</h6>
-            <p><strong>授權人:</strong> ${policy.grantor_name || policy.grantor_gmail}</p>
-            <p><strong>關係:</strong> <span class="badge bg-secondary">${policy.relationship}</span></p>
-            ${policy.authorized_date ? `<p><strong>授權時間:</strong> ${policy.authorized_date}</p>` : ''}
-          </div>
-        </div>
-      `;
-      
-      document.getElementById('policyDetailContent').innerHTML = detailHtml;
-    } else {
-      document.getElementById('policyDetailContent').innerHTML = `
-        <div class="alert alert-danger">
-          <i class="fas fa-exclamation-triangle me-2"></i>
-          無法載入保單資料: ${result.message}
-        </div>
-      `;
-    }
-  } catch (error) {
-    document.getElementById('policyDetailContent').innerHTML = `
-      <div class="alert alert-danger">
-        <i class="fas fa-exclamation-triangle me-2"></i>
-        載入失敗，請稍後再試
-      </div>
-    `;
-  }
-}
-
-// 頁面載入完成後自動檢查
+// 頁面載入完成後的操作
 document.addEventListener('DOMContentLoaded', function() {
   console.log('被授權保單頁面載入完成');
-  
- 
+  console.log('當前用戶:', '{{ user_email }}');
+  console.log('錢包地址:', '{{ user_wallet }}');
+ ;
 });
 </script>
+{% endblock %}
 </body>
 </html>

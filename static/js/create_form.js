@@ -1,41 +1,6 @@
-function createStars() {
-    const numStars = 200;
-    const starsContainer = document.querySelector(".stars");
-    const pageHeight = document.body.scrollHeight;
 
-    for (let i = 0; i < numStars; i++) {
-        let star = document.createElement("div");
-        star.classList.add("star");
 
-        const x = Math.random() * window.innerWidth;
-        const y = Math.random() * pageHeight;
-        const duration = Math.random() * 2 + 1;
-        const delay = Math.random() * 5;
 
-        star.style.top = `${y}px`;
-        star.style.left = `${x}px`;
-        star.style.animationDuration = `${duration}s`;
-        star.style.animationDelay = `${delay}s`;
-
-        starsContainer.appendChild(star);
-    }
-}
-
-createStars();
-
-// Navbar隱藏顯示的邏輯
-let lastScrollTop = 0;
-window.addEventListener('scroll', function() {
-    const navbar = document.querySelector('.navbar');
-    let currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-    
-    if (currentScroll > lastScrollTop) {
-        navbar.classList.add('hidden'); // 向下滾動隱藏navbar
-    } else {
-        navbar.classList.remove('hidden'); // 向上滾動顯示navbar
-    }
-    lastScrollTop = currentScroll <= 0 ? 0 : currentScroll; // 防止滾動條小於0
-});
 
 // 對稱加密配置
 const ENCRYPTION_KEY = CryptoJS.enc.Utf8.parse("your-32-byte-secret-key"); // 替換為實際密鑰
@@ -71,16 +36,6 @@ function decryptField(cipherText) {
 
 
 
-async function connectWallet() {
-	if (window.ethereum) {
-	  web3 = new Web3(window.ethereum);
-	  await window.ethereum.request({ method: "eth_requestAccounts" });
-	  contract = new web3.eth.Contract(contractABI, contractAddress);
-	  console.log("錢包連線成功");
-	} else {
-	  alert("請安裝 MetaMask");
-	}
-  }
 /*---------------*/  
 async function uploadPDF() {
     const fileInput = document.getElementById('pdfUpload');

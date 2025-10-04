@@ -35,7 +35,17 @@
         font-size: 16px;
         transition: all 0.3s ease;
         background: white;
+        color: #999; /* placeholder-like color when empty */
         box-sizing: border-box;
+    }
+
+    .input-field.has-value {
+        color: #000; /* 使用者輸入後的顏色 */
+    }
+
+    /* 打字中（focus 且有值）變白色 */
+    .input-field.has-value:focus {
+        color: #fff;
     }
 
     .input-field:focus {
@@ -47,6 +57,32 @@
     .input-field::placeholder {
         color: #999;
     }
+
+    select.input-field {
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23666' d='M2 0L0 2h4zm0 5L0 3h4z'/></svg>");
+        background-repeat: no-repeat;
+        background-position: right 15px center;
+        background-size: 12px;
+        padding-right: 40px;
+    }
+
+     /* 預設顯示灰色 (未選擇時) */
+    select.input-field:invalid {
+        color: #999;
+    }
+    select.input-field:valid {
+        color: #000;
+    }
+
+    /* 選擇後變黑色 */
+    select.input-field option {
+        color: #fff;
+    }
+
+    select.input-field option[disabled] {
+        color: #999;
+}
 
     .submit-btn {
         width: 100%;
@@ -68,15 +104,6 @@
         box-shadow: 0 6px 20px rgba(74, 110, 224, 0.4);
     }
 
-    select.input-field {
-        appearance: none;
-        background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23666' d='M2 0L0 2h4zm0 5L0 3h4z'/></svg>");
-        background-repeat: no-repeat;
-        background-position: right 15px center;
-        background-size: 12px;
-        padding-right: 40px;
-    }
-
     /* 響應式設計 */
     @media (max-width: 768px) {
         .register-box {
@@ -94,14 +121,22 @@
         <div class="form">
             <input type="text" name="username" class="input-field" placeholder="姓名" required>
             <input type="number" name="age" class="input-field" placeholder="年齡" required>
-            <select name="gender" class="input-field" required>
-                <option value="" disabled selected>性別</option>
+            <select id="gender" name="gender" class="input-field" required>
+                <option value="" disabled selected hidden>請選擇</option>
                 <option value="male">男</option>
                 <option value="female">女</option>
             </select>
             <input type="email" name="gmail" class="input-field" placeholder="Gmail" required>
             <input type="password" name="password1" class="input-field" placeholder="密碼" required>
             <input type="password" name="password2" class="input-field" placeholder="確認密碼" required>
+
+            <!-- 新增身份選擇 -->
+            <select id="role" name="role" class="input-field" required>
+                <option value="" disabled selected hidden>選擇身分</option>
+                <option value="0">一般用戶</option>
+                <option value="1">管理員</option>
+            </select>
+
             <button type="submit" class="submit-btn">註冊</button>
         </div>
     </form>
@@ -111,6 +146,43 @@
 {% block extra_js %}
 <script src="/static/js/signup.js"></script>
 <script>
+    document.addEventListener('DOMContentLoaded', function () {
+    const fields = document.querySelectorAll('.input-field');
+
+    function checkAndToggle(el) {
+      let hasValue = false;
+      if (el.tagName.toLowerCase() === 'select') {
+        hasValue = el.value !== '' && el.value !== null;
+      } else {
+        const v = (el.value || '').toString().trim();
+        hasValue = v.length > 0;
+      }
+
+      if (hasValue) {
+        el.classList.add('has-value');
+      } else {
+        el.classList.remove('has-value');
+      }
+    }
+
+    fields.forEach(function (el) {
+      checkAndToggle(el);
+      el.addEventListener('input', () => checkAndToggle(el));
+      el.addEventListener('blur', () => checkAndToggle(el));
+      if (el.tagName.toLowerCase() === 'select') {
+        el.addEventListener('change', () => checkAndToggle(el));
+      }
+    });
+
+    const forms = document.querySelectorAll('form');
+    forms.forEach(function (form) {
+      form.addEventListener('reset', function () {
+        setTimeout(() => {
+          fields.forEach((el) => el.classList.remove('has-value'));
+        }, 0);
+      });
+    });
+  });
     // 表單驗證增強
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.querySelector('form');

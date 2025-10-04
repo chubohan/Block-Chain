@@ -4,9 +4,10 @@
 
 {% block extra_css %}
 <style>
+    /* 新增：全螢幕居中可滑動容器 */
     .profile-container {
         max-width: 800px;
-        margin: 40px auto;
+        margin: 100px auto;
         padding: 40px;
         background: rgba(255, 255, 255, 0.95);
         border-radius: 15px;
@@ -168,7 +169,19 @@
         h2 {
             font-size: 2rem;
         }
-    }
+
+        }
+        #walletAddressDisplay {
+        display: inline-block;      /* 確保寬度自適應文字 */
+        min-width: 100px;           /* 可依需求調整最小寬度 */
+        white-space: nowrap;        /* 避免換行 */
+        }
+
+        .copy-tip {
+        font-weight: bold;
+        color: green;
+        }
+
 </style>
 {% endblock %}
 
@@ -409,17 +422,27 @@
             });
 
             // 複製錢包地址
-            document.getElementById('walletAddressDisplay').addEventListener('click', () => {
-                if (this.walletAddress) {
-                    navigator.clipboard.writeText(this.walletAddress).then(() => {
-                        const originalText = this.walletAddress;
-                        document.getElementById('walletAddressDisplay').textContent = '已複製！';
-                        setTimeout(() => {
-                            document.getElementById('walletAddressDisplay').textContent = originalText;
-                        }, 2000);
-                    });
-                }
-            });
+           document.getElementById('walletAddressDisplay').addEventListener('click', () => {
+            const walletDisplay = document.getElementById('walletAddressDisplay');
+            const originalText = walletDisplay.textContent;
+
+            if (!originalText || originalText === '尚未連接') return;
+
+            navigator.clipboard.writeText(originalText).then(() => {
+                // 建立暫時提示
+                const tip = document.createElement('span');
+                tip.textContent = '已複製 ✓';
+                tip.className = 'copy-tip';
+                tip.style.marginLeft = '10px';       // 可微調位置
+                tip.style.color = 'green';
+
+                walletDisplay.appendChild(tip);
+
+                setTimeout(() => {
+                    tip.remove();   // 自動移除提示
+                }, 1500);
+            }).catch(err => console.error('複製失敗:', err));
+        });
 
             // 監聽全局錢包狀態變化
             document.addEventListener('walletStateChanged', (e) => {

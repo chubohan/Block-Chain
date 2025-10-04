@@ -5,6 +5,7 @@
 {% block extra_css %}
 <style>
     .officer-container {
+        margin: 120px auto; /* 水平置中 */
         margin-top: 120px;
         width: 90%;
         max-width: 1200px;
@@ -36,19 +37,18 @@
 
     .officer-header h2 {
         color: #64c1ff;
-        font-size: 1.5rem;
+        font-size: 50px;
         font-weight: 600;
         margin-bottom: 20px;
     }
 
     .welcome-badge {
-        display: inline-block;
         background: linear-gradient(135deg, #a8e6cf, #88d4ab);
         color: white;
         padding: 8px 20px;
-        border-radius: 25px;
+        border-radius: 10px;
         font-weight: 600;
-        font-size: 1.1rem;
+        font-size: 2.1rem;
         box-shadow: 0 4px 15px rgba(136, 212, 171, 0.3);
     }
 
@@ -351,7 +351,6 @@
 <div class="officer-container">
     <!-- 頁面標頭 -->
     <div class="officer-header">
-        <h1>保險員客戶管理系統</h1>
         <h2>歡迎，<span id="officer-name" class="welcome-badge">{{ current_user.username }}</span></h2>
     </div>
 

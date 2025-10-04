@@ -365,35 +365,6 @@
                         </li>
                     {% endif %}
 
-                    {% if not current_user.insurance_officer and current_user.is_authenticated %}
-                        <li class="nav-item me-3">
-                            <a class="nav-link" href="/policy/wallet" id="walletLink" role="button">
-                                <i class="fas fa-wallet me-2"></i>連接錢包
-                            </a>
-                        </li>
-                    {% endif %}
-
-                    <!-- 保單服務 -->
-                    <li class="nav-item dropdown me-3">
-                        <a class="nav-link dropdown-toggle" href="#" id="policyDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-file-contract me-2"></i>保單服務
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="policyDropdown">
-                            <li><a class="dropdown-item" href="/policy/read/form">
-                                <i class="fas fa-search me-2"></i>保單查詢
-                            </a></li>
-                            <li><a class="dropdown-item" href="/policy/update/form">
-                                <i class="fas fa-edit me-2"></i>修改保單
-                            </a></li>
-                            <li><a class="dropdown-item" href="/policy/delete/form">
-                                <i class="fas fa-trash-alt me-2"></i>刪除保單
-                            </a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/policy/create">
-                                <i class="fas fa-plus-circle me-2"></i>新增保單
-                            </a></li>
-                        </ul>
-                    </li>
 
                     <!-- 理賠成功案例 -->
                     <li class="nav-item me-3">

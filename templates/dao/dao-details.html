@@ -4,9 +4,8 @@
 
 {% block extra_css %}
 <style>
-    /* 主要內容區域樣式 */
     .dao-details-container {
-        margin-top: 120px;
+        margin: 120px auto; /* 水平置中 */
         width: 90%;
         max-width: 1400px;
         z-index: 10;
@@ -17,7 +16,6 @@
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.2);
     }
-
     /* 導航區域 */
     .dao-nav {
         display: flex;
@@ -608,6 +606,17 @@
             justify-content: center;
         }
     }
+
+    #claimsListSection {
+        margin-top: 40px; /* 調整間隔大小，可自行修改 */
+    }
+
+    #daoTitle {
+        text-align: center;
+        font-size: 50px;
+        color: #007BFF; /* 藍色 */
+    }
+    
 </style>
 {% endblock %}
 
@@ -618,18 +627,21 @@
         <button id="backButton" class="btn-secondary">
             <i class="fas fa-arrow-left"></i>返回 DAO 列表
         </button>
-        <h1 class="dao-title" id="daoTitle">DAO 詳細資訊</h1>
         <div class="wallet-info">
             <i class="fas fa-wallet"></i>
             當前帳戶: <span id="walletAddress">未連接</span>
         </div>
     </div>
 
-    <!-- 查看历史记录按钮 -->
-    <div style="margin-bottom: 20px;">
-        <button id="viewHistoryButton" class="btn-warning">
+    <!-- 標題與查看歷史紀錄同一排 -->
+    <div style="display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 20px;">
+            <!-- 左側按鈕 -->
+        <button id="viewHistoryButton" class="btn-warning" style="position: absolute; left: 0;">
             <i class="fas fa-history"></i>查看歷史紀錄
         </button>
+
+        <!-- 中間標題 -->
+        <h1 class="dao-title" id="daoTitle" style="margin: 0 auto;">DAO 詳細資訊</h1>
     </div>
 
     <!-- 獎金庫顯示區塊 -->
@@ -702,10 +714,10 @@
             </div>
             <div id="membershipActions" style="margin-top: 20px;">
                 <button id="joinDaoBtn" class="btn-primary" style="display: none;">
-                    <i class="fas fa-sign-in-alt"></i>加入 DAO
+                    <i class="fas fa-sign-in-alt"></i> 加入 DAO
                 </button>
                 <button id="leaveDaoBtn" class="btn-danger" style="display: none;">
-                    <i class="fas fa-sign-out-alt"></i>退出 DAO
+                    <i class="fas fa-sign-out-alt"></i> 退出 DAO
                 </button>
                 <div id="premiumInfo" style="margin-top: 15px; display: none;">
                     <div class="info-item">
@@ -1721,7 +1733,7 @@
                 <div><strong>狀態:</strong> ${statusText}</div>
                 <div>
                     <strong>投票結果:</strong>
-                    <span style="color: green;">贊成 ${claim.noVotes}</span> /
+                    <span style="color: green;">贊成 ${claim.yesVotes}</span> /
                     <span style="color: red;">反對 ${claim.noVotes}</span>
                 </div>
                 <div class="action-buttons">

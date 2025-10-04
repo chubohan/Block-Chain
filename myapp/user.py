@@ -10,7 +10,8 @@ import random
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from utils import db
-
+from myapp.password_utils import hash_password
+from myapp.password_utils import verify_and_upgrade_password
 
 
 
@@ -120,9 +121,7 @@ def signup():
             return render_template('user/signup.html', success=False, message="密碼不一致")
 
         # 生成密碼哈希
-        password_bytes = password1.encode('utf-8')
-        salt = bcrypt.gensalt()
-        hashed_password = bcrypt.hashpw(password_bytes, salt).decode('utf-8')
+        hashed_password = hash_password(password1)
 
         # 寫入資料庫
         conn = db.get_connection()
@@ -175,9 +174,17 @@ def login():
         return render_template('user/login.html', success=False, message="此 Gmail 未注冊")
 
     stored_hash_str = result['password']
-    if bcrypt.checkpw(password.encode('utf-8'), stored_hash_str.encode('utf-8')):
+
+    # 使用 verify_and_upgrade_password
+    valid, upgraded_hash = verify_and_upgrade_password(password, stored_hash_str)
+
+    if valid:
+        # 如果 hash 被升級為 bcrypt，更新資料庫
+        if upgraded_hash != stored_hash_str:
+            cursor.execute("UPDATE user SET password = %s WHERE gmail = %s", (upgraded_hash, gmail))
+            conn.commit()
+
         if not result['is_verified']:
-            # 產生並寄送驗證碼
             code = generate_verification_code()
             session['pending_verification'] = {
                 'username': result['username'],
@@ -186,12 +193,12 @@ def login():
             }
             send_verification_code_email(result['gmail'], code)
             return redirect(url_for('user.verify_code_form'))
-        
+
         # 登入成功
         user = User(id=result['gmail'], 
                    username=result['username'], 
                    password=result['password'],
-                   insurance_officer=result['insurance_officer'])  # 新增這行
+                   insurance_officer=result['insurance_officer'])
         
         login_user(user)
         return redirect('/')
@@ -228,7 +235,7 @@ def forgot_password():
         # 寄送重設信件
         send_reset_email(email, reset_link)
         flash('重設密碼信件已寄送，請檢查您的電子郵件', 'success')
-        return redirect(url_for('user.login_form_index'))
+        return render_template('user/forgot_password.html')
 
     return render_template('user/forgot_password.html')
 
@@ -248,7 +255,7 @@ def reset_password(token):
         conn = db.get_connection()
         cursor = conn.cursor()
         cursor.execute("UPDATE user SET password = %s WHERE gmail = %s", 
-                       (generate_password_hash(new_password), email))
+                       (hash_password(new_password), email))
         conn.commit()
         conn.close()
 

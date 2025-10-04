@@ -5,6 +5,17 @@
   <title>我的保單</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="/static/css/create_form.css" rel="stylesheet">
+  <style>
+    .btn-delete {
+      background-color: #dc3545;
+      border-color: #dc3545;
+      color: white;
+    }
+    .btn-delete:hover {
+      background-color: #c82333;
+      border-color: #bd2130;
+    }
+  </style>
 </head>
 <body>
 
@@ -46,7 +57,6 @@
           <td>{{ policy.insured_person }}</td>
           <td>
             <a href="{{ url_for('policy.confirm_policy', policy_number=policy.policy_number) }}" class="btn btn-info btn-sm">詳細資料</a>
-            
           </td>
         </tr>
         {% endif %}
@@ -76,6 +86,7 @@
           <td>
             <a href="{{ url_for('policy.completed_policy_form', policy_number=policy.policy_number) }}" class="btn btn-info btn-sm">詳細資料</a>
             <a href="{{ url_for('policy.authorization_page', policy_number=policy.policy_number) }}" class="btn btn-warning btn-sm">授權</a>
+            <button class="btn btn-danger btn-sm" onclick="deletePolicy('{{ policy.policy_number }}')">刪除</button>
           </td>
         </tr>
         {% endif %}
@@ -86,44 +97,162 @@
   </table>
 </div>
 
-<script>
-  async function loadPolicies() {
-    const res = await fetch('/policy/my_policies');
-    const data = await res.json();
+<!-- 刪除確認 Modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">確認刪除保單</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>您確定要刪除此保單嗎？</p>
+        <p class="text-danger"><strong>注意：</strong>此操作將會從區塊鏈和資料庫中永久刪除保單記錄，且無法恢復！</p>
+        <p id="policyInfo"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">確認刪除</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-    const pendingTable = document.getElementById('pendingPolicies');
-    const completedTable = document.getElementById('completedPolicies');
-
-    data.pending.forEach(p => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${p.policy_number}</td>
-        <td>${p.policy_holder}</td>
-        <td>${p.insured_person}</td>
-        <td>
-          <a href="/policy/create_form/${p.policy_number}" class="btn btn-primary btn-sm">詳細資訊</a>
-        </td>
-      `;
-      pendingTable.appendChild(tr);
-    });
-
-    data.completed.forEach(p => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${p.policy_number}</td>
-        <td>${p.policy_holder}</td>
-        <td>${p.insured_person}</td>
-        <td>
-          <a href="/policy/read/${p.policy_number}" class="btn btn-secondary btn-sm">查看</a>
-        </td>
-      `;
-      completedTable.appendChild(tr);
-    });
-  }
-
-  loadPolicies();
-</script>
-
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const contractABI = [
+    {
+        "inputs": [{"internalType": "string", "name": "_policyNumber", "type": "string"}],
+        "name": "deletePolicy",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }
+];
+
+let currentPolicyNumber = '';
+
+function deletePolicy(policyNumber) {
+    currentPolicyNumber = policyNumber;
+    document.getElementById('policyInfo').textContent = `保單編號: ${policyNumber}`;
+    const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+    modal.show();
+}
+
+document.getElementById('confirmDeleteBtn').addEventListener('click', async function() {
+    const deleteBtn = this;
+    const originalText = deleteBtn.innerHTML;
+    
+    // 顯示載入狀態
+    deleteBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 刪除中...';
+    deleteBtn.disabled = true;
+    
+    try {
+        // 1. 先檢查用戶錢包綁定
+        const walletRes = await fetch('/policy/get_wallet');
+        const walletData = await walletRes.json();
+
+        if (!walletData.success) {
+            alert(walletData.message);
+            resetDeleteButton(deleteBtn, originalText);
+            return;
+        }
+
+        const userWallet = walletData.wallet;
+        console.log("使用者綁定錢包:", userWallet);
+
+        // 2. 連接區塊鏈
+        if (typeof window.ethereum === 'undefined') {
+            alert('請安裝 MetaMask 錢包');
+            resetDeleteButton(deleteBtn, originalText);
+            return;
+        }
+
+        const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+        await provider.send("eth_requestAccounts", []);
+        const signer = provider.getSigner();
+
+        // 確認 MetaMask 當前帳號是否和資料庫 wallet 一致
+        const currentAddress = await signer.getAddress();
+        if (currentAddress.toLowerCase() !== userWallet.toLowerCase()) {
+            alert(`請切換到綁定的錢包: ${userWallet}`);
+            resetDeleteButton(deleteBtn, originalText);
+            return;
+        }
+
+        // 3. 呼叫智能合約刪除
+        console.log("開始鏈上刪除保單:", currentPolicyNumber);
+        const contract = new ethers.Contract(contractAddress, contractABI, signer);
+        const tx = await contract.deletePolicy(currentPolicyNumber);
+        console.log("交易已發送:", tx.hash);
+        
+        // 等待交易確認
+        await tx.wait();
+        console.log("鏈上刪除成功");
+
+        // 4. 刪除資料庫記錄
+        const response = await fetch(`/policy/delete_policy/${currentPolicyNumber}`, {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json",
+                
+            }
+        });
+        
+        const result = await response.json();
+
+        if (result.success) {
+            alert("保單刪除成功！");
+            // 關閉 modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal'));
+            modal.hide();
+            // 重新載入頁面
+            location.reload();
+        } else {
+            alert("資料庫刪除失敗：" + result.message);
+            resetDeleteButton(deleteBtn, originalText);
+        }
+
+    } catch (err) {
+        console.error("刪除過程錯誤:", err);
+        
+        if (err.code === 'ACTION_REJECTED') {
+            alert("交易已被用戶取消");
+        } else if (err.message && err.message.includes("Not the policy owner")) {
+            alert("您不是此保單的所有者，無法刪除");
+        } else if (err.message && err.message.includes("Policy not found")) {
+            alert("保單不存在於區塊鏈上");
+        } else {
+            alert("刪除失敗，請檢查控制台錯誤信息");
+        }
+        
+        resetDeleteButton(deleteBtn, originalText);
+    }
+});
+
+function resetDeleteButton(button, originalText) {
+    button.innerHTML = originalText;
+    button.disabled = false;
+}
+
+// 載入保單資料（如果需要動態載入）
+async function loadPolicies() {
+    try {
+        const res = await fetch('/policy/my_policies');
+        const data = await res.json();
+
+        // 這裡可以根據需要動態更新表格內容
+        console.log("保單資料載入完成");
+    } catch (error) {
+        console.error('載入保單錯誤:', error);
+    }
+}
+
+// 初始化載入
+loadPolicies();
+</script>
 </body>
 </html>

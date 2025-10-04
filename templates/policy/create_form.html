@@ -16,64 +16,43 @@
     }
 
     .confirm-container h2 {
-        color: #4a6ee0;
+        color: #000000; /* 改為黑色 */
         margin-bottom: 30px;
         font-size: 2.5rem;
         font-weight: bold;
         text-align: center;
-        background: linear-gradient(135deg, #4a6ee0, #64c1ff);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
     }
 
-    .wallet-section {
-        background: rgba(248, 249, 250, 0.8);
-        padding: 25px;
-        border-radius: 15px;
-        margin-bottom: 30px;
-        border: 1px solid #e0e0e0;
-        text-align: center;
-    }
-
-    .btn-warning {
-        background: linear-gradient(135deg, #ffd28b, #ffb347);
-        color: white;
-        padding: 12px 25px;
-        border: none;
-        border-radius: 8px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(255, 179, 71, 0.3);
-        margin-bottom: 15px;
-    }
-
-    .btn-warning:hover {
-        background: linear-gradient(135deg, #ffb347, #ff9a00);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(255, 154, 0, 0.4);
-    }
-
-    .divider {
-        height: 2px;
-        background: linear-gradient(90deg, transparent, #64c1ff, transparent);
-        margin: 30px 0;
-    }
-
-    .form-row {
+    .wallet-section h3 {
+        color: #000000; /* 改為黑色 */
         margin-bottom: 20px;
+        text-align: center;
+        font-size: 1.5rem;
+    }
+
+    .wallet-label {
+        font-weight: bold;
+        color: #000000; /* 改為黑色 */
+        min-width: 120px;
+    }
+
+    .wallet-address {
+        font-family: 'Courier New', monospace;
+        background: #f8f9fa;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 14px;
+        flex-grow: 1;
+        margin: 0 15px;
+        word-break: break-all;
+        color: #000000; /* 改為黑色 */
     }
 
     .form-row label {
         font-weight: bold;
-        color: #555;
+        color: #000000; /* 改為黑色 */
         margin-bottom: 8px;
         display: block;
-    }
-
-    .required-label {
-        color: #ff6b6b;
     }
 
     .form-row input {
@@ -85,33 +64,62 @@
         transition: all 0.3s ease;
         background: #f8f9fa;
         box-sizing: border-box;
-        color: #666;
+        color: #000000; /* 改為黑色 */
     }
 
     .form-row input:read-only {
         background: #f8f9fa;
-        color: #666;
+        color: #000000; /* 改為黑色 */
         cursor: not-allowed;
     }
 
-    .upload-section {
+    .wallet-tips {
         text-align: center;
-        margin: 20px 0;
-        padding: 20px;
-        background: rgba(248, 249, 250, 0.8);
-        border-radius: 10px;
-        border: 1px solid #e0e0e0;
+        margin-top: 15px;
+        font-size: 14px;
+        color: #000000; /* 改為黑色 */
+        background: rgba(255, 255, 255, 0.7);
+        padding: 10px;
+        border-radius: 8px;
     }
 
-    .upload-section a {
-        color: #4a6ee0;
-        text-decoration: none;
-        font-weight: bold;
+    /* 其他樣式保持不變 */
+    .required-label {
+        color: #ff6b6b;
     }
 
-    .upload-section a:hover {
-        color: #64c1ff;
-        text-decoration: underline;
+    .status-connected {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-not-set {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-error {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .btn-refresh {
+        background: linear-gradient(135deg, #6c757d, #5a6268);
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: block;
+        margin: 0 auto;
+    }
+
+    .btn-refresh:hover {
+        background: linear-gradient(135deg, #5a6268, #495057);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
     }
 
     .submit {
@@ -157,29 +165,12 @@
         box-shadow: 0 6px 20px rgba(107, 196, 156, 0.4);
     }
 
-    .icon {
-        width: 20px;
-        height: 20px;
-    }
-
     #status {
         text-align: center;
         font-weight: bold;
         padding: 15px;
         border-radius: 8px;
-    }
-
-    /* 響應式設計 */
-    @media (max-width: 768px) {
-        .confirm-container {
-            margin: 60px 20px 20px;
-            padding: 30px 20px;
-        }
-
-        .submit, .btn-secondary {
-            width: 100%;
-            margin: 10px 0;
-        }
+        color: #000000; /* 改為黑色 */
     }
 </style>
 {% endblock %}
@@ -190,19 +181,38 @@
 
     <div class="form-wrapper">
         <form id="policyForm">
+            <!-- 錢包資訊部分 -->
             <div class="wallet-section">
-                <button type="button" class="btn-warning" onclick="connectWallet()">
-                    連接錢包
+                <h3>錢包資訊</h3>
+                <button type="button" class="btn-refresh" onclick="loadWalletAddresses()">
+                    🔄 重新載入錢包地址
                 </button>
-                <p>當前連接錢包: <span id="walletAddress">未連接</span></p>
+                
+                <div class="wallet-info">
+                    <span class="wallet-label">您的錢包地址:</span>
+                    <span class="wallet-address" id="userWalletAddress">載入中...</span>
+                    <span class="wallet-status status-connected" id="userWalletStatus">已連接</span>
+                </div>
+
+                <div class="wallet-info">
+                    <span class="wallet-label">業務員錢包地址:</span>
+                    <span class="wallet-address" id="officerWalletAddress">載入中...</span>
+                    <span class="wallet-status status-connected" id="officerWalletStatus">已連接</span>
+                </div>
+
+                <div class="wallet-tips">
+                    💡 錢包地址自動從資料庫載入，無需手動連接
+                </div>
             </div>
 
             <div class="divider"></div>
 
+            <!-- 隱藏欄位 -->
             <input type="hidden" id="clientGmail" value="{{ current_user.id }}">
             <input type="hidden" id="officerGmail" value="{{ policy.officer_gmail }}">
             <input type="hidden" id="pdfHash" value="{{ policy.pdf_hash }}">
 
+            <!-- 表單欄位 -->
             <div class="form-row">
                 <label for="policyNumber">保單編號 <span class="required-label">*</span></label>
                 <input type="text" id="policyNumber" required readonly />

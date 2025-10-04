@@ -24,6 +24,83 @@ def my_policies():
                            pending_policies=pending_policies,
                            completed_policies=completed_policies)
 
+# 刪除保單路由 - 改為返回 JSON 回應
+# 刪除保單路由 - 修正參數名稱
+@policy_bp.route('/delete_policy/<policy_number>', methods=['POST'])
+@login_required
+def delete_policy(policy_number):  # 參數名稱改為 policy_number
+    user_email = current_user.id
+    
+    conn = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        print(f"開始刪除保單: {policy_number}, 用戶: {user_email}")
+
+        # 檢查保單是否存在且屬於當前用戶
+        cursor.execute("""
+            SELECT policy_id, client_gmail 
+            FROM policy 
+            WHERE policy_id = %s AND client_gmail = %s
+        """, (policy_number, user_email))
+        
+        policy = cursor.fetchone()
+        
+        if not policy:
+            return jsonify({'success': False, 'message': '保單不存在或您沒有權限刪除'})
+
+        # 在同一個 transaction 中刪除兩個資料表的記錄
+        # 先刪除 policy_draft
+        cursor.execute("""
+            DELETE FROM policy_draft 
+            WHERE client_gmail = %s AND policy_number = %s
+        """, (user_email, policy_number))
+        draft_deleted = cursor.rowcount
+
+        # 再刪除 policy
+        cursor.execute("""
+            DELETE FROM policy 
+            WHERE client_gmail = %s AND policy_id = %s
+        """, (user_email, policy_number))
+        policy_deleted = cursor.rowcount
+
+        conn.commit()
+        
+        print(f"刪除結果 - 草稿表: {draft_deleted} 條, 政策表: {policy_deleted} 條")
+        
+        return jsonify({
+            'success': True, 
+            'message': f'保單刪除成功！',
+            'details': {
+                'draft_deleted': draft_deleted,
+                'policy_deleted': policy_deleted
+            }
+        })
+                
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        print(f"刪除保單錯誤: {str(e)}")
+        return jsonify({'success': False, 'message': f'刪除過程中發生錯誤: {str(e)}'})
+    finally:
+        if conn:
+            conn.close()
+@policy_bp.route('/get_wallet', methods=['GET'])
+@login_required
+def get_wallet():
+    user_email = current_user.id
+    conn = get_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT wallet FROM user WHERE gmail = %s", (user_email,))
+            wallet = cursor.fetchone()
+            if not wallet or not wallet['wallet']:
+                return jsonify({'success': False, 'message': '未綁定錢包'})
+            return jsonify({'success': True, 'wallet': wallet['wallet']})
+    finally:
+        conn.close()
+
 # 詳細資料
 @policy_bp.route('/confirm/<policy_number>')
 @login_required
@@ -39,6 +116,97 @@ def confirm_policy(policy_number):
     finally:
         conn.close()
     return render_template('policy/create_form.html', policy=policy)
+
+@policy_bp.route('/get_wallet_addresses')
+@login_required
+def get_wallet_addresses():
+    """獲取用戶和業務員的錢包地址"""
+    user_email = current_user.id
+    
+    conn = get_connection()
+    try:
+        with conn.cursor() as cursor:
+            # 獲取當前用戶的錢包地址
+            cursor.execute("SELECT wallet FROM user WHERE gmail = %s", (user_email,))
+            user_wallet = cursor.fetchone()
+            
+            # 獲取業務員的錢包地址（從保單草稿中獲取業務員郵件）
+            cursor.execute(
+                "SELECT officer_gmail FROM policy_draft WHERE client_gmail = %s LIMIT 1", 
+                (user_email,)
+            )
+            policy_draft = cursor.fetchone()
+            
+            officer_wallet = None
+            if policy_draft and policy_draft['officer_gmail']:
+                cursor.execute(
+                    "SELECT wallet FROM user WHERE gmail = %s", 
+                    (policy_draft['officer_gmail'],)
+                )
+                officer_wallet = cursor.fetchone()
+            
+            return jsonify({
+                'success': True,
+                'user_wallet': user_wallet['wallet'] if user_wallet and user_wallet['wallet'] else None,
+                'officer_wallet': officer_wallet['wallet'] if officer_wallet and officer_wallet['wallet'] else None
+            })
+            
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+    finally:
+        conn.close()
+
+@policy_bp.route('/get_user_wallet')
+@login_required
+def get_user_wallet():
+    """獲取當前用戶的錢包地址"""
+    user_email = current_user.id
+    
+    conn = get_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT wallet FROM user WHERE gmail = %s", (user_email,))
+            result = cursor.fetchone()
+            
+            if result and result['wallet']:
+                return jsonify({
+                    'success': True, 
+                    'wallet_address': result['wallet']
+                })
+            else:
+                return jsonify({
+                    'success': False, 
+                    'error': '用戶錢包地址未設定'
+                })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+    finally:
+        conn.close()
+
+@policy_bp.route('/get_officer_wallet/<officer_gmail>')
+@login_required
+def get_officer_wallet(officer_gmail):
+    """獲取業務員的錢包地址"""
+    conn = get_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT wallet FROM user WHERE gmail = %s", (officer_gmail,))
+            result = cursor.fetchone()
+            
+            if result and result['wallet']:
+                return jsonify({
+                    'success': True, 
+                    'wallet_address': result['wallet']
+                })
+            else:
+                return jsonify({
+                    'success': False, 
+                    'error': '業務員錢包地址未設定'
+                })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+    finally:
+        conn.close()
 
 @policy_bp.route('/create_and_confirm', methods=['POST'])
 @login_required

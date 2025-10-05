@@ -1,362 +1,649 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-  <meta charset="UTF-8">
-  <title>我被授權的保單</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-  <style>
+{% extends "base.html" %}
+
+{% block title %}我被授權的保單 - ChainSure{% endblock %}
+
+{% block extra_css %}
+<style>
+    .main-content-container {
+        margin: 120px auto; /* 水平置中 */
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: calc(100vh - 120px);
+        padding: 2rem 1rem;
+        margin-top: 80px;
+    }
+    
+    .authorized-policies-container {
+        width: 100%;
+        max-width: 1400px;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        padding: 3rem;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        margin: 0 auto;
+    }
+
+    .page-title {
+        color: #1e293b;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-align: center;
+        font-size: 2.2rem;
+    }
+
+    .page-subtitle {
+        color: #64748b;
+        text-align: center;
+        margin-bottom: 3rem;
+        font-size: 1.1rem;
+    }
+
     .card {
-      transition: transform 0.2s;
-      margin-bottom: 1rem;
-      border: 1px solid #e3f2fd;
+        transition: all 0.3s ease;
+        margin-bottom: 1.5rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        background: white;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
     }
+    
     .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(99, 102, 241, 0.15);
+        border-color: #c7d2fe;
     }
+    
     .badge-relationship {
-      background-color: #2196F3;
-      color: white;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
+        border: none;
+        font-size: 0.75rem;
+        padding: 0.5rem 0.8rem;
+        border-radius: 10px;
+        font-weight: 600;
     }
-    .badge-grantor {
-      background-color: #4CAF50;
-      color: white;
+    
+    .badge-policy {
+        background: linear-gradient(135deg, #10b981, #34d399);
+        color: white;
+        border: none;
+        font-size: 0.75rem;
+        padding: 0.5rem 0.8rem;
+        border-radius: 10px;
+        font-weight: 600;
     }
+    
     .empty-state {
-      text-align: center;
-      padding: 3rem;
-      color: #6c757d;
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #64748b;
+        background: white;
+        border-radius: 16px;
+        border: 2px dashed #e2e8f0;
+        margin: 2rem 0;
     }
-    .policy-header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 2rem 0;
-      margin-bottom: 2rem;
-      border-radius: 0 0 20px 20px;
+    
+    .empty-state i {
+        font-size: 4rem;
+        color: #cbd5e1;
+        margin-bottom: 1.5rem;
     }
+    
     .grantor-info {
-      background-color: #f8f9fa;
-      border-left: 4px solid #2196F3;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      border-radius: 4px;
+        background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+        border-left: 4px solid #0ea5e9;
+        padding: 1.2rem;
+        margin-bottom: 1.2rem;
+        border-radius: 12px;
+        border: 1px solid #bae6fd;
     }
+    
     .policy-detail-section {
-      margin-bottom: 1.5rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #f1f5f9;
     }
+    
     .detail-label {
-      font-weight: 600;
-      color: #495057;
+        font-weight: 600;
+        color: #475569;
+        min-width: 120px;
+        display: inline-block;
     }
+    
     .tx-hash {
-      font-family: monospace;
-      font-size: 0.85em;
-      background-color: #f8f9fa;
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.8em;
+        background: #f8fafc;
+        padding: 0.6rem 1rem;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        word-break: break-all;
+        color: #475569;
     }
-  </style>
-</head>
-<body>
+    
+    .stats-card {
+        background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+        border: 1px solid #bae6fd;
+        border-radius: 16px;
+        text-align: center;
+        color: #0369a1;
+        padding: 2rem 1rem;
+        transition: transform 0.3s ease;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(14, 165, 233, 0.15);
+    }
+    
+    .user-info-card {
+        background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+        border: 1px solid #bbf7d0;
+        border-radius: 16px;
+        padding: 2rem;
+    }
+    
+    .section-title {
+        color: #1e293b;
+        font-weight: 700;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f1f5f9;
+        text-align: center;
+        font-size: 1.6rem;
+    }
+    
+    .btn-view-detail {
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 0.8rem 1.5rem;
+        transition: all 0.3s ease;
+        width: 100%;
+        font-size: 0.9rem;
+    }
+    
+    .btn-view-detail:hover {
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+    }
+    
+    .card-header {
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        border-bottom: 1px solid #e2e8f0;
+        font-weight: 600;
+        padding: 1.2rem 1.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .modal-content {
+        border-radius: 16px;
+        border: none;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+    }
+    
+    .modal-header {
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        border-bottom: 1px solid #e2e8f0;
+        border-radius: 16px 16px 0 0;
+        padding: 1.5rem 2rem;
+    }
 
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="/">ChainSure</a>
-    <div class="collapse navbar-collapse">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a class="nav-link" href="/">首頁</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/policy/mypolicy">我的保單</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link active" href="/policy/authorized_policies">被授權保單</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/logout">登出</a>
-        </li>
-      </ul>
-    </div>
-  </div>
-</nav>
+    .policy-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
 
-<div class="policy-header">
-  <div class="container">
-    <h1><i class="fas fa-user-check me-3"></i>我被授權的保單</h1>
-    <p class="lead mb-0">查看他人授權給您管理的保單資料</p>
-  </div>
-</div>
+    .user-stats-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
 
-<div class="container">
-  {% if error %}
-  <div class="alert alert-danger alert-dismissible fade show" role="alert">
-    <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-  </div>
-  {% endif %}
+    .alert-custom {
+        background: linear-gradient(135deg, #fef2f2, #fee2e2);
+        border: 1px solid #fecaca;
+        border-left: 4px solid #ef4444;
+        color: #dc2626;
+        border-radius: 12px;
+    }
 
-  <!-- 用戶資訊 -->
-  <div class="row mb-4">
-    <div class="col-md-8">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title"><i class="fas fa-user me-2"></i>我的資訊</h5>
-          <div class="row">
-            <div class="col-md-6">
-              <p class="mb-2"><strong>姓名:</strong> {{ user_name or '未設定' }}</p>
-              <p class="mb-2"><strong>Gmail:</strong> {{ user_email }}</p>
-            </div>
-            <div class="col-md-6">
-              <p class="mb-2"><strong>錢包地址:</strong></p>
-              <p class="mb-0"><small class="tx-hash">{{ user_wallet or '未綁定錢包' }}</small></p>
-            </div>
-          </div>
+    /* 響應式設計 */
+    @media (max-width: 1200px) {
+        .authorized-policies-container {
+            padding: 2.5rem;
+            max-width: 95%;
+        }
+        
+        .policy-grid {
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .main-content-container {
+            padding: 1rem 0.5rem;
+            margin-top: 60px;
+        }
+        
+        .authorized-policies-container {
+            padding: 2rem;
+            border-radius: 16px;
+        }
+        
+        .page-title {
+            font-size: 1.8rem;
+        }
+        
+        .user-stats-row {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .policy-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .empty-state {
+            padding: 3rem 1.5rem;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .authorized-policies-container {
+            padding: 1.5rem;
+            border-radius: 12px;
+        }
+        
+        .page-title {
+            font-size: 1.5rem;
+        }
+        
+        .page-subtitle {
+            font-size: 1rem;
+        }
+        
+        .empty-state {
+            padding: 2rem 1rem;
+        }
+        
+        .empty-state i {
+            font-size: 2.5rem;
+        }
+        
+        .grantor-info {
+            padding: 1rem;
+        }
+        
+        .user-info-card {
+            padding: 1.5rem;
+        }
+    }
+
+    /* 動畫效果 */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card {
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    .card:nth-child(1) { animation-delay: 0.1s; }
+    .card:nth-child(2) { animation-delay: 0.2s; }
+    .card:nth-child(3) { animation-delay: 0.3s; }
+    .card:nth-child(4) { animation-delay: 0.4s; }
+    .card:nth-child(5) { animation-delay: 0.5s; }
+
+    /* 自定義滾動條 */
+    .modal-body::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .modal-body::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 10px;
+    }
+
+    .modal-body::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+
+    .modal-body::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+    .btn-primary {
+        padding: 10px 22px;
+        font-size: 20px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(74, 110, 224, 0.25);
+    }
+    .btn-arrow {
+          display: inline-flex;       /* 使用 Flex 排列 */
+          align-items: center;        /* 垂直置中 */
+          gap: 0.8rem;                /* 箭頭與文字間距 */
+          padding: 10px 22px;         /* 可調整按鈕大小 */
+          font-size: 20px;            /* 文字大小 */
+      }
+
+      .btn-arrow i {
+          font-size: 1em;           /* 箭頭大小 */
+          line-height: 1;             /* 強制箭頭不受文字行高影響 */
+      }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- 主要內容區域 -->
+<div class="main-content-container">
+    <div class="authorized-policies-container">
+        <!-- 頁面標題 -->
+        <div class="mb-4">
+            <h1 class="page-title">
+                <i class="fas fa-user-check me-2"></i>我被授權的保單
+            </h1>
         </div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="card bg-primary text-white">
-        <div class="card-body text-center">
-          <h3 class="mb-1">{{ authorized_policies|length }}</h3>
-          <p class="mb-0">被授權保單數量</p>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- 保單列表 -->
-  <div class="row">
-    <div class="col-12">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3>授權保單列表</h3>
-        <span class="badge bg-secondary">共 {{ authorized_policies|length }} 筆</span>
-      </div>
-      
-      {% if authorized_policies %}
-        <div class="row">
-          {% for auth in authorized_policies %}
-          <div class="col-lg-6 col-xl-4">
-            <div class="card h-100">
-              <div class="card-header d-flex justify-content-between align-items-center">
-                <span class="badge bg-primary">
-                  <i class="fas fa-file-contract me-1"></i>{{ auth.policy_number }}
-                </span>
-                <span class="badge badge-relationship">
-                  <i class="fas fa-handshake me-1"></i>{{ auth.relationship }}
-                </span>
-              </div>
-              
-              <div class="card-body">
-                <!-- 授權人資訊 -->
-                <div class="grantor-info">
-                  <h6 class="mb-2">
-                    <i class="fas fa-user-tie me-1"></i>授權人
-                  </h6>
-                  <p class="mb-1 small">
-                    <strong>{{ auth.grantor_name or auth.grantor_gmail }}</strong>
-                  </p>
-                  <p class="mb-0 small text-muted">
-                    {{ auth.grantor_gmail }}
-                  </p>
+        {% if error %}
+        <div class="alert alert-custom alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endif %}
+
+        <!-- 用戶資訊 -->
+        <div class="user-stats-row">
+            <div class="user-info-card">
+                <h5 class="card-title mb-3"><i class="fas fa-user me-2"></i>我的資訊</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-3"><strong class="detail-label">姓名:</strong> {{ user_name or '未設定' }}</p>
+                        <p class="mb-3"><strong class="detail-label">Gmail:</strong> {{ user_email }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-2"><strong class="detail-label">錢包地址:</strong></p>
+                        <p class="mb-0"><code class="tx-hash">{{ user_wallet or '未綁定錢包' }}</code></p>
+                    </div>
                 </div>
-
-                <!-- 保單基本資訊 -->
-                <h6 class="card-title text-truncate">{{ auth.policyHolder }}</h6>
-                <p class="card-text small">
-                  <i class="fas fa-user me-1 text-muted"></i>被保險人: {{ auth.insuredPerson }}<br>
-                  <i class="fas fa-building me-1 text-muted"></i>保險公司: {{ auth.company }}<br>
-                  <i class="fas fa-dollar-sign me-1 text-muted"></i>保額: {{ auth.insuranceAmount }}<br>
-                  <i class="fas fa-calendar me-1 text-muted"></i>授權日期: {{ auth.authorized_date.strftime('%Y-%m-%d') if auth.authorized_date else 'N/A' }}
-                </p>
-              </div>
-              
-              <div class="card-footer bg-transparent">
-                <button class="btn btn-outline-primary btn-sm w-100" 
-                        onclick="viewPolicyDetail('{{ auth.policy_number }}')">
-                  <i class="fas fa-eye me-1"></i>查看詳細資料
-                </button>
-              </div>
             </div>
-          </div>
-          {% endfor %}
+            <div class="stats-card">
+                <i class="fas fa-file-contract fa-3x mb-3 opacity-75"></i>
+                <h2 class="display-6 fw-bold mb-2">{{ authorized_policies|length }}</h2>
+                <p class="mb-0 fs-5 fw-semibold">被授權保單數量</p>
+            </div>
         </div>
-      {% else %}
-        <div class="empty-state">
-          <i class="fas fa-folder-open fa-4x mb-3 text-muted"></i>
-          <h4>尚無被授權的保單</h4>
-          <p class="text-muted">當有人將保單授權給您管理時，相關保單會顯示在此處</p>
-          <div class="mt-4">
-            <a href="/policy/mypolicy" class="btn btn-primary">
-              <i class="fas fa-arrow-left me-2"></i>返回我的保單
-            </a>
-          </div>
+
+        <!-- 保單列表 -->
+        <div class="row">
+            <div class="col-12">
+                <h3 class="section-title">授權保單列表</h3>
+                
+                {% if authorized_policies %}
+                    <div class="policy-grid">
+                        {% for auth in authorized_policies %}
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span class="badge badge-policy">
+                                    <i class="fas fa-file-contract me-1"></i>{{ auth.policy_number }}
+                                </span>
+                                <span class="badge badge-relationship">
+                                    <i class="fas fa-handshake me-1"></i>{{ auth.relationship }}
+                                </span>
+                            </div>
+                            
+                            <div class="card-body">
+                                <!-- 授權人資訊 -->
+                                <div class="grantor-info">
+                                    <h6 class="mb-2">
+                                        <i class="fas fa-user-tie me-1"></i>授權人
+                                    </h6>
+                                    <p class="mb-1 fw-semibold">
+                                        {{ auth.grantor_name or auth.grantor_gmail }}
+                                    </p>
+                                    <p class="mb-0 text-muted small">
+                                        {{ auth.grantor_gmail }}
+                                    </p>
+                                </div>
+
+                                <!-- 保單基本資訊 -->
+                                <h6 class="card-title text-truncate fw-bold mb-3">{{ auth.policyHolder }}</h6>
+                                <div class="policy-info">
+                                    <p class="mb-2">
+                                        <i class="fas fa-user me-2 text-muted"></i>
+                                        <small>被保險人: {{ auth.insuredPerson }}</small>
+                                    </p>
+                                    <p class="mb-2">
+                                        <i class="fas fa-building me-2 text-muted"></i>
+                                        <small>保險公司: {{ auth.company }}</small>
+                                    </p>
+                                    <p class="mb-2">
+                                        <i class="fas fa-dollar-sign me-2 text-muted"></i>
+                                        <small>保額: {{ auth.insuranceAmount }}</small>
+                                    </p>
+                                    <p class="mb-0">
+                                        <i class="fas fa-calendar me-2 text-muted"></i>
+                                        <small>授權日期: {{ auth.authorized_date.strftime('%Y-%m-%d') if auth.authorized_date else 'N/A' }}</small>
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="card-footer bg-transparent border-top-0 pt-0">
+                                <button class="btn btn-view-detail" 
+                                        onclick="viewPolicyDetail('{{ auth.policy_number }}')">
+                                    <i class="fas fa-eye me-2"></i>查看詳細資料
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-folder-open"></i>
+                        <h4 class="fw-bold mb-3">尚無被授權的保單</h4>
+                        <p class="text-muted mb-4">當有人將保單授權給您管理時，相關保單會顯示在此處</p>
+                        <div class="mt-3">
+                            <div class="mt-3">
+                        <a href="/policy/mypolicy" class="btn btn-primary">
+                            返回我的保單
+                        </a>
+                    </div>
+                    </div>
+                {% endif %}
+            </div>
         </div>
-      {% endif %}
     </div>
-  </div>
 </div>
 
 <!-- 保單詳細資料 Modal -->
 <div class="modal fade" id="policyDetailModal" tabindex="-1">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">
-          <i class="fas fa-file-contract me-2"></i>保單詳細資料
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body" id="policyDetailContent">
-        <!-- 內容由 JavaScript 動態載入 -->
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-          <i class="fas fa-times me-1"></i>關閉
-        </button>
-      </div>
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-file-contract me-2"></i>保單詳細資料
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="policyDetailContent" style="max-height: 70vh; overflow-y: auto;">
+                <!-- 內容由 JavaScript 動態載入 -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>關閉
+                </button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 // 查看保單詳細資料
 async function viewPolicyDetail(policyNumber) {
-  try {
-    // 顯示載入中
-    document.getElementById('policyDetailContent').innerHTML = `
-      <div class="text-center py-4">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">載入中...</span>
-        </div>
-        <p class="mt-2 text-muted">載入保單資料中...</p>
-      </div>
-    `;
-    
-    const modal = new bootstrap.Modal(document.getElementById('policyDetailModal'));
-    modal.show();
+    try {
+        // 顯示載入中
+        document.getElementById('policyDetailContent').innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                    <span class="visually-hidden">載入中...</span>
+                </div>
+                <p class="mt-3 text-muted">載入保單資料中...</p>
+            </div>
+        `;
+        
+        const modal = new bootstrap.Modal(document.getElementById('policyDetailModal'));
+        modal.show();
 
-    const response = await fetch(`/policy/get_authorized_policy_detail/${policyNumber}`);
-    const result = await response.json();
-    
-    if (result.success) {
-      const policy = result.policy;
-      
-      // 建立詳細資料 HTML
-      const detailHtml = `
-        <div class="policy-detail-section">
-          <h6 class="border-bottom pb-2">
-            <i class="fas fa-info-circle me-2"></i>基本資訊
-          </h6>
-          <div class="row">
-            <div class="col-md-6">
-              <p><span class="detail-label">保單編號:</span> ${policy.policy_number}</p>
-              <p><span class="detail-label">投保人:</span> ${policy.policy_holder}</p>
-              <p><span class="detail-label">被保險人:</span> ${policy.insured_person}</p>
-            </div>
-            <div class="col-md-6">
-              <p><span class="detail-label">保險公司:</span> ${policy.company}</p>
-              <p><span class="detail-label">起始日期:</span> ${policy.start_date || '未設定'}</p>
-              <p><span class="detail-label">受益人:</span> ${policy.beneficiary || '未設定'}</p>
-            </div>
-          </div>
-        </div>
+        const response = await fetch(`/policy/get_authorized_policy_detail/${policyNumber}`);
+        const result = await response.json();
+        
+        if (result.success) {
+            const policy = result.policy;
+            
+            // 建立詳細資料 HTML
+            const detailHtml = `
+                <div class="policy-detail-section">
+                    <h6 class="border-bottom pb-3 fw-bold">
+                        <i class="fas fa-info-circle me-2"></i>基本資訊
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-3"><span class="detail-label">保單編號:</span> ${policy.policy_number}</p>
+                            <p class="mb-3"><span class="detail-label">投保人:</span> ${policy.policy_holder}</p>
+                            <p class="mb-3"><span class="detail-label">被保險人:</span> ${policy.insured_person}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-3"><span class="detail-label">保險公司:</span> ${policy.company}</p>
+                            <p class="mb-3"><span class="detail-label">起始日期:</span> ${policy.start_date || '未設定'}</p>
+                            <p class="mb-3"><span class="detail-label">受益人:</span> ${policy.beneficiary || '未設定'}</p>
+                        </div>
+                    </div>
+                </div>
 
-        <div class="policy-detail-section">
-          <h6 class="border-bottom pb-2">
-            <i class="fas fa-chart-line me-2"></i>保單內容
-          </h6>
-          <div class="row">
-            <div class="col-md-6">
-              <p><span class="detail-label">保險金額:</span> ${policy.insurance_amount}</p>
-              <p><span class="detail-label">繳費期間:</span> ${policy.premium_period || '未設定'} 年</p>
-            </div>
-            <div class="col-md-6">
-              <p><span class="detail-label">每期保費:</span> ${policy.premium_amount || '未設定'}</p>
-              <p><span class="detail-label">成長率:</span> ${policy.growth_rate || '未設定'}</p>
-              <p><span class="detail-label">宣告利率:</span> ${policy.declared_interest_rate || '未設定'}</p>
-            </div>
-          </div>
-        </div>
+                <div class="policy-detail-section">
+                    <h6 class="border-bottom pb-3 fw-bold">
+                        <i class="fas fa-chart-line me-2"></i>保單內容
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-3"><span class="detail-label">保險金額:</span> ${policy.insurance_amount}</p>
+                            <p class="mb-3"><span class="detail-label">繳費期間:</span> ${policy.premium_period || '未設定'} 年</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-3"><span class="detail-label">每期保費:</span> ${policy.premium_amount || '未設定'}</p>
+                            <p class="mb-3"><span class="detail-label">成長率:</span> ${policy.growth_rate || '未設定'}</p>
+                            <p class="mb-3"><span class="detail-label">宣告利率:</span> ${policy.declared_interest_rate || '未設定'}</p>
+                        </div>
+                    </div>
+                </div>
 
-        <div class="policy-detail-section">
-          <h6 class="border-bottom pb-2">
-            <i class="fas fa-user-tie me-2"></i>授權人資訊
-          </h6>
-          <div class="row">
-            <div class="col-md-6">
-              <p><span class="detail-label">授權人姓名:</span> ${policy.grantor_name || '未設定'}</p>
-              <p><span class="detail-label">授權人 Gmail:</span> ${policy.grantor_gmail}</p>
-            </div>
-            <div class="col-md-6">
-              <p><span class="detail-label">授權人錢包:</span></p>
-              <p class="tx-hash">${policy.grantor_wallet || '未綁定錢包'}</p>
-            </div>
-          </div>
-        </div>
+                <div class="policy-detail-section">
+                    <h6 class="border-bottom pb-3 fw-bold">
+                        <i class="fas fa-user-tie me-2"></i>授權人資訊
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-3"><span class="detail-label">授權人姓名:</span> ${policy.grantor_name || '未設定'}</p>
+                            <p class="mb-3"><span class="detail-label">授權人 Gmail:</span> ${policy.grantor_gmail}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2"><span class="detail-label">授權人錢包:</span></p>
+                            <p class="mb-3"><code class="tx-hash">${policy.grantor_wallet || '未綁定錢包'}</code></p>
+                        </div>
+                    </div>
+                </div>
 
-        <div class="policy-detail-section">
-          <h6 class="border-bottom pb-2">
-            <i class="fas fa-handshake me-2"></i>授權關係
-          </h6>
-          <div class="row">
-            <div class="col-md-6">
-              <p><span class="detail-label">關係:</span> <span class="badge badge-relationship">${policy.relationship}</span></p>
-              <p><span class="detail-label">授權時間:</span> ${policy.authorized_date}</p>
-            </div>
-            <div class="col-md-6">
-              <p><span class="detail-label">交易雜湊:</span></p>
-              <p class="tx-hash">${policy.tx_hash || '無交易記錄'}</p>
-            </div>
-          </div>
-        </div>
+                <div class="policy-detail-section">
+                    <h6 class="border-bottom pb-3 fw-bold">
+                        <i class="fas fa-handshake me-2"></i>授權關係
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-3"><span class="detail-label">關係:</span> <span class="badge badge-relationship">${policy.relationship}</span></p>
+                            <p class="mb-3"><span class="detail-label">授權時間:</span> ${policy.authorized_date}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2"><span class="detail-label">交易雜湊:</span></p>
+                            <p class="mb-3"><code class="tx-hash">${policy.tx_hash || '無交易記錄'}</code></p>
+                        </div>
+                    </div>
+                </div>
 
-        <div class="policy-detail-section">
-          <h6 class="border-bottom pb-2">
-            <i class="fas fa-user-check me-2"></i>我的資訊（被授權人）
-          </h6>
-          <div class="row">
-            <div class="col-md-6">
-              <p><span class="detail-label">我的姓名:</span> ${policy.authorized_name || '未設定'}</p>
-              <p><span class="detail-label">我的 Gmail:</span> ${policy.authorized_gmail}</p>
+                <div class="policy-detail-section">
+                    <h6 class="border-bottom pb-3 fw-bold">
+                        <i class="fas fa-user-check me-2"></i>我的資訊（被授權人）
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-3"><span class="detail-label">我的姓名:</span> ${policy.authorized_name || '未設定'}</p>
+                            <p class="mb-3"><span class="detail-label">我的 Gmail:</span> ${policy.authorized_gmail}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2"><span class="detail-label">我的錢包:</span></p>
+                            <p class="mb-0"><code class="tx-hash">${policy.authorized_wallet || '未綁定錢包'}</code></p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('policyDetailContent').innerHTML = detailHtml;
+        } else {
+            document.getElementById('policyDetailContent').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    無法載入保單資料: ${result.message}
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('載入保單詳細資料失敗:', error);
+        document.getElementById('policyDetailContent').innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                載入失敗，請稍後再試
             </div>
-            <div class="col-md-6">
-              <p><span class="detail-label">我的錢包:</span></p>
-              <p class="tx-hash">${policy.authorized_wallet || '未綁定錢包'}</p>
-            </div>
-          </div>
-        </div>
-      `;
-      
-      document.getElementById('policyDetailContent').innerHTML = detailHtml;
-    } else {
-      document.getElementById('policyDetailContent').innerHTML = `
-        <div class="alert alert-danger">
-          <i class="fas fa-exclamation-triangle me-2"></i>
-          無法載入保單資料: ${result.message}
-        </div>
-      `;
+        `;
     }
-  } catch (error) {
-    console.error('載入保單詳細資料失敗:', error);
-    document.getElementById('policyDetailContent').innerHTML = `
-      <div class="alert alert-danger">
-        <i class="fas fa-exclamation-triangle me-2"></i>
-        載入失敗，請稍後再試
-      </div>
-    `;
-  }
 }
 
 // 頁面載入完成後的操作
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('被授權保單頁面載入完成');
-  console.log('當前用戶:', '{{ user_email }}');
-  console.log('錢包地址:', '{{ user_wallet }}');
-  ;
+    console.log('被授權保單頁面載入完成');
 });
 </script>
-</body>
-</html>
+{% endblock %}

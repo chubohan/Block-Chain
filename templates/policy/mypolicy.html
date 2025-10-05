@@ -1,122 +1,329 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-  <meta charset="UTF-8">
-  <title>我的保單</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="/static/css/create_form.css" rel="stylesheet">
-  <style>
+{% extends "base.html" %}
+
+{% block title %}我的保單 - ChainSure{% endblock %}
+
+{% block extra_css %}
+<style>
+    .my-policies-container {
+        margin: 120px auto; /* 水平置中 */
+        margin-top: 120px;
+        width: 90%;
+        max-width: 1400px;
+        z-index: 10;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 12px 40px rgba(74, 110, 224, 0.15);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .page-title {
+        color: #2d4fc6;
+        font-weight: bold;
+        margin-bottom: 15px;
+        font-size: 2.5rem;
+    }
+
+    .section-title {
+        color: #2d4fc6;
+        font-weight: bold;
+        margin-bottom: 25px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid rgba(74, 110, 224, 0.2);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .policy-table {
+        background: linear-gradient(135deg, #ffffff, #f8faff);
+        border-radius: 15px;
+        border: 1px solid rgba(74, 110, 224, 0.15);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .table thead {
+        background: linear-gradient(135deg, rgba(74, 110, 224, 0.1), rgba(100, 193, 255, 0.1));
+    }
+
+    .table th {
+        color: #2d4fc6;
+        font-weight: 600;
+        border-bottom: 2px solid rgba(74, 110, 224, 0.2);
+        padding: 15px;
+    }
+
+    .table td {
+        padding: 15px;
+        border-bottom: 1px solid rgba(74, 110, 224, 0.1);
+        vertical-align: middle;
+    }
+
+    .table tbody tr {
+        transition: all 0.3s ease;
+    }
+
+    .table tbody tr:hover {
+        background: rgba(74, 110, 224, 0.05);
+        transform: translateX(5px);
+    }
+
+    .btn-detail {
+        background: linear-gradient(135deg, #8ac6ff, #64c1ff);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .btn-detail:hover {
+        background: linear-gradient(135deg, #64c1ff, #4a6ee0);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(100, 193, 255, 0.3);
+        color: white;
+    }
+
+    .btn-authorize {
+        background: linear-gradient(135deg, #ffd28b, #ffb347);
+        color: #333;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .btn-authorize:hover {
+        background: linear-gradient(135deg, #ffb347, #ff9a02);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 179, 71, 0.3);
+        color: #333;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #666;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: #ffd28b;
+        margin-bottom: 15px;
+    }
+
+    .empty-state h5 {
+        color: #2d4fc6;
+        margin-bottom: 10px;
+    }
+
+    .policy-badge {
+        background: linear-gradient(135deg, #a8e6cf, #88d4ab);
+        color: #059669;
+        padding: 4px 12px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .section-divider {
+        margin: 50px 0;
+        border: none;
+        height: 2px;
+        background: linear-gradient(135deg, rgba(74, 110, 224, 0.1), rgba(100, 193, 255, 0.1));
+    }
+
+    /* 響應式設計 */
+    @media (max-width: 768px) {
+        .my-policies-container {
+            margin-top: 100px;
+            width: 95%;
+            padding: 25px;
+        }
+
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .table-responsive {
+            border-radius: 10px;
+        }
+
+        .btn-detail, .btn-authorize {
+            width: 100%;
+            justify-content: center;
+            margin-bottom: 5px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .my-policies-container {
+            padding: 20px;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+        }
+    }
     .btn-delete {
-      background-color: #dc3545;
-      border-color: #dc3545;
-      color: white;
+        background: linear-gradient(135deg, #ff6b6b, #f44336);
+        color: white;
     }
+
     .btn-delete:hover {
-      background-color: #c82333;
-      border-color: #bd2130;
+        background: linear-gradient(135deg, #f44336, #d32f2f);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+        color: white;
     }
-  </style>
-</head>
-<body>
+</style>
+{% endblock %}
 
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="/">ChainSure</a>
-    <div class="collapse navbar-collapse">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a class="nav-link" href="/">首頁</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/logout">登出</a>
-        </li>
-      </ul>
+{% block content %}
+<div class="my-policies-container">
+    <!-- 頁面標頭 -->
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-file-contract me-3"></i>我的保單
+        </h1>
+        <p class="lead text-muted">管理您的所有保單資料</p>
     </div>
-  </div>
-</nav>
 
-<div class="container mt-5">
-  <h2 class="mb-4">我的保單</h2>
-
-  <h4>待確認保單</h4>
-  <table class="table table-bordered">
-    <thead>
-      <tr>
-        <th>保單編號</th>
-        <th>投保人</th>
-        <th>被保險人</th>
-        <th>操作</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for policy in pending_policies %}
-        {% if policy.status == 0 %}
-        <tr>
-          <td>{{ policy.policy_number }}</td>
-          <td>{{ policy.policy_holder }}</td>
-          <td>{{ policy.insured_person }}</td>
-          <td>
-            <a href="{{ url_for('policy.confirm_policy', policy_number=policy.policy_number) }}" class="btn btn-info btn-sm">詳細資料</a>
-          </td>
-        </tr>
-        {% endif %}
-      {% else %}
-        <tr><td colspan="4">目前沒有待確認保單</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-
-  <h4 class="mt-5">已完成保單</h4>
-  <table class="table table-bordered">
-    <thead>
-      <tr>
-        <th>保單編號</th>
-        <th>投保人</th>
-        <th>被保險人</th>
-        <th>操作</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for policy in completed_policies %}
-        {% if policy.status == 1 %}
-        <tr>
-          <td>{{ policy.policy_number }}</td>
-          <td>{{ policy.policy_holder }}</td>
-          <td>{{ policy.insured_person }}</td>
-          <td>
-            <a href="{{ url_for('policy.completed_policy_form', policy_number=policy.policy_number) }}" class="btn btn-info btn-sm">詳細資料</a>
-            <a href="{{ url_for('policy.authorization_page', policy_number=policy.policy_number) }}" class="btn btn-warning btn-sm">授權</a>
-            <button class="btn btn-danger btn-sm" onclick="deletePolicy('{{ policy.policy_number }}')">刪除</button>
-          </td>
-        </tr>
-        {% endif %}
-      {% else %}
-        <tr><td colspan="4">目前沒有已完成保單</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-
-<!-- 刪除確認 Modal -->
-<div class="modal fade" id="deleteConfirmModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">確認刪除保單</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <p>您確定要刪除此保單嗎？</p>
-        <p class="text-danger"><strong>注意：</strong>此操作將會從區塊鏈和資料庫中永久刪除保單記錄，且無法恢復！</p>
-        <p id="policyInfo"></p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">確認刪除</button>
-      </div>
+    <!-- 待確認保單 -->
+    <div class="policy-section">
+        <h3 class="section-title">
+            <i class="fas fa-clock me-2"></i>待確認保單
+        </h3>
+        
+        <div class="policy-table">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>保單編號</th>
+                            <th>投保人</th>
+                            <th>被保險人</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for policy in pending_policies %}
+                            {% if policy.status == 0 %}
+                            <tr>
+                                <td>
+                                    <span class="policy-badge">
+                                        <i class="fas fa-hashtag me-1"></i>{{ policy.policy_number }}
+                                    </span>
+                                </td>
+                                <td>{{ policy.policy_holder }}</td>
+                                <td>{{ policy.insured_person }}</td>
+                                <td>
+                                    <a href="{{ url_for('policy.confirm_policy', policy_number=policy.policy_number) }}" 
+                                       class="btn-detail">
+                                        <i class="fas fa-eye me-1"></i>詳細資料
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endif %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center">
+                                    <div class="empty-state">
+                                        <i class="fas fa-inbox"></i>
+                                        <h5>目前沒有待確認保單</h5>
+                                        <p class="text-muted">所有保單都已處理完成</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-  </div>
+
+    <hr class="section-divider">
+
+    <!-- 已完成保單 -->
+    <div class="policy-section">
+        <h3 class="section-title">
+            <i class="fas fa-check-circle me-2"></i>已完成保單
+        </h3>
+        
+        <div class="policy-table">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>保單編號</th>
+                            <th>投保人</th>
+                            <th>被保險人</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for policy in completed_policies %}
+                            {% if policy.status == 1 %}
+                            <tr>
+                                <td>
+                                    <span class="policy-badge">
+                                        <i class="fas fa-hashtag me-1"></i>{{ policy.policy_number }}
+                                    </span>
+                                </td>
+                                <td>{{ policy.policy_holder }}</td>
+                                <td>{{ policy.insured_person }}</td>
+                                <td>
+                                    <div class="d-flex gap-2 flex-wrap">
+                                        <a href="{{ url_for('policy.completed_policy_form', policy_number=policy.policy_number) }}" 
+                                           class="btn-detail">
+                                            <i class="fas fa-eye me-1"></i>詳細資料
+                                        </a>
+                                        <a href="{{ url_for('policy.authorization_page', policy_number=policy.policy_number) }}" 
+                                           class="btn-authorize">
+                                            <i class="fas fa-handshake me-1"></i>授權
+                                        </a>
+                                        <a href="javascript:void(0);" 
+                                          class="btn-authorize btn-delete" 
+                                          onclick="deletePolicyFrontEnd('{{ policy.policy_number }}', this)">
+                                            <i class="fas fa-trash me-1"></i>刪除
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endif %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center">
+                                    <div class="empty-state">
+                                        <i class="fas fa-folder-open"></i>
+                                        <h5>目前沒有已完成保單</h5>
+                                        <p class="text-muted">完成處理的保單將顯示在此處</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
+{% endblock %}
 
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -250,6 +457,19 @@ async function loadPolicies() {
         console.error('載入保單錯誤:', error);
     }
 }
+
+// 頁面載入完成後的操作
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('我的保單頁面載入完成');
+    
+    // 添加表格行的懸停效果
+    const tableRows = document.querySelectorAll('.table tbody tr');
+    tableRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.transition = 'all 0.3s ease';
+        });
+    });
+});
 
 // 初始化載入
 loadPolicies();

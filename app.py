@@ -1760,7 +1760,6 @@ def vote_claim(dao_address):
         })
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
-
 #-----------------------
 # 啟動網站
 #-----------------------

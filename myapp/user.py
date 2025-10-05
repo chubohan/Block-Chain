@@ -270,7 +270,7 @@ def verify_email(token):
         s = TimedSerializer('secret_key')
         email = s.loads(token, salt='email-confirm', max_age=3600)  # 1 小時內有效
     except SignatureExpired:
-        flash('驗證連結已過期，請重新註冊或聯繫管理員。', 'danger')
+        flash('驗證連結已過期，請重新登入或聯繫管理員。', 'danger')
         return redirect(url_for('user.user_signup_form'))
 
     conn = db.get_connection()
@@ -279,7 +279,6 @@ def verify_email(token):
     conn.commit()
     conn.close()
 
-    flash('帳戶驗證成功，請登入。', 'success')
     return redirect(url_for('user.login_form_index'))
 
 @user_bp.route('/resend_verification', methods=['GET'])
@@ -335,7 +334,6 @@ def verify_code():
     else:
         flash('驗證碼錯誤，請重新輸入。', 'danger')
         return redirect(url_for('user.verify_code_form'))
-#------------------------------------
 #google登入    
 # 配置 Google 客户端 ID（从环境变量获取）
 # 從 Google Cloud Console 獲取的客戶端 ID
@@ -451,9 +449,11 @@ def complete_profile():
 
         age = data.get('age')
         gender = data.get('gender')
+        insurance_officer = data.get('insurance_officer')
+        wallet = data.get('wallet', '').strip()
         
         # 字段存在性检查
-        if age is None or gender is None:
+        if age is None or gender is None or insurance_officer is None:
             return jsonify({'success': False, 'error': '所有資料必填'}), 400
 
         # 年龄转换与验证
@@ -466,8 +466,25 @@ def complete_profile():
 
         # 性别验证
         gender = gender.strip().lower()
-        if gender not in ['male', 'female', 'other']:
+        if gender not in ['male', 'female']:
             return jsonify({'success': False, 'error': '無效的性别選項'}), 400
+
+        # 管理員身份驗證
+        try:
+            insurance_officer = int(insurance_officer)
+            if insurance_officer not in [0, 1]:
+                return jsonify({'success': False, 'error': '無效的身份選項'}), 400
+        except ValueError:
+            return jsonify({'success': False, 'error': '身份需為有效數字'}), 400
+
+        # 如果選擇管理員身份，需要錢包地址
+        if insurance_officer == 1 and not wallet:
+            return jsonify({'success': False, 'error': '管理員身份需要連接錢包'}), 400
+
+        # 驗證錢包地址格式（如果提供）
+        if wallet:
+            if not wallet.startswith('0x') or len(wallet) != 42:
+                return jsonify({'success': False, 'error': '無效的錢包地址格式'}), 400
 
         # 获取数据库连接
         conn = db.get_connection()
@@ -483,12 +500,20 @@ def complete_profile():
                 conn.close()
                 return jsonify({'success': False, 'error': '用戶不存在'}), 404
 
+            # 檢查錢包地址是否已被其他用戶使用（如果提供了錢包地址）
+            if wallet:
+                cursor.execute("SELECT gmail FROM `user` WHERE wallet = %s AND gmail != %s", 
+                             (wallet, current_user.id))
+                if cursor.fetchone():
+                    conn.close()
+                    return jsonify({'success': False, 'error': '該錢包地址已被其他用戶使用'}), 400
+
             # 执行更新
             cursor.execute("""
                 UPDATE `user` 
-                SET age = %s, gender = %s 
+                SET age = %s, gender = %s, insurance_officer = %s, wallet = %s
                 WHERE gmail = %s
-            """, (age, gender, current_user.id))
+            """, (age, gender, insurance_officer, wallet if wallet else None, current_user.id))
             
             # 提交事务
             conn.commit()
@@ -525,6 +550,27 @@ def profile():
     conn.close()
 
     return render_template('user/profile.html', user=user_data)
+
+@user_bp.route('/save-wallet', methods=['POST'])
+@login_required
+def save_wallet():
+    data = request.get_json()
+    wallet = data.get('wallet')
+
+    if not wallet:
+        return jsonify({'success': False, 'message': '錢包地址缺失'}), 400
+
+    try:
+        conn = db.get_connection()
+        with conn.cursor() as cursor:
+            sql = "UPDATE user SET wallet = %s WHERE gmail = %s"
+            cursor.execute(sql, (wallet, current_user.id))
+        conn.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        conn.close()
 
 # 登出路由
 @user_bp.route('/logout', methods=['GET', 'POST'])

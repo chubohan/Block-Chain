@@ -4,10 +4,10 @@
 
 {% block extra_css %}
 <style>
-    /* 新增：全螢幕居中可滑動容器 */
+    /* 保持原有的 CSS 樣式不變 */
     .profile-container {
         max-width: 800px;
-        margin: 100px auto;
+        margin: 40px auto;
         padding: 40px;
         background: rgba(255, 255, 255, 0.95);
         border-radius: 15px;
@@ -24,7 +24,6 @@
         padding-bottom: 15px;
     }
 
-    /* 使用者資料卡片 */
     .profile-card {
         background: rgba(255, 255, 255, 0.9);
         border-radius: 12px;
@@ -57,7 +56,6 @@
         font-size: 1.1rem;
     }
 
-    /* 錢包區域 */
     .wallet-section {
         background: rgba(255, 255, 255, 0.9);
         border-radius: 12px;
@@ -97,7 +95,6 @@
         border: 1px solid #ff6b6b;
     }
 
-    /* 按鈕樣式 */
     .btn-warning {
         background: linear-gradient(135deg, #a8e6cf, #88d4ab);
         color: white;
@@ -134,7 +131,6 @@
         box-shadow: 0 4px 12px rgba(74, 110, 224, 0.3);
     }
 
-    /* 未登入狀態 */
     .login-prompt {
         text-align: center;
         padding: 40px;
@@ -153,7 +149,6 @@
         margin-bottom: 20px;
     }
 
-    /* 響應式調整 */
     @media (max-width: 768px) {
         .profile-container {
             margin: 20px;
@@ -169,19 +164,7 @@
         h2 {
             font-size: 2rem;
         }
-
-        }
-        #walletAddressDisplay {
-        display: inline-block;      /* 確保寬度自適應文字 */
-        min-width: 100px;           /* 可依需求調整最小寬度 */
-        white-space: nowrap;        /* 避免換行 */
-        }
-
-        .copy-tip {
-        font-weight: bold;
-        color: green;
-        }
-
+    }
 </style>
 {% endblock %}
 
@@ -273,11 +256,12 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
 <script>
-    // 錢包連接功能
+    // 修復後的錢包連接功能
     class ProfileWalletManager {
         constructor() {
             this.isConnected = false;
             this.walletAddress = null;
+            this.userId = '{{ current_user.gmail }}'; // 使用使用者唯一標識
             this.init();
         }
 
@@ -285,31 +269,106 @@
             this.loadWalletState();
             this.setupEventListeners();
             this.updateUI();
+            this.checkInitialConnection();
         }
 
         loadWalletState() {
-            // 從 localStorage 讀取錢包狀態
-            const savedState = localStorage.getItem('walletState');
+            // 使用使用者特定的 localStorage key
+            const userKey = `walletState_${this.userId}`;
+            const savedState = localStorage.getItem(userKey);
+            
             if (savedState) {
                 try {
                     const state = JSON.parse(savedState);
-                    this.isConnected = state.isConnected;
-                    this.walletAddress = state.walletAddress;
-                    console.log('載入錢包狀態:', state);
+                    // 驗證狀態是否有效（24小時內）
+                    const isExpired = Date.now() - state.timestamp > 24 * 60 * 60 * 1000;
+                    
+                    if (!isExpired && state.walletAddress) {
+                        this.isConnected = state.isConnected;
+                        this.walletAddress = state.walletAddress;
+                        console.log('載入錢包狀態:', state);
+                    } else {
+                        console.log('錢包狀態已過期或無效，清除狀態');
+                        this.clearWalletState();
+                    }
                 } catch (e) {
                     console.error('解析錢包狀態失敗:', e);
+                    this.clearWalletState();
                 }
             }
         }
 
         saveWalletState() {
+            const userKey = `walletState_${this.userId}`;
             const state = {
                 isConnected: this.isConnected,
                 walletAddress: this.walletAddress,
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                userId: this.userId
             };
-            localStorage.setItem('walletState', JSON.stringify(state));
+            localStorage.setItem(userKey, JSON.stringify(state));
             console.log('保存錢包狀態:', state);
+        }
+
+        clearWalletState() {
+            const userKey = `walletState_${this.userId}`;
+            localStorage.removeItem(userKey);
+            this.isConnected = false;
+            this.walletAddress = null;
+        }
+
+        async checkInitialConnection() {
+            // 檢查是否已經有資料庫中的錢包地址
+            const dbWalletAddress = '{{ user.wallet if user.wallet else "" }}';
+            
+            if (dbWalletAddress && dbWalletAddress !== 'None') {
+                console.log('發現資料庫中的錢包地址:', dbWalletAddress);
+                
+                // 優先使用資料庫中的地址
+                if (!this.walletAddress || this.walletAddress !== dbWalletAddress) {
+                    this.walletAddress = dbWalletAddress;
+                    this.isConnected = true;
+                    this.saveWalletState();
+                    this.updateUI();
+                    console.log('使用資料庫錢包地址:', dbWalletAddress);
+                }
+                
+                // 檢查 MetaMask 是否已連接相同的地址
+                await this.checkMetaMaskConnection();
+            }
+        }
+
+        async checkMetaMaskConnection() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    const accounts = await window.ethereum.request({ 
+                        method: 'eth_accounts' 
+                    });
+                    
+                    if (accounts && accounts.length > 0) {
+                        const currentMetaMaskAddress = accounts[0].toLowerCase();
+                        const storedAddress = this.walletAddress ? this.walletAddress.toLowerCase() : null;
+                        
+                        console.log('MetaMask 當前地址:', currentMetaMaskAddress);
+                        console.log('儲存的地址:', storedAddress);
+                        
+                        // 如果 MetaMask 地址與儲存地址不同，提示使用者
+                        if (storedAddress && currentMetaMaskAddress !== storedAddress) {
+                            console.warn('錢包地址不匹配:', {
+                                metaMask: currentMetaMaskAddress,
+                                stored: storedAddress
+                            });
+                            
+                            // 可以選擇提示使用者或自動更新
+                            if (confirm('檢測到不同的錢包地址，是否要更新為當前連接的錢包？')) {
+                                await this.updateWalletAddress(currentMetaMaskAddress);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('檢查 MetaMask 連接失敗:', error);
+                }
+            }
         }
 
         async connectWallet() {
@@ -319,13 +378,27 @@
             }
 
             try {
+                // 檢查鏈 ID（Hardhat 通常是 31337 或 1337）
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                console.log('當前鏈 ID:', chainId);
+                
+                // 如果是 Hardhat 網路，可以檢查或提示
+                if (chainId !== '0x1' && chainId !== '0xaa36a7') { // 不是主網或 Sepolia
+                    console.log('檢測到測試網路');
+                }
+
                 // 請求帳戶訪問
                 const accounts = await window.ethereum.request({ 
                     method: 'eth_requestAccounts' 
                 });
                 
                 if (accounts && accounts.length > 0) {
-                    this.walletAddress = accounts[0];
+                    const connectedAddress = accounts[0];
+                    
+                    console.log('成功連接錢包:', connectedAddress);
+                    
+                    // 更新狀態
+                    this.walletAddress = connectedAddress;
                     this.isConnected = true;
                     
                     // 保存狀態
@@ -338,34 +411,46 @@
                     this.dispatchWalletChange();
                     
                     // 發送到伺服器保存
-                    await this.saveToServer(this.walletAddress);
+                    await this.saveToServer(connectedAddress);
                     
-                    alert('錢包連接成功！');
+                    alert('錢包連接成功！地址: ' + this.formatAddress(connectedAddress));
                 }
             } catch (error) {
                 console.error('連接錢包失敗:', error);
                 if (error.code === 4001) {
                     alert('使用者拒絕了錢包連接請求');
                 } else {
-                    alert('連接錢包失敗: ' + error.message);
+                    alert('連接錢包失敗: ' + (error.message || '未知錯誤'));
                 }
             }
         }
 
-        disconnectWallet() {
-            this.isConnected = false;
-            this.walletAddress = null;
+        async updateWalletAddress(newAddress) {
+            this.walletAddress = newAddress;
+            this.isConnected = true;
             
-            // 保存狀態
             this.saveWalletState();
-            
-            // 更新 UI
             this.updateUI();
-            
-            // 發送全局事件
             this.dispatchWalletChange();
             
-            alert('錢包已斷開連接');
+            // 更新到伺服器
+            await this.saveToServer(newAddress);
+            
+            console.log('錢包地址已更新:', newAddress);
+        }
+
+        disconnectWallet() {
+            if (confirm('確定要斷開錢包連接嗎？這不會從資料庫中刪除錢包地址，但會清除本地連接狀態。')) {
+                this.clearWalletState();
+                this.updateUI();
+                this.dispatchWalletChange();
+                alert('錢包已斷開連接');
+            }
+        }
+
+        formatAddress(address) {
+            if (!address) return '';
+            return `${address.substring(0, 6)}...${address.substring(38)}`;
         }
 
         updateUI() {
@@ -376,10 +461,10 @@
 
             if (this.isConnected && this.walletAddress) {
                 // 已連接狀態
-                const shortAddress = `${this.walletAddress.substring(0, 6)}...${this.walletAddress.substring(38)}`;
                 addressDisplay.textContent = this.walletAddress;
                 addressDisplay.className = 'wallet-address';
                 addressDisplay.title = '點擊複製錢包地址';
+                addressDisplay.style.cursor = 'pointer';
                 
                 statusDisplay.textContent = '已連接';
                 statusDisplay.className = 'wallet-status wallet-connected';
@@ -395,6 +480,7 @@
                 addressDisplay.textContent = '尚未連接';
                 addressDisplay.className = '';
                 addressDisplay.title = '';
+                addressDisplay.style.cursor = 'default';
                 
                 statusDisplay.textContent = '未連接';
                 statusDisplay.className = 'wallet-status wallet-disconnected';
@@ -416,33 +502,24 @@
 
             // 斷開連接按鈕
             document.getElementById('disconnectWalletBtn').addEventListener('click', () => {
-                if (confirm('確定要斷開錢包連接嗎？')) {
-                    this.disconnectWallet();
-                }
+                this.disconnectWallet();
             });
 
             // 複製錢包地址
-           document.getElementById('walletAddressDisplay').addEventListener('click', () => {
-            const walletDisplay = document.getElementById('walletAddressDisplay');
-            const originalText = walletDisplay.textContent;
-
-            if (!originalText || originalText === '尚未連接') return;
-
-            navigator.clipboard.writeText(originalText).then(() => {
-                // 建立暫時提示
-                const tip = document.createElement('span');
-                tip.textContent = '已複製 ✓';
-                tip.className = 'copy-tip';
-                tip.style.marginLeft = '10px';       // 可微調位置
-                tip.style.color = 'green';
-
-                walletDisplay.appendChild(tip);
-
-                setTimeout(() => {
-                    tip.remove();   // 自動移除提示
-                }, 1500);
-            }).catch(err => console.error('複製失敗:', err));
-        });
+            document.getElementById('walletAddressDisplay').addEventListener('click', () => {
+                if (this.walletAddress) {
+                    navigator.clipboard.writeText(this.walletAddress).then(() => {
+                        const originalText = this.walletAddress;
+                        const formattedText = this.formatAddress(originalText);
+                        document.getElementById('walletAddressDisplay').textContent = '已複製！';
+                        setTimeout(() => {
+                            document.getElementById('walletAddressDisplay').textContent = originalText;
+                        }, 2000);
+                    }).catch(err => {
+                        console.error('複製失敗:', err);
+                    });
+                }
+            });
 
             // 監聽全局錢包狀態變化
             document.addEventListener('walletStateChanged', (e) => {
@@ -455,18 +532,25 @@
             // 監聽 MetaMask 帳戶變化
             if (window.ethereum) {
                 window.ethereum.on('accountsChanged', (accounts) => {
+                    console.log('帳戶變化:', accounts);
                     if (accounts.length === 0) {
-                        this.disconnectWallet();
-                    } else {
-                        this.walletAddress = accounts[0];
-                        this.isConnected = true;
-                        this.saveWalletState();
+                        // 使用者斷開了所有帳戶
+                        this.clearWalletState();
                         this.updateUI();
                         this.dispatchWalletChange();
+                        alert('錢包已斷開連接');
+                    } else {
+                        // 帳戶切換
+                        const newAddress = accounts[0];
+                        if (newAddress !== this.walletAddress) {
+                            this.updateWalletAddress(newAddress);
+                        }
                     }
                 });
 
-                window.ethereum.on('chainChanged', () => {
+                window.ethereum.on('chainChanged', (chainId) => {
+                    console.log('鏈變化:', chainId);
+                    // 可以選擇重新加載頁面或更新 UI
                     window.location.reload();
                 });
             }
@@ -494,13 +578,20 @@
                     })
                 });
                 
+                const result = await response.json();
+                
                 if (response.ok) {
-                    console.log('錢包地址已保存到伺服器');
+                    console.log('錢包地址已保存到伺服器:', result);
+                    return true;
                 } else {
-                    console.error('保存錢包地址失敗');
+                    console.error('保存錢包地址失敗:', result);
+                    alert('保存錢包地址到伺服器失敗: ' + (result.message || '未知錯誤'));
+                    return false;
                 }
             } catch (error) {
                 console.error('保存錢包地址失敗:', error);
+                alert('網路錯誤，無法保存錢包地址');
+                return false;
             }
         }
     }
@@ -510,21 +601,14 @@
         // 初始化錢包管理器
         const walletManager = new ProfileWalletManager();
         
-        // 檢查是否有預設的錢包地址
-        const defaultWallet = '{{ user.wallet if user.wallet else "" }}';
-        if (defaultWallet && !walletManager.walletAddress) {
-            // 如果有資料庫中的錢包地址，自動連接
-            walletManager.walletAddress = defaultWallet;
-            walletManager.isConnected = true;
-            walletManager.saveWalletState();
-            walletManager.updateUI();
-            walletManager.dispatchWalletChange();
-        }
-        
         console.log('使用者資料頁面載入完成，錢包狀態:', {
             isConnected: walletManager.isConnected,
-            walletAddress: walletManager.walletAddress
+            walletAddress: walletManager.walletAddress,
+            userId: walletManager.userId
         });
+
+        // 全局訪問（用於調試）
+        window.walletManager = walletManager;
     });
 </script>
 {% endblock %}

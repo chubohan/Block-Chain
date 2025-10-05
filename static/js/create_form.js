@@ -1,7 +1,3 @@
-
-
-
-
 // 對稱加密配置
 const ENCRYPTION_KEY = CryptoJS.enc.Utf8.parse("your-32-byte-secret-key"); // 替換為實際密鑰
 const IV = CryptoJS.enc.Utf8.parse("your-16-byte-iv"); // 初始化向量
@@ -34,8 +30,6 @@ function decryptField(cipherText) {
   return decrypted.toString(CryptoJS.enc.Utf8);
 }
 
-
-
 /*---------------*/  
 async function uploadPDF() {
     const fileInput = document.getElementById('pdfUpload');
@@ -66,15 +60,11 @@ async function uploadPDF() {
     }
 }
 
-  
 //------------------------
-// 全域宣告 (必須!)
-// 全域變數
+// 全域宣告
 let web3 = null;
 let contract = null;
 let userWalletAddress = null;
-let officerWalletAddress = null;
-// 明確初始化為 null
 
 // 合約地址和 ABI（需與後端一致）
 const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
@@ -452,6 +442,13 @@ const contractABI = [
 	}
 ];
 
+// 格式化錢包地址顯示 (前6位...後4位)
+function formatWalletAddress(address) {
+    if (!address) return '';
+    if (address.length <= 12) return address;
+    return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+}
+
 // 頁面載入時自動獲取錢包地址
 window.addEventListener('DOMContentLoaded', function() {
     // 自動填寫表單資料
@@ -469,20 +466,18 @@ window.addEventListener('DOMContentLoaded', function() {
     
     // 延遲載入錢包地址，確保頁面完全載入
     setTimeout(() => {
-        loadWalletAddresses();
+        loadWalletAddress();
     }, 500);
 });
 
 // 載入錢包地址
-async function loadWalletAddresses() {
+async function loadWalletAddress() {
     try {
         console.log('開始載入錢包地址...');
         
         // 顯示載入狀態
         document.getElementById('userWalletAddress').textContent = '載入中...';
-        document.getElementById('officerWalletAddress').textContent = '載入中...';
         document.getElementById('userWalletStatus').textContent = '載入中';
-        document.getElementById('officerWalletStatus').textContent = '載入中';
 
         // 獲取錢包地址
         const response = await fetch('/policy/get_wallet_addresses');
@@ -494,47 +489,24 @@ async function loadWalletAddresses() {
         const data = await response.json();
         console.log('錢包地址回應:', data);
 
-        if (data.success) {
-            // 更新用戶錢包地址
-            if (data.user_wallet) {
-                userWalletAddress = data.user_wallet;
-                document.getElementById('userWalletAddress').textContent = formatWalletAddress(data.user_wallet);
-                document.getElementById('userWalletStatus').textContent = '已連接';
-                document.getElementById('userWalletStatus').className = 'wallet-status status-connected';
-                console.log('用戶錢包地址載入成功:', data.user_wallet);
-            } else {
-                document.getElementById('userWalletAddress').textContent = '未設定錢包地址';
-                document.getElementById('userWalletStatus').textContent = '未設定';
-                document.getElementById('userWalletStatus').className = 'wallet-status status-not-set';
-                console.warn('用戶錢包地址未設定');
-            }
-
-            // 更新業務員錢包地址
-            if (data.officer_wallet) {
-                officerWalletAddress = data.officer_wallet;
-                document.getElementById('officerWalletAddress').textContent = formatWalletAddress(data.officer_wallet);
-                document.getElementById('officerWalletStatus').textContent = '已連接';
-                document.getElementById('officerWalletStatus').className = 'wallet-status status-connected';
-                console.log('業務員錢包地址載入成功:', data.officer_wallet);
-            } else {
-                document.getElementById('officerWalletAddress').textContent = '業務員未設定錢包';
-                document.getElementById('officerWalletStatus').textContent = '未設定';
-                document.getElementById('officerWalletStatus').className = 'wallet-status status-not-set';
-                console.warn('業務員錢包地址未設定');
-            }
+        if (data.success && data.user_wallet) {
+            userWalletAddress = data.user_wallet;
+            document.getElementById('userWalletAddress').textContent = formatWalletAddress(data.user_wallet);
+            document.getElementById('userWalletStatus').textContent = '已連接';
+            document.getElementById('userWalletStatus').className = 'wallet-status status-connected';
+            console.log('用戶錢包地址載入成功:', data.user_wallet);
+            
+            // 自動初始化 Web3 和合約
+            await initWeb3AndContract();
         } else {
-            throw new Error(data.error || '獲取錢包地址失敗');
+            throw new Error(data.error || '用戶錢包地址未設定');
         }
     } catch (error) {
         console.error('載入錢包地址失敗:', error);
         document.getElementById('userWalletAddress').textContent = '載入失敗';
-        document.getElementById('officerWalletAddress').textContent = '載入失敗';
         document.getElementById('userWalletStatus').textContent = '錯誤';
-        document.getElementById('officerWalletStatus').textContent = '錯誤';
         document.getElementById('userWalletStatus').className = 'wallet-status status-error';
-        document.getElementById('officerWalletStatus').className = 'wallet-status status-error';
         
-        // 顯示更具體的錯誤訊息
         let errorMsg = '載入錢包地址失敗: ';
         if (error.message.includes('HTTP error')) {
             errorMsg += '後端服務暫時無法訪問，請稍後再試';
@@ -544,13 +516,6 @@ async function loadWalletAddresses() {
         
         console.error(errorMsg);
     }
-}
-
-// 格式化錢包地址顯示 (前6位...後4位)
-function formatWalletAddress(address) {
-    if (!address) return '';
-    if (address.length <= 12) return address;
-    return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
 }
 
 // 初始化 Web3 和合約
@@ -770,6 +735,6 @@ document.addEventListener('visibilitychange', function() {
     if (!document.hidden) {
         // 頁面從後台切換到前台時，重新檢查錢包狀態
         console.log('頁面重新可見，檢查錢包狀態');
-        loadWalletAddresses();
+        loadWalletAddress();
     }
 });

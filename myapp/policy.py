@@ -50,15 +50,22 @@ def delete_policy(policy_number):  # 參數名稱改為 policy_number
         if not policy:
             return jsonify({'success': False, 'message': '保單不存在或您沒有權限刪除'})
 
-        # 在同一個 transaction 中刪除兩個資料表的記錄
-        # 先刪除 policy_draft
+        # 在同一個 transaction 中刪除三個資料表的記錄
+        # 先刪除 authorization 表中的相關授權記錄
+        cursor.execute("""
+            DELETE FROM authorization 
+            WHERE policy_number = %s
+        """, (policy_number,))
+        auth_deleted = cursor.rowcount
+
+        # 刪除 policy_draft
         cursor.execute("""
             DELETE FROM policy_draft 
             WHERE client_gmail = %s AND policy_number = %s
         """, (user_email, policy_number))
         draft_deleted = cursor.rowcount
 
-        # 再刪除 policy
+        # 刪除 policy
         cursor.execute("""
             DELETE FROM policy 
             WHERE client_gmail = %s AND policy_id = %s
@@ -67,12 +74,13 @@ def delete_policy(policy_number):  # 參數名稱改為 policy_number
 
         conn.commit()
         
-        print(f"刪除結果 - 草稿表: {draft_deleted} 條, 政策表: {policy_deleted} 條")
+        print(f"刪除結果 - 授權表: {auth_deleted} 條, 草稿表: {draft_deleted} 條, 政策表: {policy_deleted} 條")
         
         return jsonify({
             'success': True, 
-            'message': f'保單刪除成功！',
+            'message': f'保單及相關授權刪除成功！',
             'details': {
+                'auth_deleted': auth_deleted,
                 'draft_deleted': draft_deleted,
                 'policy_deleted': policy_deleted
             }

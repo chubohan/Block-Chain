@@ -141,80 +141,112 @@ from utils.ipfs import upload_to_pinata
 @officer_bp.route('/upload-policy', methods=['POST'])
 @login_required
 def upload_policy():
-    conn = None
-
     if not getattr(current_user, 'insurance_officer', False):
-        return jsonify({'success': False, 'message': '無權限操作'}), 403
-
+        return jsonify({'success': False, 'message': '無權限訪問'})
+    
     try:
-        # 取得表單資料
-        client_gmail = request.form.get('clientGmail')
-        policy_number = request.form.get('policyNumber')
-        insurance_company = request.form.get('insuranceCompany')
-        policy_holder = request.form.get('policyHolder')
-        insured_person = request.form.get('insuredPerson')
-        insurance_amount = request.form.get('insuranceAmount')
-        premium_period = request.form.get('premiumPeriod')
-        premium_amount = request.form.get('premiumAmount')
-        start_date = request.form.get('startDate')
+        # 獲取表單數據
+        client_gmail = request.form.get('client_gmail')
+        policy_number = request.form.get('policy_number')
+        insurance_company = request.form.get('insurance_company')
+        policy_holder = request.form.get('policy_holder')
+        insured_person = request.form.get('insured_person')
+        insurance_amount = request.form.get('insurance_amount')
+        premium_period = request.form.get('premium_period')
+        premium_amount = request.form.get('premium_amount')
+        start_date = request.form.get('start_date')
         beneficiary = request.form.get('beneficiary')
-        growth_rate = request.form.get('growthRate')
-        declared_interest_rate = request.form.get('declaredInterestRate')
-        pdf_file = request.files.get('pdfUpload')
-        ipfs_hash = request.form.get('ipfsHash')
-
-        # 檢查必填字段（排除 pdf_file，因為可能為 None）
-        required_fields = [
-            client_gmail, policy_number, insurance_company, policy_holder,
-            insured_person, insurance_amount, premium_period, premium_amount,
-            start_date, beneficiary, growth_rate, declared_interest_rate, ipfs_hash
-        ]
+        growth_rate = request.form.get('growth_rate')
+        declared_interest_rate = request.form.get('declared_interest_rate')
+        ipfs_hash = request.form.get('ipfs_hash')  # 新增 IPFS hash
         
-        if not all(required_fields):
-            return jsonify({'success': False, 'message': '所有欄位皆為必填'}), 400
-
-        # 檢查文件是否存在
-        if not pdf_file or pdf_file.filename == '':
-            return jsonify({'success': False, 'message': '請選擇 PDF 文件'}), 400
-
-        # 檢查文件類型
-        if not pdf_file.filename.lower().endswith('.pdf'):
-            return jsonify({'success': False, 'message': '只允許上傳 PDF 文件'}), 400
-
-        # 儲存到暫存路徑
-        filename = secure_filename(f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{pdf_file.filename}")
-        upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-        pdf_file.save(upload_path)
-
-        print("儲存的檔名為：", filename)
-        print("IPFS Hash：", ipfs_hash)
+        print("=== 接收到的表單數據 ===")
+        print(f"client_gmail: {client_gmail}")
+        print(f"policy_number: {policy_number}")
+        print(f"insurance_company: {insurance_company}")
+        print(f"ipfs_hash: {ipfs_hash}")
         
-        # 寫入 policy_draft
+        # 驗證必填字段
+        required_fields = {
+            'client_gmail': client_gmail,
+            'policy_number': policy_number,
+            'insurance_company': insurance_company,
+            'policy_holder': policy_holder,
+            'insured_person': insured_person,
+            'insurance_amount': insurance_amount,
+            'premium_period': premium_period,
+            'premium_amount': premium_amount,
+            'start_date': start_date,
+            'beneficiary': beneficiary
+        }
+        
+        missing_fields = []
+        for field_name, field_value in required_fields.items():
+            if not field_value or field_value.strip() == '':
+                missing_fields.append(field_name)
+        
+        if missing_fields:
+            return jsonify({
+                'success': False, 
+                'message': f'缺少必填字段: {", ".join(missing_fields)}'
+            })
+        
+        # 處理文件上傳
+        pdf_filename = None
+        pdf_file = request.files.get('pdf_file')
+        
+        if pdf_file and hasattr(pdf_file, 'filename') and pdf_file.filename:
+            filename = secure_filename(pdf_file.filename)
+            upload_dir = os.path.join('uploads', 'policies')
+            os.makedirs(upload_dir, exist_ok=True)
+            pdf_path = os.path.join(upload_dir, filename)
+            pdf_file.save(pdf_path)
+            pdf_filename = filename
+            print(f"文件已保存: {pdf_path}")
+        else:
+            return jsonify({'success': False, 'message': '請上傳 PDF 文件'})
+        
+        # 類型轉換和默認值處理
+        try:
+            insurance_amount_int = int(insurance_amount) if insurance_amount else 0
+            premium_period_int = int(premium_period) if premium_period else 0
+            premium_amount_int = int(premium_amount) if premium_amount else 0
+            growth_rate_float = float(growth_rate) if growth_rate else 0.0
+            declared_interest_rate_float = float(declared_interest_rate) if declared_interest_rate else 0.0
+        except (ValueError, TypeError) as e:
+            return jsonify({'success': False, 'message': f'數字格式錯誤: {str(e)}'})
+        
+        # 連接數據庫並插入數據
         conn = db.get_connection()
         with conn.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO policy_draft (
-                    client_gmail, policy_number, insurance_company, policy_holder, insured_person,
-                    insurance_amount, premium_period, premium_amount, start_date,
-                    beneficiary, growth_rate, declared_interest_rate,
-                    pdf_filename, pdf_hash, officer_gmail
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    client_gmail, policy_number, insurance_company, policy_holder,
+                    insured_person, insurance_amount, premium_period, premium_amount,
+                    start_date, beneficiary, growth_rate, declared_interest_rate,
+                    pdf_filename, officer_gmail, status, created_at, pdf_hash
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), %s)
             """, (
-                client_gmail, policy_number, insurance_company, policy_holder, insured_person,
-                insurance_amount, premium_period, premium_amount, start_date,
-                beneficiary, growth_rate, declared_interest_rate,
-                filename, ipfs_hash, current_user.id
+                client_gmail, policy_number, insurance_company, policy_holder,
+                insured_person, insurance_amount_int, premium_period_int, premium_amount_int,
+                start_date, beneficiary, growth_rate_float, declared_interest_rate_float,
+                pdf_filename, current_user.id, 0, ipfs_hash  # status = 0 表示草稿
             ))
+            
             conn.commit()
-
-        return jsonify({'success': True, 'ipfs_hash': ipfs_hash})
+            policy_id = cursor.lastrowid
+            
+        return jsonify({
+            'success': True, 
+            'message': '保單新增成功',
+            'policy_id': policy_id
+        })
+        
     except Exception as e:
-        if conn:
-            conn.rollback()
-        return jsonify({'success': False, 'message': str(e)}), 500
-    finally:
-        if conn:
-            conn.close()
+        print(f"上傳保單錯誤: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': f'上傳失敗：{str(e)}'})
 @officer_bp.route('/upload-policy-page', methods=['GET'])
 @login_required
 def upload_policy_page():
@@ -357,11 +389,17 @@ def update_policy():
     if not getattr(current_user, 'insurance_officer', False):
         return jsonify({'success': False, 'message': '無權限訪問'})
     
+    # 詳細的調試信息
+    print("=== 更新保單調試信息 ===")
     policy_id = request.form.get('policy_id')
+    print(f"收到的 policy_id: '{policy_id}'")
+    
     if not policy_id:
+        print("錯誤：policy_id 為空或不存在")
         return jsonify({'success': False, 'message': '缺少保單ID'})
     
-    print("=== 接收到的表單數據 ===")
+    # 調試：打印所有接收到的表單數據
+    print("=== 所有接收到的表單數據 ===")
     for key in request.form:
         print(f"'{key}': '{request.form[key]}'")
     
@@ -369,62 +407,109 @@ def update_policy():
     
     try:
         with conn.cursor() as cursor:
-            # 直接更新所有字段，不處理文件
+            # 檢查保單是否存在
+            cursor.execute("SELECT * FROM policy_draft WHERE id = %s AND officer_gmail = %s", 
+                         (policy_id, current_user.id))
+            existing_policy = cursor.fetchone()
+            
+            if not existing_policy:
+                print(f"錯誤：保單不存在，policy_id: {policy_id}, officer_gmail: {current_user.id}")
+                return jsonify({'success': False, 'message': '保單不存在'})
+            
+            print("現有保單數據:", existing_policy)
+            
+            # 使用正確的數據庫字段名稱
             update_fields = []
             update_values = []
             
-            # 定義所有可能更新的字段
-            fields_to_update = [
-                ('client_gmail', 'str'),
-                ('policy_number', 'str'),
-                ('insurance_company', 'str'),
-                ('policy_holder', 'str'),
-                ('insured_person', 'str'),
-                ('insurance_amount', 'int'),
-                ('premium_period', 'int'),
-                ('premium_amount', 'int'),
-                ('start_date', 'str'),
-                ('beneficiary', 'str'),
-                ('growth_rate', 'float'),
-                ('declared_interest_rate', 'float')
-            ]
+            # 字段映射
+            field_mappings = {
+                'client_gmail': 'client_gmail',
+                'policy_number': 'policy_number', 
+                'insurance_company': 'insurance_company',
+                'policy_holder': 'policy_holder',
+                'insured_person': 'insured_person', 
+                'insurance_amount': 'insurance_amount',
+                'premium_period': 'premium_period',
+                'premium_amount': 'premium_amount',
+                'start_date': 'start_date',
+                'beneficiary': 'beneficiary',
+                'growth_rate': 'growth_rate',
+                'declared_interest_rate': 'declared_interest_rate'
+            }
             
-            for field_name, field_type in fields_to_update:
-                value = request.form.get(field_name)
+            for form_field, db_field in field_mappings.items():
+                value = request.form.get(form_field)
+                print(f"處理字段: {form_field} -> {db_field}, 值: {value}")
+                
                 if value is not None and value != '':
-                    update_fields.append(f"{field_name} = %s")
+                    update_fields.append(f"{db_field} = %s")
                     
-                    if field_type == 'int':
+                    # 類型轉換
+                    if db_field in ['insurance_amount', 'premium_amount', 'premium_period']:
                         try:
                             update_values.append(int(value))
-                        except:
+                        except (ValueError, TypeError):
                             update_values.append(0)
-                    elif field_type == 'float':
+                    elif db_field in ['growth_rate', 'declared_interest_rate']:
                         try:
                             update_values.append(float(value))
-                        except:
+                        except (ValueError, TypeError):
                             update_values.append(0.0)
+                    elif db_field == 'start_date':
+                        update_values.append(value)
                     else:
                         update_values.append(value)
-                    print(f"添加字段 {field_name}: {value}")
+            
+            # 處理文件上傳和 IPFS hash
+            pdf_file = request.files.get('pdf_file')
+            ipfs_hash = request.form.get('ipfs_hash')
+            
+            if pdf_file and pdf_file.filename:
+                filename = secure_filename(pdf_file.filename)
+                upload_dir = os.path.join('uploads', 'policies')
+                os.makedirs(upload_dir, exist_ok=True)
+                pdf_path = os.path.join(upload_dir, filename)
+                pdf_file.save(pdf_path)
+                update_fields.append("pdf_filename = %s")
+                update_values.append(filename)
+                print(f"文件已保存: {filename}")
+            
+            # 如果有新的 IPFS hash，更新它
+            if ipfs_hash and ipfs_hash.strip():
+                update_fields.append("pdf_hash = %s")
+                update_values.append(ipfs_hash.strip())
+                print(f"更新 IPFS hash: {ipfs_hash}")
+            
+            print("更新字段:", update_fields)
+            print("更新值:", update_values)
             
             if update_fields:
                 update_values.extend([policy_id, current_user.id])
                 
                 query = f"UPDATE policy_draft SET {', '.join(update_fields)} WHERE id = %s AND officer_gmail = %s"
-                print("執行 SQL:", query)
-                print("參數:", update_values)
+                print("最終 SQL:", query)
+                print("最終參數:", update_values)
                 
                 cursor.execute(query, update_values)
                 conn.commit()
                 
-                return jsonify({'success': True, 'message': '保單更新成功'})
+                # 檢查受影響的行數
+                affected_rows = cursor.rowcount
+                print(f"受影響的行數: {affected_rows}")
+                
+                if affected_rows > 0:
+                    return jsonify({'success': True, 'message': '保單更新成功'})
+                else:
+                    return jsonify({'success': False, 'message': '沒有數據被更新'})
             else:
                 return jsonify({'success': False, 'message': '沒有提供更新數據'})
             
     except Exception as e:
         conn.rollback()
         print(f"更新錯誤: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'success': False, 'message': f'更新失敗：{str(e)}'})
     finally:
         conn.close()

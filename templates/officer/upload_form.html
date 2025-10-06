@@ -372,7 +372,10 @@
                     <label>
                         保單編號 <span class="required-label">*</span>
                     </label>
-                    <input type="text" id="policyNumber" required />
+                    <input type="text" id="policyNumber" readonly required />
+                    <small style="color: #718096; font-size: 0.9rem; display: block; margin-top: 5px;">
+                        保單編號已自動生成
+                    </small>
                 </div>
             </div>
 
@@ -495,6 +498,15 @@
     let currentPolicyId = null;
     let isEditMode = false;
 
+    // 生成不重複的保單編號
+    function generatePolicyNumber() {
+        const timestamp = Date.now().toString(); // 當前時間戳
+        const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0'); // 4位隨機數
+        const companyCode = 'CS'; // 公司代碼，可以根據需要修改
+        
+        return `${companyCode}${timestamp}${random}`;
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const urlParams = new URLSearchParams(window.location.search);
         const policyId = urlParams.get('policy_id');
@@ -503,6 +515,12 @@
             currentPolicyId = policyId;
             isEditMode = true;
             loadPolicyData(policyId);
+        } else {
+            // 新增模式：自動生成保單編號
+            const policyNumberInput = document.getElementById('policyNumber');
+            if (policyNumberInput) {
+                policyNumberInput.value = generatePolicyNumber();
+            }
         }
 
         // 初始化按鈕事件
@@ -608,6 +626,12 @@
             const element = document.getElementById(fieldId);
             if (element && value !== null && value !== undefined) {
                 element.value = value;
+                
+                // 如果是保單編號，設置為唯讀
+                if (fieldId === 'policyNumber') {
+                    element.readOnly = true;
+                }
+                
                 console.log(`設置 ${fieldId}:`, value);
             }
         }
@@ -651,149 +675,230 @@
         }
     }
 
-    async function processPolicyForm(url, actionType) {
-        if (!validateForm()) {
-            return;
-        }
+async function processPolicyForm(url, actionType) {
+    if (!validateForm()) {
+        return;
+    }
 
-        const formData = new FormData();
+    const formData = new FormData();
 
-        // 使用與後端完全一致的字段名稱
-        const fieldMappings = {
-            'clientGmail': 'clientGmail',
-            'policyNumber': 'policyNumber',
-            'insuranceCompany': 'insuranceCompany',
-            'policyHolder': 'policyHolder',
-            'insuredPerson': 'insuredPerson',
-            'insuranceAmount': 'insuranceAmount',
-            'premiumPeriod': 'premiumPeriod',
-            'premiumAmount': 'premiumAmount',
-            'startDate': 'startDate',
-            'beneficiary': 'beneficiary',
-            'growthRate': 'growthRate',
-            'declaredInterestRate': 'declaredInterestRate'
-        };
+    // 字段映射
+    const fieldMappings = {
+        'clientGmail': 'client_gmail',
+        'policyNumber': 'policy_number',
+        'insuranceCompany': 'insurance_company',
+        'policyHolder': 'policy_holder',
+        'insuredPerson': 'insured_person',
+        'insuranceAmount': 'insurance_amount',
+        'premiumPeriod': 'premium_period',
+        'premiumAmount': 'premium_amount',
+        'startDate': 'start_date',
+        'beneficiary': 'beneficiary',
+        'growthRate': 'growth_rate',
+        'declaredInterestRate': 'declared_interest_rate'
+    };
 
-        // 添加所有表單字段
-        for (const [frontendField, backendField] of Object.entries(fieldMappings)) {
-            const element = document.getElementById(frontendField);
-            if (element && element.value.trim()) {
-                formData.append(backendField, element.value.trim());
-                console.log(`發送: ${backendField} = ${element.value.trim()}`);
+    // 添加所有表單字段
+    for (const [frontendField, backendField] of Object.entries(fieldMappings)) {
+        const element = document.getElementById(frontendField);
+        if (element) {
+            const value = element.value.trim();
+            if (value === '') {
+                if (backendField.includes('amount') || backendField.includes('period')) {
+                    formData.append(backendField, '0');
+                } else if (backendField.includes('rate')) {
+                    formData.append(backendField, '0.0');
+                } else {
+                    formData.append(backendField, '');
+                }
+            } else {
+                formData.append(backendField, value);
             }
+            console.log(`發送: ${backendField} = ${element.value.trim()}`);
         }
+    }
 
-        // 如果是更新模式，添加 policy_id
-        if (currentPolicyId) {
-            formData.append('policy_id', currentPolicyId);
-            console.log(`發送: policy_id = ${currentPolicyId}`);
-        }
+    // 重要：在更新模式下添加 policy_id
+    if (isEditMode && currentPolicyId) {
+        formData.append('policy_id', currentPolicyId);
+        console.log(`發送: policy_id = ${currentPolicyId}`);
+    }
 
-        // 處理文件上傳和 IPFS Hash 生成
-        const fileInput = document.getElementById('pdfUpload');
-        let file = null;
-        let ipfsHash = null;
+    // 處理文件上傳和 IPFS hash
+    const fileInput = document.getElementById('pdfUpload');
+    let file = null;
+    let ipfsHash = null;
+    
+    if (fileInput && fileInput.files && fileInput.files.length > 0) {
+        file = fileInput.files[0];
+        formData.append('pdf_file', file);
+        console.log(`上傳文件: ${file.name}`);
         
-        if (fileInput && fileInput.files && fileInput.files.length > 0) {
-            file = fileInput.files[0];
-            
-            try {
-                // 生成 IPFS Hash
-                ipfsHash = await generateIPFSHash(file);
-                formData.append('ipfsHash', ipfsHash);
-                console.log(`IPFS Hash: ${ipfsHash}`);
-                
-                // 添加文件到 FormData
-                formData.append('pdfUpload', file);
-                console.log(`上傳文件: ${file.name} (${file.size} bytes)`);
-                
-            } catch (error) {
-                showStatus(`❌ ${error.message}`, 'error');
-                return;
-            }
-        } else {
-            console.log('沒有選擇文件');
-            // 如果是新增模式，文件是必填的
-            if (!isEditMode) {
-                showStatus('請選擇 PDF 文件', 'error');
-                return;
-            }
+        // 生成 IPFS hash（新增和更新模式都需要）
+        try {
+            showStatus('正在生成檔案雜湊值...', 'info');
+            ipfsHash = await generateIPFSHash(file);
+            formData.append('ipfs_hash', ipfsHash);
+            console.log(`IPFS Hash: ${ipfsHash}`);
+            showStatus('檔案雜湊值生成成功', 'success');
+        } catch (error) {
+            console.warn('IPFS 上傳失敗，繼續流程:', error);
+            showStatus('IPFS 上傳失敗，但保單仍會保存', 'info');
+            // 即使 IPFS 失敗，仍然繼續流程
         }
+    } else if (!isEditMode) {
+        // 新增模式必須有文件
+        showStatus('請選擇 PDF 文件', 'error');
+        return;
+    }
+
+    // 調試：顯示所有發送的數據
+    console.log('=== 發送的 FormData ===');
+    for (let pair of formData.entries()) {
+        if (pair[0] === 'pdf_file') {
+            console.log(`${pair[0]}: [File] ${pair[1].name}`);
+        } else {
+            console.log(`${pair[0]}: ${pair[1]}`);
+        }
+    }
+
+    try {
+        showStatus(`${actionType}保單中...`, 'info');
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            body: formData,
+            credentials: 'include'
+        });
+
+        const result = await response.json();
+        console.log('服務器響應:', result);
+        
+        if (result.success) {
+            showStatus(`✅ ${actionType}保單成功！`, 'success');
+            setTimeout(() => {
+                if (currentPolicyId) {
+                    window.location.href = `/officer/view-policy?policy_id=${currentPolicyId}`;
+                } else {
+                    window.location.href = '/officer/client-page';
+                }
+            }, 2000);
+        } else {
+            showStatus(`❌ ${actionType}失敗：${result.message}`, 'error');
+        }
+    } catch (error) {
+        console.error('請求錯誤:', error);
+        showStatus(`❌ 伺服器錯誤：${error.message}`, 'error');
+    }
+}
+
+// 改進的 IPFS hash 生成函數
+async function generateIPFSHash(file) {
+    return new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+            reject(new Error('IPFS 上傳超時，跳過 IPFS 上傳'));
+        }, 15000); // 15秒超時
 
         try {
-            showStatus(`${actionType}保單中...`, 'info');
-            console.log(`發送請求到: ${url}`);
-            
-            const response = await fetch(url, {
-                method: 'POST',
-                body: formData,
-                credentials: 'include'
+            const ipfs = window.IpfsHttpClient.create({ 
+                url: "http://127.0.0.1:5001/api/v0" 
             });
 
-            const result = await response.json();
-            console.log('服務器響應:', result);
+            ipfs.add(file).then(result => {
+                clearTimeout(timeout);
+                console.log('IPFS Hash 生成成功:', result.path);
+                resolve(result.path);
+            }).catch(error => {
+                clearTimeout(timeout);
+                reject(new Error('IPFS 上傳失敗'));
+            });
             
-            if (result.success) {
-                showStatus(`✅ ${actionType}保單成功！`, 'success');
-                setTimeout(() => {
-                    if (currentPolicyId) {
-                        window.location.href = `/officer/view-policy?policy_id=${currentPolicyId}`;
-                    } else {
-                        window.location.href = '/officer/client-page';
-                    }
-                }, 2000);
-            } else {
-                showStatus(`❌ ${actionType}失敗：${result.message}`, 'error');
-            }
         } catch (error) {
-            console.error('請求錯誤:', error);
-            showStatus(`❌ 伺服器錯誤：${error.message}`, 'error');
+            clearTimeout(timeout);
+            reject(new Error('IPFS 連接失敗'));
         }
-    }
+    });
+}
 
     function validateForm() {
-        const requiredFields = [
-            'clientGmail', 'policyNumber', 'insuranceCompany', 'policyHolder',
-            'insuredPerson', 'insuranceAmount', 'premiumPeriod', 'premiumAmount',
-            'startDate', 'beneficiary', 'growthRate', 'declaredInterestRate'
-        ];
+    const requiredFields = [
+        'clientGmail', 'policyNumber', 'insuranceCompany', 'policyHolder',
+        'insuredPerson', 'insuranceAmount', 'premiumPeriod', 'premiumAmount',
+        'startDate', 'beneficiary'
+    ];
 
-        for (const fieldId of requiredFields) {
-            const element = document.getElementById(fieldId);
-            if (element && !element.value.trim()) {
-                showStatus(`請填寫 ${element.previousElementSibling.textContent.trim()}`, 'error');
-                element.focus();
-                return false;
-            }
-        }
-
-        // 驗證數字字段
-        const insuranceAmount = document.getElementById('insuranceAmount').value;
-        const premiumAmount = document.getElementById('premiumAmount').value;
-        const growthRate = document.getElementById('growthRate').value;
-        const declaredInterestRate = document.getElementById('declaredInterestRate').value;
-
-        if (insuranceAmount <= 0) {
-            showStatus('保險金額必須大於 0', 'error');
+    for (const fieldId of requiredFields) {
+        const element = document.getElementById(fieldId);
+        if (element && !element.value.trim()) {
+            const fieldName = getFieldDisplayName(fieldId);
+            showStatus(`請填寫${fieldName}`, 'error');
+            element.focus();
             return false;
         }
-
-        if (premiumAmount <= 0) {
-            showStatus('保費金額必須大於 0', 'error');
-            return false;
-        }
-
-        if (growthRate < 0 || growthRate > 100) {
-            showStatus('增額比例必須在 0-100% 之間', 'error');
-            return false;
-        }
-
-        if (declaredInterestRate < 0 || declaredInterestRate > 100) {
-            showStatus('宣告利率必須在 0-100% 之間', 'error');
-            return false;
-        }
-
-        return true;
     }
+
+    // 驗證數字字段
+    const insuranceAmount = document.getElementById('insuranceAmount').value;
+    const premiumAmount = document.getElementById('premiumAmount').value;
+    const premiumPeriod = document.getElementById('premiumPeriod').value;
+    const growthRate = document.getElementById('growthRate').value;
+    const declaredInterestRate = document.getElementById('declaredInterestRate').value;
+
+    if (insuranceAmount <= 0) {
+        showStatus('保險金額必須大於 0', 'error');
+        return false;
+    }
+
+    if (premiumAmount <= 0) {
+        showStatus('保費金額必須大於 0', 'error');
+        return false;
+    }
+
+    if (premiumPeriod <= 0) {
+        showStatus('繳費期間必須大於 0', 'error');
+        return false;
+    }
+
+    // 這些字段可以是 0
+    if (growthRate < 0) {
+        showStatus('增額比例不能為負數', 'error');
+        return false;
+    }
+
+    if (declaredInterestRate < 0) {
+        showStatus('宣告利率不能為負數', 'error');
+        return false;
+    }
+
+    // 檢查文件上傳（僅在新增模式）
+    if (!isEditMode) {
+        const fileInput = document.getElementById('pdfUpload');
+        if (!fileInput.files || fileInput.files.length === 0) {
+            showStatus('請選擇 PDF 文件', 'error');
+            return false;
+        }
+    }
+
+    return true;
+}
+
+// 獲取字段顯示名稱
+function getFieldDisplayName(fieldId) {
+    const nameMap = {
+        'clientGmail': '客戶 Gmail',
+        'policyNumber': '保單編號',
+        'insuranceCompany': '保險公司名稱',
+        'policyHolder': '要保人姓名',
+        'insuredPerson': '被保險人姓名',
+        'insuranceAmount': '保險金額',
+        'premiumPeriod': '繳費期間',
+        'premiumAmount': '保費金額',
+        'startDate': '生效日期',
+        'beneficiary': '受益人',
+        'growthRate': '增額比例',
+        'declaredInterestRate': '宣告利率'
+    };
+    return nameMap[fieldId] || fieldId;
+}
 </script>
 {% endblock %}

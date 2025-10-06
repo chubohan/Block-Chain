@@ -625,7 +625,7 @@
     <!-- 導航區域 -->
     <div class="dao-nav">
         <button id="backButton" class="btn-secondary">
-            <i class="fas fa-arrow-left"></i>返回 DAO 列表
+            <i class="fas fa-arrow-left"></i>返回列表
         </button>
         <div class="wallet-info">
             <i class="fas fa-wallet"></i>
@@ -659,7 +659,7 @@
         <!-- DAO 基本資訊 -->
         <div class="info-card">
             <h2 class="card-title">
-                <i class="fas fa-info-circle"></i>DAO 基本資訊
+                <i class="fas fa-info-circle"></i>理賠基本資訊
             </h2>
             <div class="info-item">
                 <span class="info-label">
@@ -714,10 +714,10 @@
             </div>
             <div id="membershipActions" style="margin-top: 20px;">
                 <button id="joinDaoBtn" class="btn-primary" style="display: none;">
-                    <i class="fas fa-sign-in-alt"></i> 加入 DAO
+                    <i class="fas fa-sign-in-alt"></i> 加入計畫
                 </button>
                 <button id="leaveDaoBtn" class="btn-danger" style="display: none;">
-                    <i class="fas fa-sign-out-alt"></i> 退出 DAO
+                    <i class="fas fa-sign-out-alt"></i> 退出計畫
                 </button>
                 <div id="premiumInfo" style="margin-top: 15px; display: none;">
                     <div class="info-item">
@@ -740,7 +740,7 @@
     <!-- 非會員提示訊息 -->
     <div id="nonMemberMessage" class="non-member-message" style="display: none;">
         <h3><i class="fas fa-lock"></i> 會員專屬功能</h3>
-        <p>請先加入 DAO 才能使用申請理賠、投票等功能</p>
+        <p>請先加入理賠計畫才能使用申請理賠、投票等功能</p>
         <button id="joinFromMessageBtn" class="btn-primary">
             <i class="fas fa-sign-in-alt"></i>立即加入
         </button>
@@ -1932,7 +1932,7 @@ function updateExecuteButtonStatus(claimId, text, disabled) {
             const treasuryBalance = await daoContract.getTreasuryBalance();
             const availableBalance = ethers.utils.formatEther(treasuryBalance);
             
-            balanceHint.textContent = `DAO 可用餘額: ${availableBalance} ETH`;
+            balanceHint.textContent = `可用餘額: ${availableBalance} ETH`;
             
             // 如果用戶輸入了金額，檢查是否超過餘額
             if (amountInput.value) {

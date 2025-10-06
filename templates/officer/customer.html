@@ -391,6 +391,7 @@
                     <td>{{ client.gender }}</td>
                     <td>
                         <div class="action-buttons">
+                            <button class="btn-action" onclick="viewPolicies('{{ client.gmail }}')">📋 查看保單</button>
                             <button class="btn-action" onclick="addPolicy('{{ client.gmail }}')">📄 新增保單</button>
                             <button class="btn-danger" onclick="deleteClient('{{ client.gmail }}')">🗑️ 刪除</button>
                         </div>
@@ -561,5 +562,8 @@
         element.className = `message ${type}`;
         element.style.display = 'block';
     }
+    function viewPolicies(clientGmail) {
+    window.location.href = `/officer/client-policies?client_gmail=${encodeURIComponent(clientGmail)}`;
+}
 </script>
 {% endblock %}

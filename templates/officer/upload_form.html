@@ -5,194 +5,477 @@
 {% block extra_css %}
 <link href="/static/css/create_form.css" rel="stylesheet">
 <style>
+    /* 重置與基礎樣式 */
+    * {
+        box-sizing: border-box;
+    }
+    
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: #333;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+    }
+    
+    /* 主要容器 */
     .create-container {
-        max-width: 800px;
-        margin: 80px auto 40px;
+        max-width: 900px;
+        margin: 40px auto;
         padding: 40px;
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 20px;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-        backdrop-filter: blur(10px);
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        border: 1px solid #e1e5e9;
     }
 
+    /* 標題樣式 */
     .create-container h2 {
-        color: #4a6ee0;
-        margin-bottom: 30px;
+        color: #2c5aa0;
+        margin-bottom: 35px;
         font-size: 2.5rem;
-        font-weight: bold;
+        font-weight: 700;
         text-align: center;
-        background: linear-gradient(135deg, #4a6ee0, #64c1ff);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        letter-spacing: -0.5px;
     }
 
+    /* 表單包裹器 */
+    .form-wrapper {
+        width: 100%;
+    }
+
+    /* 標籤樣式 - 更明顯 */
     .form-wrapper label {
-        font-weight: bold;
-        color: #555;
-        margin-bottom: 8px;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 10px;
         display: block;
+        font-size: 1.1rem;
+        text-align: left;
     }
 
     .required-label {
-        color: #ff6b6b;
+        color: #e53e3e;
+        font-weight: 700;
+        margin-left: 2px;
     }
 
-    .form-wrapper input {
+    .optional-label {
+        color: #718096;
+        font-size: 0.9em;
+        font-weight: 500;
+        margin-left: 4px;
+    }
+
+    /* 輸入框樣式 - 確保文字可見 */
+    .form-wrapper input, 
+    .form-wrapper select {
         width: 100%;
-        padding: 12px 15px;
-        border: 2px solid #e0e0e0;
-        border-radius: 8px;
-        font-size: 16px;
+        padding: 14px 16px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 1.1rem;
         transition: all 0.3s ease;
-        background: white;
-        box-sizing: border-box;
-        margin-bottom: 20px;
+        background: #ffffff;
+        color: #2d3748; /* 深色文字確保可見性 */
+        font-weight: 500;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
 
-    .form-wrapper input:focus {
+    /* 輸入框焦點狀態 */
+    .form-wrapper input:focus, 
+    .form-wrapper select:focus {
         outline: none;
-        border-color: #64c1ff;
-        box-shadow: 0 0 0 3px rgba(100, 193, 255, 0.1);
+        border-color: #4299e1;
+        box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.15);
+        background: #ffffff;
+        color: #2d3748; /* 保持深色文字 */
+        transform: translateY(-1px);
     }
 
+    /* 輸入框佔位符 */
+    .form-wrapper input::placeholder {
+        color: #a0aec0;
+        font-weight: 400;
+        opacity: 0.8;
+    }
+
+    /* 只讀輸入框 */
+    .form-wrapper input[readonly] {
+        background-color: #f7fafc;
+        color: #4a5568;
+        cursor: not-allowed;
+        border-color: #cbd5e0;
+        font-weight: 500;
+    }
+
+    /* 分隔線 */
     .divider {
         height: 2px;
-        background: linear-gradient(90deg, transparent, #64c1ff, transparent);
-        margin: 30px 0;
+        background: linear-gradient(90deg, transparent, #4299e1, transparent);
+        margin: 40px 0;
+        opacity: 0.3;
     }
 
+    /* 上傳區域 */
     .upload-section {
         text-align: center;
-        margin: 20px 0;
-        padding: 20px;
-        background: rgba(248, 249, 250, 0.8);
-        border-radius: 10px;
-        border: 1px solid #e0e0e0;
+        margin: 30px 0;
+        padding: 30px;
+        background: #f8fafc;
+        border-radius: 12px;
+        border: 2px dashed #cbd5e0;
+        transition: all 0.3s ease;
+    }
+
+    .upload-section:hover {
+        border-color: #4299e1;
+        background: #edf2f7;
     }
 
     .upload-section input[type="file"] {
-        margin: 10px 0;
+        margin: 15px 0;
+        font-size: 1rem;
+        padding: 12px;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
     }
 
+    /* 主要按鈕 */
     .btn-primary {
-        background: linear-gradient(135deg, #8ac6ff, #64c1ff);
+        background: linear-gradient(135deg, #4299e1, #3182ce);
         color: white;
-        padding: 12px 25px;
+        padding: 16px 32px;
         border: none;
-        border-radius: 8px;
-        font-weight: bold;
+        border-radius: 10px;
+        font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(100, 193, 255, 0.3);
+        box-shadow: 0 6px 20px rgba(66, 153, 225, 0.3);
+        font-size: 1.2rem;
+        width: 100%;
+        margin-top: 20px;
+        letter-spacing: 0.5px;
     }
 
     .btn-primary:hover {
-        background: linear-gradient(135deg, #64c1ff, #4a6ee0);
+        background: linear-gradient(135deg, #3182ce, #2c5aa0);
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(74, 110, 224, 0.4);
+        box-shadow: 0 8px 25px rgba(49, 130, 206, 0.4);
     }
 
+    /* 次要按鈕 */
+    .btn-secondary {
+        background: linear-gradient(135deg, #48bb78, #38a169);
+        color: white;
+        padding: 14px 28px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 25px;
+        font-size: 1.1rem;
+    }
+
+    .btn-secondary:hover {
+        background: linear-gradient(135deg, #38a169, #2f855a);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(56, 161, 105, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    /* 表單底部 */
     .form-footer {
         margin-top: 30px;
         text-align: center;
     }
 
+    /* 狀態訊息 */
     #status {
-        margin-top: 20px;
-        padding: 15px;
-        border-radius: 8px;
-        font-weight: bold;
+        margin-top: 25px;
+        padding: 18px 24px;
+        border-radius: 10px;
+        font-weight: 600;
         text-align: center;
+        display: none;
+        border: 2px solid transparent;
+        font-size: 1.1rem;
+        line-height: 1.5;
+    }
+
+    #status.success {
+        background: #f0fff4;
+        color: #276749;
+        border-color: #9ae6b4;
+    }
+
+    #status.error {
+        background: #fed7d7;
+        color: #c53030;
+        border-color: #fc8181;
+    }
+
+    #status.info {
+        background: #bee3f8;
+        color: #2c5aa0;
+        border-color: #90cdf4;
+    }
+
+    /* 表單行佈局 */
+    .form-row {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+
+    .form-group {
+        flex: 1;
+        text-align: left;
+    }
+
+    /* 文件資訊 */
+    .file-info {
+        margin-top: 15px;
+        font-size: 1rem;
+        color: #4a5568;
+        font-weight: 500;
+        padding: 12px;
+        background: #edf2f7;
+        border-radius: 8px;
+        border-left: 4px solid #4299e1;
+    }
+
+    /* 分區標題 */
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #2c5aa0;
+        margin: 35px 0 20px;
+        text-align: left;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .section-title::before {
+        content: '';
+        width: 6px;
+        height: 24px;
+        background: linear-gradient(135deg, #4299e1, #2c5aa0);
+        border-radius: 3px;
     }
 
     /* 響應式設計 */
     @media (max-width: 768px) {
-        .create-container {
-            margin: 60px 20px 20px;
-            padding: 30px 20px;
+        body {
+            padding: 15px;
         }
+        
+        .create-container {
+            margin: 20px auto;
+            padding: 25px 20px;
+        }
+        
+        .create-container h2 {
+            font-size: 2rem;
+        }
+
+        .form-row {
+            flex-direction: column;
+            gap: 0;
+        }
+        
+        .btn-primary, .btn-secondary {
+            font-size: 1.1rem;
+            padding: 14px 20px;
+        }
+        
+        .upload-section {
+            padding: 20px 15px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .create-container {
+            padding: 20px 15px;
+            margin: 10px auto;
+        }
+        
+        .create-container h2 {
+            font-size: 1.8rem;
+        }
+        
+        .form-wrapper input, .form-wrapper select {
+            padding: 12px 14px;
+            font-size: 1rem;
+        }
+        
+        .section-title {
+            font-size: 1.2rem;
+        }
+    }
+
+    /* 數字輸入框特殊樣式 */
+    input[type="number"] {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* 日期輸入框特殊樣式 */
+    input[type="date"] {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #2d3748;
+    }
+
+    /* 確保所有文字在各種狀態下都可見 */
+    .form-wrapper input:not([readonly]):not(:focus) {
+        color: #2d3748 !important;
+    }
+
+    .form-wrapper select {
+        color: #2d3748 !important;
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="create-container">
-    <h2>新增保單</h2>
+    <a href="/officer/client-page" class="btn-secondary">
+        <i class="fas fa-arrow-left"></i> 返回客戶列表
+    </a>
+    
+    <h2 id="pageTitle">新增保單</h2>
     
     <div class="form-wrapper">
         <form id="policyForm">
-            <label>
-                客戶 Gmail <span class="required-label">*</span>
-                <input type="email" id="clientGmail" value="{{ client_gmail }}" required />
-            </label> 
+            <div class="section-title">基本資訊</div>
             
-            <label>
-                保單編號 <span class="required-label">*</span>
-                <input type="text" id="policyNumber" required />
-            </label>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>
+                        客戶 Gmail <span class="required-label">*</span>
+                    </label>
+                    <input type="email" id="clientGmail" value="{{ client_gmail }}" {% if client_gmail %}readonly{% endif %} required />
+                </div>
+                <div class="form-group">
+                    <label>
+                        保單編號 <span class="required-label">*</span>
+                    </label>
+                    <input type="text" id="policyNumber" required />
+                </div>
+            </div>
 
-            <label>
-                保險公司名稱 <span class="required-label">*</span>
-                <input type="text" id="insuranceCompany" required />
-            </label>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>
+                        保險公司名稱 <span class="required-label">*</span>
+                    </label>
+                    <input type="text" id="insuranceCompany" required />
+                </div>
+            </div>
 
-            <label>
-                投保人姓名 <span class="required-label">*</span>
-                <input type="text" id="policyHolder" required />
-            </label>
+            <div class="section-title">人員資訊</div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>
+                        要保人姓名 <span class="required-label">*</span>
+                    </label>
+                    <input type="text" id="policyHolder" required />
+                </div>
+                <div class="form-group">
+                    <label>
+                        被保險人姓名 <span class="required-label">*</span>
+                    </label>
+                    <input type="text" id="insuredPerson" required />
+                </div>
+            </div>
 
-            <label>
-                被保險人姓名 <span class="required-label">*</span>
-                <input type="text" id="insuredPerson" required />
-            </label>
+            <div class="section-title">金額與期間</div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>
+                        保險金額 (NTD) <span class="required-label">*</span>
+                    </label>
+                    <input type="number" id="insuranceAmount" step="1" min="0" required />
+                </div>
+                <div class="form-group">
+                    <label>
+                        保費金額 (NTD) <span class="required-label">*</span>
+                    </label>
+                    <input type="number" id="premiumAmount" step="1" min="0" required />
+                </div>
+            </div>
 
-            <label>
-                保險金額 (NTD) <span class="required-label">*</span>
-                <input type="number" id="insuranceAmount" step="0.01" required />
-            </label>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>
+                        繳費期間 (年) <span class="required-label">*</span>
+                    </label>
+                    <input type="number" id="premiumPeriod" min="1" max="50" required />
+                </div>
+                <div class="form-group">
+                    <label>
+                        生效日期 <span class="required-label">*</span>
+                    </label>
+                    <input type="date" id="startDate" required />
+                </div>
+            </div>
 
-            <label>
-                繳費期間 (年) <span class="required-label">*</span>
-                <input type="number" id="premiumPeriod" required />
-            </label>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>
+                        受益人 <span class="required-label">*</span>
+                    </label>
+                    <input type="text" id="beneficiary" required />
+                </div>
+            </div>
 
-            <label>
-                保費金額 (NTD) <span class="required-label">*</span>
-                <input type="number" id="premiumAmount" step="0.01" required />
-            </label>
-
-            <label>
-                生效日期 <span class="required-label">*</span>
-                <input type="date" id="startDate" required />
-            </label>
-
-            <label>
-                受益人 <span class="required-label">*</span>
-                <input type="text" id="beneficiary" required />
-            </label>
-
-            <label>
-                增額比例 (%) <span class="required-label">*</span>
-                <input type="number" id="growthRate" required />
-            </label>
-
-            <label>
-                宣告利率 (%) <span class="required-label">*</span>
-                <input type="number" id="declaredInterestRate" required />
-            </label>
+            <div class="section-title">利率設定</div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>
+                        增額比例 (%) <span class="required-label">*</span>
+                    </label>
+                    <input type="number" id="growthRate" step="0.01" min="0" max="100" required />
+                </div>
+                <div class="form-group">
+                    <label>
+                        宣告利率 (%) <span class="required-label">*</span>
+                    </label>
+                    <input type="number" id="declaredInterestRate" step="0.01" min="0" max="100" required />
+                </div>
+            </div>
 
             <div class="divider"></div>
 
             <div class="upload-section">
                 <label>
-                    上傳 PDF 文件 <span class="required-label">*</span>
-                    <input type="file" id="pdfUpload" accept=".pdf" required />
+                    上傳 PDF 文件 
+                    <span id="pdfRequiredLabel" class="required-label">*</span>
+                    <span id="pdfOptionalLabel" class="optional-label" style="display: none;">(可選)</span>
                 </label>
+                <input type="file" id="pdfUpload" accept=".pdf" required />
+                <div class="file-info" id="currentFileInfo" style="display: none;">
+                    當前文件: <span id="currentFileName"></span>
+                </div>
                 <input type="hidden" id="ipfsHash" name="ipfsHash" />
                 
                 {% if current_user.insurance_officer %}
-                <button type="button" class="btn-primary" onclick="submitPolicy()">上傳並發送簡訊</button>
+                <button type="button" class="btn-primary" id="submitButton">上傳並發送簡訊</button>
                 {% endif %}
             </div>
 
@@ -202,6 +485,7 @@
         </form>
     </div>
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -209,50 +493,276 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
 <script>
-    async function submitPolicy() {
-        const formData = new FormData();
+    let currentPolicyId = null;
+    let isEditMode = false;
 
-        formData.append('clientGmail', document.getElementById('clientGmail').value.trim());
-        formData.append('policyNumber', document.getElementById('policyNumber').value.trim());
-        formData.append('insuranceCompany', document.getElementById('insuranceCompany').value.trim());
-        formData.append('policyHolder', document.getElementById('policyHolder').value.trim());
-        formData.append('insuredPerson', document.getElementById('insuredPerson').value.trim());
-        formData.append('insuranceAmount', document.getElementById('insuranceAmount').value.trim());
-        formData.append('premiumPeriod', document.getElementById('premiumPeriod').value.trim());
-        formData.append('premiumAmount', document.getElementById('premiumAmount').value.trim());
-        formData.append('startDate', document.getElementById('startDate').value.trim());
-        formData.append('beneficiary', document.getElementById('beneficiary').value.trim());
-        formData.append('growthRate', document.getElementById('growthRate').value.trim());
-        formData.append('declaredInterestRate', document.getElementById('declaredInterestRate').value.trim());
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const policyId = urlParams.get('policy_id');
         
-        const file = document.getElementById('pdfUpload').files[0];
-        const ipfs = window.IpfsHttpClient.create({ url: "http://127.0.0.1:5001/api/v0" });
-        const result = await ipfs.add(file);
-        console.log(result.path);
+        if (policyId) {
+            currentPolicyId = policyId;
+            isEditMode = true;
+            loadPolicyData(policyId);
+        }
 
-        document.getElementById("ipfsHash").value = result.path;
+        // 初始化按鈕事件
+        const submitBtn = document.getElementById('submitButton');
+        if (submitBtn) {
+            submitBtn.onclick = function(event) {
+                event.preventDefault();
+                if (isEditMode) {
+                    updatePolicy();
+                } else {
+                    submitPolicy();
+                }
+            };
+        }
 
-        formData.append('pdfUpload', file);
-        formData.append('ipfsHash', result.path);
-        
+        // 設置今天為生效日期的默認值（僅在新增模式）
+        if (!isEditMode) {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('startDate').value = today;
+        }
+    });
+
+    async function loadPolicyData(policyId) {
         try {
-            const response = await fetch('/officer/upload-policy', {
-                method: 'POST',
-                body: formData,
+            showStatus('正在載入保單數據...', 'info');
+            
+            const response = await fetch(`/officer/get-policy-data?policy_id=${policyId}`, {
                 credentials: 'include'
             });
 
-            const result = await response.json();
-            if (result.success) {
-                alert('保單已暫存並發送簡訊');
-                window.location.href = '/officer/client-page';
+            if (!response.ok) {
+                throw new Error(`HTTP 錯誤！狀態碼: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (data.success) {
+                fillFormWithPolicyData(data.policy);
+                showStatus('保單數據載入完成', 'success');
+                setTimeout(() => {
+                    document.getElementById('status').style.display = 'none';
+                }, 2000);
             } else {
-                alert('操作失敗：' + result.message);
+                throw new Error(data.message);
             }
         } catch (error) {
-            console.error(error);
-            alert('伺服器錯誤：' + error.message);
+            console.error('載入保單數據失敗:', error);
+            showStatus(`載入失敗：${error.message}`, 'error');
         }
+    }
+
+    function fillFormWithPolicyData(policy) {
+        console.log('正在填充保單數據:', policy);
+        
+        // 更新頁面標題
+        const pageTitle = document.getElementById('pageTitle');
+        if (pageTitle) {
+            pageTitle.textContent = '編輯保單';
+        }
+        
+        // 更新按鈕文字
+        const submitButton = document.getElementById('submitButton');
+        if (submitButton) {
+            submitButton.textContent = '更新保單並發送簡訊';
+        }
+        
+        // 編輯模式下 PDF 不是必填
+        const pdfRequiredLabel = document.getElementById('pdfRequiredLabel');
+        const pdfOptionalLabel = document.getElementById('pdfOptionalLabel');
+        const pdfUpload = document.getElementById('pdfUpload');
+        
+        if (pdfRequiredLabel) pdfRequiredLabel.style.display = 'none';
+        if (pdfOptionalLabel) pdfOptionalLabel.style.display = 'inline';
+        if (pdfUpload) pdfUpload.required = false;
+        
+        // 顯示當前文件信息
+        if (policy.pdf_filename) {
+            const currentFileInfo = document.getElementById('currentFileInfo');
+            const currentFileName = document.getElementById('currentFileName');
+            if (currentFileInfo && currentFileName) {
+                currentFileName.textContent = policy.pdf_filename;
+                currentFileInfo.style.display = 'block';
+            }
+        }
+        
+        // 填充表單字段
+        const fieldMappings = {
+            'clientGmail': policy.client_gmail,
+            'policyNumber': policy.policy_number,
+            'insuranceCompany': policy.insurance_company,
+            'policyHolder': policy.policy_holder,
+            'insuredPerson': policy.insured_person,
+            'insuranceAmount': policy.insurance_amount,
+            'premiumPeriod': policy.premium_period,
+            'premiumAmount': policy.premium_amount,
+            'startDate': policy.start_date,
+            'beneficiary': policy.beneficiary,
+            'growthRate': policy.growth_rate,
+            'declaredInterestRate': policy.declared_interest_rate
+        };
+
+        for (const [fieldId, value] of Object.entries(fieldMappings)) {
+            const element = document.getElementById(fieldId);
+            if (element && value !== null && value !== undefined) {
+                element.value = value;
+                console.log(`設置 ${fieldId}:`, value);
+            }
+        }
+    }
+
+    function showStatus(message, type = 'info') {
+        const statusElement = document.getElementById('status');
+        if (statusElement) {
+            statusElement.textContent = message;
+            statusElement.className = type;
+            statusElement.style.display = 'block';
+        }
+    }
+
+    async function submitPolicy() {
+        await processPolicyForm('/officer/upload-policy', '新增');
+    }
+
+    async function updatePolicy() {
+        await processPolicyForm('/officer/update-policy', '更新');
+    }
+
+   async function processPolicyForm(url, actionType) {
+    if (!validateForm()) {
+        return;
+    }
+
+    const formData = new FormData();
+
+    // 使用與後端完全一致的字段名稱
+    const fieldMappings = {
+        'clientGmail': 'client_gmail',
+        'policyNumber': 'policy_number',
+        'insuranceCompany': 'insurance_company',
+        'policyHolder': 'policy_holder',
+        'insuredPerson': 'insured_person',
+        'insuranceAmount': 'insurance_amount',
+        'premiumPeriod': 'premium_period',
+        'premiumAmount': 'premium_amount',
+        'startDate': 'start_date',
+        'beneficiary': 'beneficiary',
+        'growthRate': 'growth_rate',
+        'declaredInterestRate': 'declared_interest_rate'
+    };
+
+    // 添加所有表單字段
+    for (const [frontendField, backendField] of Object.entries(fieldMappings)) {
+        const element = document.getElementById(frontendField);
+        if (element && element.value.trim()) {
+            formData.append(backendField, element.value.trim());
+            console.log(`發送: ${backendField} = ${element.value.trim()}`);
+        }
+    }
+
+    // 如果是更新模式，添加 policy_id
+    if (currentPolicyId) {
+        formData.append('policy_id', currentPolicyId);
+        console.log(`發送: policy_id = ${currentPolicyId}`);
+    }
+
+    // 安全地處理文件上傳
+    const fileInput = document.getElementById('pdfUpload');
+    let file = null;
+    
+    if (fileInput && fileInput.files && fileInput.files.length > 0) {
+        file = fileInput.files[0];
+    }
+    
+    if (file) {
+        console.log(`上傳文件: ${file.name} (${file.size} bytes)`);
+        formData.append('pdf_file', file);
+    } else {
+        console.log('沒有選擇文件');
+        // 如果是新增模式，文件是必填的
+        if (!isEditMode) {
+            showStatus('請選擇 PDF 文件', 'error');
+            return;
+        }
+    }
+
+    try {
+        showStatus(`${actionType}保單中...`, 'info');
+        console.log(`發送請求到: ${url}`);
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            body: formData,
+            credentials: 'include'
+        });
+
+        const result = await response.json();
+        console.log('服務器響應:', result);
+        
+        if (result.success) {
+            showStatus(`✅ ${actionType}保單成功！`, 'success');
+            setTimeout(() => {
+                if (currentPolicyId) {
+                    window.location.href = `/officer/view-policy?policy_id=${currentPolicyId}`;
+                } else {
+                    window.location.href = '/officer/client-page';
+                }
+            }, 2000);
+        } else {
+            showStatus(`❌ ${actionType}失敗：${result.message}`, 'error');
+        }
+    } catch (error) {
+        console.error('請求錯誤:', error);
+        showStatus(`❌ 伺服器錯誤：${error.message}`, 'error');
+    }
+}
+
+    function validateForm() {
+        const requiredFields = [
+            'clientGmail', 'policyNumber', 'insuranceCompany', 'policyHolder',
+            'insuredPerson', 'insuranceAmount', 'premiumPeriod', 'premiumAmount',
+            'startDate', 'beneficiary', 'growthRate', 'declaredInterestRate'
+        ];
+
+        for (const fieldId of requiredFields) {
+            const element = document.getElementById(fieldId);
+            if (element && !element.value.trim()) {
+                showStatus(`請填寫 ${element.previousElementSibling.textContent.trim()}`, 'error');
+                element.focus();
+                return false;
+            }
+        }
+
+        // 驗證數字字段
+        const insuranceAmount = document.getElementById('insuranceAmount').value;
+        const premiumAmount = document.getElementById('premiumAmount').value;
+        const growthRate = document.getElementById('growthRate').value;
+        const declaredInterestRate = document.getElementById('declaredInterestRate').value;
+
+        if (insuranceAmount <= 0) {
+            showStatus('保險金額必須大於 0', 'error');
+            return false;
+        }
+
+        if (premiumAmount <= 0) {
+            showStatus('保費金額必須大於 0', 'error');
+            return false;
+        }
+
+        if (growthRate < 0 || growthRate > 100) {
+            showStatus('增額比例必須在 0-100% 之間', 'error');
+            return false;
+        }
+
+        if (declaredInterestRate < 0 || declaredInterestRate > 100) {
+            showStatus('宣告利率必須在 0-100% 之間', 'error');
+            return false;
+        }
+
+        return true;
     }
 </script>
 {% endblock %}

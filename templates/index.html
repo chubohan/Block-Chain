@@ -4,379 +4,1189 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="/static/css/index.css" rel="stylesheet">
 <style>
-    /* 画廊样式 */
-    .gallery {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-top: 100px;
-        width: 60%;
-        max-width: 800px;
-        margin-left: auto;
-        margin-right: auto;
-    }
+/* ====== 畫廊 / Carousel ====== */
+.carousel-item {
+    position: relative;
+    height: 100vh; /* 讓每個 slide 滿屏 */
+    overflow: hidden;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
 
-    .carousel-item {
+.carousel-item img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    aspect-ratio: 16/9;
+    border-radius: 15px;
+}
+    .carousel-inner {
+        border-radius: 20px;
         overflow: hidden;
-        border-radius: 15px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.15);
     }
 
-    .carousel-item img {
-        object-fit: cover;
-        width: 100%;
-        height: auto;
-        aspect-ratio: 16 / 9;
+    .carousel-caption {
+        bottom: 20%;
+        background: rgba(0,0,0,0.35);
+        padding: 20px 30px;
         border-radius: 15px;
     }
 
-    .carousel-indicators button {
-        background-color: rgba(45, 79, 198, 0.5); /* 使用更深的品牌藍色 */
+.slide-title, .slide-text {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease;
+}
+
+.carousel-item.active .slide-title,
+.carousel-item.active .slide-text {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.slide-title {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.slide-text {
+    font-size: 1.5rem;
+}
+
+/* ====== 主要功能區塊 ====== */
+.main-features {
+    margin: 50px auto;
+    width: 90%;
+    max-width: 1200px;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 24px;
+    padding: 40px 20px;
+    background: transparent;
+    border-radius: 16px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.feature-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: rgba(255,255,255,0.9);
+    padding: 30px 20px;
+    border-radius: 16px;
+    box-shadow: 0 6px 25px rgba(0,0,0,0.08);
+    transition: all 0.4s ease;
+    border: 2px solid rgba(45,79,198,0.1);
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: transform 0.6s ease-out, opacity 0.6s ease-out;
+}
+
+/* 加上 show 後顯示 */
+.feature-card.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(135deg,#2d4fc6,#4a6ee0);
+}
+
+.feature-card:hover {
+    transform: translateY(-8px);
+    border-color: #2d4fc6;
+    box-shadow: 0 12px 35px rgba(45,79,198,0.15);
+}
+
+.feature-icon {
+    background: linear-gradient(135deg,#2d4fc6,#4a6ee0);
+    color: white;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin-bottom: 20px;
+    box-shadow: 0 6px 20px rgba(45,79,198,0.3);
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover .feature-icon {
+    transform: scale(1.1);
+    box-shadow: 0 8px 25px rgba(45,79,198,0.4);
+}
+
+.feature-card h3 {
+    margin: 0 0 12px;
+    font-size: 20px;
+    color: #1e293b;
+    font-weight: 700;
+}
+
+.feature-card p {
+    margin: 0 0 20px;
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+.feature-btn {
+    background: linear-gradient(135deg,#2d4fc6,#4a6ee0);
+    color: white;
+    padding: 10px 24px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(45,79,198,0.3);
+}
+
+.feature-btn:hover {
+    background: linear-gradient(135deg,#4a6ee0,#2d4fc6);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(45,79,198,0.4);
+}
+
+/* ====== 介紹框 ====== */
+.intro-box {
+    margin: 60px auto 40px;
+    background: rgba(255,255,255,0.9);
+    padding: 50px 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.08);
+    width: 80%;
+    max-width: 900px;
+    text-align: center;
+    border: 1px solid rgba(45,79,198,0.1);
+}
+
+.intro-box h1 {
+    font-size: 36px;
+    font-weight: bold;
+    color: #2d4fc6;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg,#2d4fc6,#4a6ee0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 2px 4px rgba(45,79,198,0.2);
+}
+
+.intro-box p {
+    font-size: 18px;
+    color: #555;
+    line-height: 1.8;
+    margin-bottom: 30px;
+}
+
+.intro-box .btn {
+    background: linear-gradient(135deg,#2d4fc6,#4a6ee0);
+    padding: 15px 35px;
+    font-size: 18px;
+    color: white;
+    border-radius: 12px;
+    text-decoration: none;
+    border: none;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 20px rgba(45,79,198,0.3);
+}
+
+.intro-box .btn:hover {
+    background: linear-gradient(135deg,#4a6ee0,#2d4fc6);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(45,79,198,0.4);
+}
+
+/* ====== 次要功能區塊 ====== */
+.secondary-features {
+    margin: 40px auto;
+    width: 90%;
+    max-width: 1200px;
+}
+
+.secondary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
+    gap: 20px;
+    padding: 30px 20px;
+}
+
+.secondary-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(255,255,255,0.9);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(45,79,198,0.1);
+}
+
+.secondary-card:hover {
+    transform: translateY(-3px);
+    border-color: #2d4fc6;
+    box-shadow: 0 6px 20px rgba(45,79,198,0.1);
+}
+
+.secondary-icon {
+    background: linear-gradient(135deg,#2d4fc6,#4a6ee0);
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(45,79,198,0.3);
+}
+
+.secondary-card h4 {
+    margin: 0 0 4px;
+    font-size: 16px;
+    color: #2d4fc6;
+    font-weight: 600;
+}
+
+.secondary-card p {
+    margin: 0;
+    font-size: 13px;
+    color: #666;
+}
+
+.arrow-link {
+    color: #4a6ee0;
+    font-weight: bold;
+    text-decoration: none;
+    margin-top: 8px;
+    display: inline-block;
+    transition: color 0.3s ease;
+}
+
+.arrow-link:hover {
+    color: #2d4fc6;
+    transform: translateX(3px);
+}
+
+/* ====== 固定意見反饋按鈕 ====== */
+.feedback-button {
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: linear-gradient(135deg,#2d4fc6,#4a6ee0);
+    color: white;
+    padding: 12px 18px;
+    border-radius: 20px 0 0 20px;
+    font-size: 14px;
+    text-align: center;
+    writing-mode: vertical-rl;
+    box-shadow: 0 4px 15px rgba(45,79,198,0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: bold;
+    border: none;
+    z-index: 1000;
+}
+
+.feedback-button:hover {
+    background: linear-gradient(135deg,#4a6ee0,#2d4fc6);
+    transform: translateY(-50%) translateX(5px);
+    box-shadow: 0 6px 20px rgba(45,79,198,0.4);
+}
+
+/* ====== 響應式 ====== */
+@media (max-width: 1200px) {
+    .features-grid { grid-template-columns: repeat(2,1fr); }
+}
+
+@media (max-width: 768px) {
+    .gallery { width: 90%; margin-top: 80px; }
+    .features-grid { grid-template-columns: 1fr; gap: 20px; padding: 30px 15px; }
+    .intro-box { width: 95%; padding: 30px 20px; }
+    .secondary-grid { grid-template-columns: 1fr; }
+    .feedback-button { padding: 10px 15px; font-size: 12px; }
+}
+
+@media (max-width: 480px) {
+    .feature-card { padding: 25px 15px; }
+    .feature-icon { width: 60px; height: 60px; font-size: 24px; }
+    .intro-box h1 { font-size: 28px; }
+    .intro-box p { font-size: 16px; }
+}
+
+    /* 整體結構 */
+    .why-section {
+    width: 100%;
+    overflow: hidden;
     }
 
-    .carousel-indicators .active {
-        background-color: #2d4fc6; /* 使用更深的品牌藍色 */
+    /* 上半部：為什麼選擇我們服務 */
+    .why-top {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: #fff;
+    clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+    overflow: hidden;
+    background: #0e153a;
     }
 
-    /* 主要功能區塊樣式 - 四個一排放置 */
-    .main-features {
-        margin: 50px auto;
-        width: 90%;
-        max-width: 1200px;
+    .why-bg {
+    position: absolute;
+    inset: 0;
+    background: url("https://ongeki.sega.jp/assets/images/character/2023_mainvisual.jpg") center/cover no-repeat;
+    filter: brightness(0.5);
+    transform: scale(1.1);
+    transition: transform 10s ease;
     }
 
-    .features-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 24px;
-        padding: 40px 20px;
-        background: transparent;
-        border-radius: 16px;
-        width: 100%;
-        box-sizing: border-box;
+    .why-top:hover .why-bg {
+    transform: scale(1.2);
     }
 
-    .feature-card {
+    .why-overlay {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 60% 40%, rgba(60, 130, 255, 0.3), transparent 70%);
+    mix-blend-mode: screen;
+    }
+
+    .why-content {
+    position: relative;
+    z-index: 2;
+    max-width: 800px;
+    opacity: 0;
+    transform: translateY(60px);
+    animation: floatUp 1.8s ease forwards;
+    }
+
+    .why-content h2 {
+    font-size: 60px;
+    line-height: 1.2;
+    font-weight: 900;
+    margin-bottom: 25px;
+    letter-spacing: 2px;
+    background: linear-gradient(90deg, #fff, #a4c6ff); /* 背景漸層 */
+    -webkit-background-clip: text;                  /* 正確屬性名稱 */
+    -webkit-text-fill-color: transparent;          /* 讓文字顯示背景漸層 */
+    background-clip: text;                          /* 標準屬性 */
+    color: transparent;                             /* 標準屬性保險做法 */
+    text-shadow: 0 6px 25px rgba(0, 0, 0, 0.5);    /* 增加浮動感/陰影 */
+    }  
+
+    .why-content p {
+    font-size: 22px;
+    color: #e6ebff;
+    opacity: 0;
+    animation: fadeIn 2.5s ease forwards 0.8s;
+    text-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    }
+
+    /* 下半部：我們的優勢 */
+    .why-bottom {
+    background: #f9fbff;
+    clip-path: polygon(0 10%, 100% 0, 100% 100%, 0 100%);
+    padding: 120px 40px 100px;
+    text-align: center;
+    }
+
+    .advantages h3 {
+    font-size: 40px;
+    color: #1a2a6c;
+    margin-bottom: 60px;
+    position: relative;
+    }
+
+    .advantages h3::after {
+    content: "";
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, #1a2a6c, #56ccf2);
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 2px;
+    }
+
+    .adv-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 40px;
+    max-width: 1000px;
+    margin: 0 auto;
+    }
+
+    .adv-item {
+    background: #fff;
+    border-radius: 20px;
+    padding: 40px 30px;
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+    transition: all 0.4s ease;
+    opacity: 0;
+    transform: translateY(50px);
+    animation: fadeUp 1.5s ease forwards 1s;
+    }
+
+    .adv-item:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .adv-item i {
+    font-size: 36px;
+    color: #4b6cb7;
+    margin-bottom: 20px;
+    }
+
+    .adv-item h4 {
+    font-size: 22px;
+    color: #1a2a6c;
+    margin-bottom: 12px;
+    }
+
+    .adv-item p {
+    font-size: 16px;
+    color: #555;
+    line-height: 1.6;
+    }
+
+    /* 動畫 */
+    @keyframes floatUp {
+    0% {
+        opacity: 0;
+        transform: translateY(60px);
+    }
+    70% {
+        opacity: 1;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    }
+
+    @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+    }
+
+    @keyframes fadeUp {
+    0% { opacity: 0; transform: translateY(50px); }
+    100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 響應式 */
+    @media (max-width: 768px) {
+    .why-content h2 { font-size: 40px; }
+    .why-content p { font-size: 18px; }
+    .advantages h3 { font-size: 30px; }
+    }
+
+    /* ====== 社群案例卡片 ====== */
+    .claims-carousel-section {
         display: flex;
         flex-direction: column;
         align-items: center;
-        text-align: center;
-        background: rgba(255, 255, 255, 0.9);
-        padding: 30px 20px;
-        border-radius: 16px;
-        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
-        transition: all 0.4s ease;
-        border: 2px solid rgba(45, 79, 198, 0.1); /* 使用更深的品牌藍色 */
-        position: relative;
-        overflow: hidden;
+        margin: 80px auto 60px;
+        width: 90%;
+        max-width: 1000px;
     }
 
-    .feature-card::before {
+    .claims-carousel-section .section-title {
+        font-size: 36px;
+        font-weight: 800;
+        color: #1a2a6c;
+        margin-bottom: 50px;
+        text-align: center;
+        position: relative;
+    }
+
+    .claims-carousel-section .section-title::after {
         content: '';
+        width: 100px;
+        height: 4px;
+        background: linear-gradient(90deg,#2d4fc6,#4a6ee0);
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 2px;
+    }
+
+    .claim-card {
+        max-width: 500px;
+        margin: 0 auto;
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        transition: transform 0.5s ease, box-shadow 0.5s ease;
+    }
+    
+    .claim-card:hover {
+        transform: scale(1.05) translateY(-5px);
+        box-shadow: 0 18px 50px rgba(0,0,0,0.25);
+    }
+
+    .claim-card img {
+        width: 100%;
+        height: 320px;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .claim-card:hover img {
+        transform: scale(1.08);
+    }
+
+    .claim-info {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: linear-gradient(to top, rgba(255,255,255,0.95), transparent);
+        color: #1a2a6c;
+        padding: 25px;
+        transition: all 0.5s ease;
+    }
+
+    .claim-info h5 {
+        margin: 0 0 8px;
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        background: linear-gradient(90deg,#2d4fc6,#4a6ee0);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .claim-info p {
+        margin: 0;
+        font-size: 15px;
+        line-height: 1.5;
+        color: #344056;
+    }
+
+    /* CTA 卡片動畫效果 */
+    .cta-card {
+        background: linear-gradient(135deg,#2d4fc6,#4a6ee0);
+        padding: 50px 80px;
+        border-radius: 25px;
+        text-align: center;
+        color: #fff;
+        box-shadow: 0 16px 45px rgba(45,79,198,0.3);
+        transition: transform 0.5s ease, box-shadow 0.5s ease;
+        position: relative;
+    }
+
+    .cta-card:hover {
+        transform: translateY(-10px) scale(1.03);
+        box-shadow: 0 20px 60px rgba(45,79,198,0.5);
+    }
+
+    .cta-card h2 {
+        font-size: 36px;
+        margin-bottom: 30px;
+        text-shadow: 2px 2px 12px rgba(0,0,0,0.4);
+        background: linear-gradient(90deg,#ffffff,#a4c6ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .cta-btn {
+        background: #fff;
+        color: #2d4fc6;
+        padding: 15px 50px;
+        font-size: 20px;
+        font-weight: bold;
+        border-radius: 30px;
+        text-decoration: none;
+        transition: all 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 6px 25px rgba(255,255,255,0.4);
+    }
+
+    .cta-btn:hover {
+        background: #e6eaff;
+        transform: scale(1.1) translateY(-3px);
+        box-shadow: 0 8px 30px rgba(255,255,255,0.5);
+    }
+
+        /* ====== 我們的服務區塊調整 ====== */
+    .services-section {
+        width: 90%;
+        max-width: 1200px;
+        margin: 80px auto 60px;
+        text-align: center;
+        background: #f9fbff; /* 淺白底 */
+        padding: 60px 20px;
+        border-radius: 25px;
+        box-shadow: 0 12px 35px rgba(45,79,198,0.1);
+    }
+
+    .services-section .section-title {
+        font-size: 36px;
+        font-weight: 800;
+        color: #1a2a6c; /* 深藍 */
+        margin-bottom: 50px;
+        position: relative;
+    }
+
+    .services-section .section-title::after {
+        content: '';
+        width: 100px;
+        height: 4px;
+        background: linear-gradient(90deg,#2d4fc6,#4a6ee0);
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 2px;
+    }
+
+    .services-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+    }
+
+    /* 翻牌容器 */
+    .service-card {
+        perspective: 1000px;
+        height: 280px;
+        border-radius: 20px;
+    }
+
+    /* 內層翻牌 */
+    .service-card-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.8s;
+        transform-style: preserve-3d;
+        border-radius: 20px;
+    }
+
+    /* 滑鼠 hover 翻牌 */
+    .service-card:hover .service-card-inner {
+        transform: rotateY(180deg);
+    }
+
+    /* 正面卡片 */
+    .service-card-front,
+    .service-card-back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        transition: all 0.5s ease;
+    }
+
+    /* 正面卡片 */
+    .service-card-front {
+        background: #ffffff; /* 白色底 */
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        color: #1a2a6c; /* 深藍字 */
+        padding-bottom: 15px;
+        border: 1px solid rgba(45,79,198,0.1);
+    }
+
+    .service-card-front img {
+        width: 100%;
+        height: 160px;
+        object-fit: cover;
+        border-radius: 20px 20px 0 0;
+        transition: transform 0.5s ease;
+    }
+
+    .service-card-front h4 {
+        margin: 15px 0 0;
+        font-size: 20px;
+        font-weight: 700;
+        color: #1a2a6c;
+    }
+
+        /* 背面卡片改造 */
+    .service-card-back {
+        background: #f0f4ff; /* 淺藍白底 */
+        color: #1a2a6c; /* 深藍文字 */
+        transform: rotateY(180deg);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        font-size: 16px;
+        text-align: center;
+        line-height: 1.5;
+        border-radius: 20px;
+        border: 1px solid rgba(45,79,198,0.1);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+    }
+
+    /* 可選：背面加漸層小裝飾 */
+    .service-card-back::before {
+        content: "";
         position: absolute;
         top: 0;
         left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(135deg, #2d4fc6, #4a6ee0); /* 使用更深的品牌藍色 */
-    }
-
-    .feature-card:hover {
-        transform: translateY(-8px);
-        border-color: #2d4fc6; /* 使用更深的品牌藍色 */
-        box-shadow: 0 12px 35px rgba(45, 79, 198, 0.15); /* 使用更深的品牌藍色 */
-    }
-
-    .feature-icon {
-        background: linear-gradient(135deg, #2d4fc6, #4a6ee0); /* 使用更深的品牌藍色 */
-        color: white;
-        width: 70px;
-        height: 70px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 28px;
-        margin-bottom: 20px;
-        box-shadow: 0 6px 20px rgba(45, 79, 198, 0.3); /* 使用更深的品牌藍色 */
-        transition: all 0.3s ease;
-    }
-
-    .feature-card:hover .feature-icon {
-        transform: scale(1.1);
-        box-shadow: 0 8px 25px rgba(45, 79, 198, 0.4); /* 使用更深的品牌藍色 */
-    }
-
-    .feature-card h3 {
-        margin: 0 0 12px;
-        font-size: 20px;
-        color: #1e293b;
-        font-weight: 700;
-    }
-
-    .feature-card p {
-        margin: 0 0 20px;
-        font-size: 14px;
-        color: #64748b;
-        line-height: 1.5;
-    }
-
-    .feature-btn {
-        background: linear-gradient(135deg, #2d4fc6, #4a6ee0); /* 使用更深的品牌藍色 */
-        color: white;
-        padding: 10px 24px;
-        border-radius: 25px;
-        text-decoration: none;
-        font-weight: 600;
-        font-size: 14px;
-        transition: all 0.3s ease;
-        border: none;
-        cursor: pointer;
-        box-shadow: 0 4px 15px rgba(45, 79, 198, 0.3); /* 使用更深的品牌藍色 */
-    }
-
-    .feature-btn:hover {
-        background: linear-gradient(135deg, #4a6ee0, #2d4fc6); /* 使用更深的品牌藍色 */
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(45, 79, 198, 0.4); /* 使用更深的品牌藍色 */
-        color: white;
-        text-decoration: none;
-    }
-
-    /* 次要功能區塊樣式 */
-    .secondary-features {
-        margin: 40px auto;
-        width: 90%;
-        max-width: 1200px;
-    }
-
-    .secondary-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 20px;
-        padding: 30px 20px;
-    }
-
-    .secondary-card {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        background: rgba(255, 255, 255, 0.9);
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
-        transition: all 0.3s ease;
-        border: 1px solid rgba(45, 79, 198, 0.1); /* 使用更深的品牌藍色 */
-    }
-
-    .secondary-card:hover {
-        transform: translateY(-3px);
-        border-color: #2d4fc6; /* 使用更深的品牌藍色 */
-        box-shadow: 0 6px 20px rgba(45, 79, 198, 0.1); /* 使用更深的品牌藍色 */
-    }
-
-    .secondary-icon {
-        background: linear-gradient(135deg, #2d4fc6, #4a6ee0); /* 使用更深的品牌藍色 */
-        color: white;
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 20px;
-        flex-shrink: 0;
-        box-shadow: 0 4px 12px rgba(45, 79, 198, 0.3); /* 使用更深的品牌藍色 */
-    }
-
-    .secondary-card h4 {
-        margin: 0 0 4px;
-        font-size: 16px;
-        color: #2d4fc6; /* 使用更深的品牌藍色 */
-        font-weight: 600;
-    }
-
-    .secondary-card p {
-        margin: 0;
-        font-size: 13px;
-        color: #666;
-    }
-
-    .arrow-link {
-        color: #4a6ee0;
-        font-weight: bold;
-        text-decoration: none;
-        margin-top: 8px;
-        display: inline-block;
-        transition: color 0.3s ease;
-    }
-
-    .arrow-link:hover {
-        color: #2d4fc6; /* 使用更深的品牌藍色 */
-        transform: translateX(3px);
-    }
-
-    /* 介紹框樣式 */
-    .intro-box {
-        margin: 60px auto 40px;
-        background: rgba(255, 255, 255, 0.9);
-        padding: 50px 40px;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(45,79,198,0.05), transparent);
         border-radius: 20px;
-        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
-        width: 80%;
-        max-width: 900px;
+        z-index: 0;
+    }
+    .service-card-back p {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* 手機上不翻牌，改為淡入效果 */
+    @media (max-width: 768px) {
+        .service-card:hover .service-card-inner {
+            transform: none;
+        }
+    }
+
+        /* 滾動漸入動畫 */
+    .services-section.fade-up-left {
+        opacity: 0;
+        transform: translateY(60px);
+        transition: opacity 1.2s ease, transform 1.2s ease;
+    }
+
+    .services-section.fade-up-left.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* carousel 滿版 */
+    #servicesCarousel, 
+    #servicesCarousel .carousel-inner, 
+    #servicesCarousel .carousel-item {
+        width: 100%;
+        height: 100vh; /* 滿版高度 */
+    }
+
+    /* 卡片滿版，背景圖片覆蓋整個卡片 */
+    .service-card {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        perspective: 1000px;
+        opacity: 0;
+        transform: translateY(30px);
+        transition: transform 0.6s ease, opacity 0.6s ease;
+        position: relative;
+    }
+
+    /* 滑入動畫 */
+    .carousel-item.active .service-card {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* 卡片內部翻轉 */
+    .service-card-inner {
+        width: 100%;
+        height: 100%;
+        transition: transform 0.8s;
+        transform-style: preserve-3d;
+        position: relative;
+    }
+
+    /* 滑鼠懸停翻轉 */
+    .service-card:hover .service-card-inner {
+        transform: rotateY(180deg);
+    }
+
+    /* 卡片正面與背面滿版 */
+    .service-card-front, .service-card-back {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        backface-visibility: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
         text-align: center;
-        border: 1px solid rgba(45, 79, 198, 0.1); /* 使用更深的品牌藍色 */
+        color: #fff;
+        padding: 20px;
+        box-sizing: border-box;
+        background-size: cover;
+        background-position: center;
+        font-family: 'Arial', sans-serif;
     }
 
-    .intro-box h1 {
-        font-size: 36px;
-        font-weight: bold;
-        color: #2d4fc6; /* 使用更深的品牌藍色 */
-        margin-bottom: 20px;
-        background: linear-gradient(135deg, #2d4fc6, #4a6ee0); /* 使用更深的品牌藍色 */
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        text-shadow: 0 2px 4px rgba(45, 79, 198, 0.2); /* 添加陰影增強可讀性 */
+    /* 正面圖片作為背景 */
+    .service-card-front img {
+        display: none; /* 隱藏 img，改用背景 */
     }
 
-    .intro-box p {
-        font-size: 18px;
-        color: #555;
-        line-height: 1.8;
-        margin-bottom: 30px;
+    .service-card-front {
+        background-size: cover;
+        background-position: center;
     }
 
-    .intro-box .btn {
-        background: linear-gradient(135deg, #2d4fc6, #4a6ee0); /* 使用更深的品牌藍色 */
-        padding: 15px 35px;
-        font-size: 18px;
-        color: white;
-        border-radius: 12px;
-        text-decoration: none;
-        border: none;
-        font-weight: bold;
-        transition: all 0.3s ease;
-        box-shadow: 0 6px 20px rgba(45, 79, 198, 0.3); /* 使用更深的品牌藍色 */
+    /* 背面內容 */
+    .service-card-back {
+        background: rgba(0,0,0,0.7);
+        transform: rotateY(180deg);
+        color: #fff;
+        font-size: 1.5rem;
+        padding: 40px;
     }
 
-    .intro-box .btn:hover {
-        background: linear-gradient(135deg, #4a6ee0, #2d4fc6); /* 使用更深的品牌藍色 */
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(45, 79, 198, 0.4); /* 使用更深的品牌藍色 */
+    /* 標題文字大一點 */
+    .service-card-front h4 {
+        font-size: 3rem;
+        margin-top: 20px;
+        text-shadow: 2px 2px 5px rgba(0,0,0,0.6);
     }
 
-    /* 立即意見反饋按鈕 */
-    .feedback-button {
-        position: fixed;
-        left: 0;
+    /* carousel 前後按鈕置中 */
+    .carousel-control-prev,
+    .carousel-control-next {
         top: 50%;
         transform: translateY(-50%);
-        background: linear-gradient(135deg, #2d4fc6, #4a6ee0); /* 使用更深的品牌藍色 */
-        color: white;
-        padding: 12px 18px;
-        border-radius: 20px 0 0 20px;
-        font-size: 14px;
-        text-align: center;
-        writing-mode: vertical-rl;
-        box-shadow: 0 4px 15px rgba(45, 79, 198, 0.3); /* 使用更深的品牌藍色 */
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-weight: bold;
-        border: none;
-        z-index: 1000;
+    }
+    
+   /* HERO 區塊高度 */
+#hero, .carousel-inner, .carousel-item {
+    height: 100vh;
+}
+
+/* HERO 容器 */
+#hero {
+    width: 100%;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+}
+
+/* 半透明黑遮罩 */
+#hero .carousel-item::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.4);
+    z-index: 1;
+}
+
+/* 文字置中 */
+#hero .carousel-caption {
+    position: absolute;
+    top: 50%;
+    bottom: auto !important; /* 覆蓋 bootstrap 的 bottom: 20px */
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    z-index: 2;
+    background: none;
+    padding: 0;
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.7);
+}
+   #hero .carousel-item {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    display: flex;           /* 讓子元素可以 flex 排列 */
+    align-items: center;     /* 垂直置中 */
+    justify-content: center; /* 水平置中 */
+}
+
+
+    /* 文字置中 & 動畫 */
+    .carousel-caption {
+    background: none !important; /* 移除黑色半透明背景 */
+    padding: 0 !important;       /* 移除內距 */
+    top: 50%;
+    transform: translateY(-50%);
+    text-align: center;
+    color: white;
+    z-index: 2;
+    animation: fadeInUp 1s ease forwards;
+    opacity: 0;
     }
 
-    .feedback-button:hover {
-        background: linear-gradient(135deg, #4a6ee0, #2d4fc6); /* 使用更深的品牌藍色 */
-        transform: translateY(-50%) translateX(5px);
-        box-shadow: 0 6px 20px rgba(45, 79, 198, 0.4); /* 使用更深的品牌藍色 */
+    .carousel-item.active .carousel-caption {
+    animation: fadeInUp 1s ease forwards;
     }
 
-    /* 響應式設計 */
-    @media (max-width: 1200px) {
-        .features-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
+    .slide-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.6);
     }
 
-    @media (max-width: 768px) {
-        .gallery {
-            width: 90%;
-            margin-top: 80px;
-        }
-        
-        .features-grid {
-            grid-template-columns: 1fr;
-            gap: 20px;
-            padding: 30px 15px;
-        }
-        
-        .intro-box {
-            width: 95%;
-            padding: 30px 20px;
-        }
-        
-        .secondary-grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .feedback-button {
-            padding: 10px 15px;
-            font-size: 12px;
-        }
+    .slide-text {
+    font-size: 1.5rem;
+    margin-top: 1rem;
     }
 
-    @media (max-width: 480px) {
-        .feature-card {
-            padding: 25px 15px;
-        }
-        
-        .feature-icon {
-            width: 60px;
-            height: 60px;
-            font-size: 24px;
-        }
-        
-        .intro-box h1 {
-            font-size: 28px;
-        }
-        
-        .intro-box p {
-            font-size: 16px;
-        }
+    /* 文字淡入 + 上滑 */
+    @keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
     }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    }
+
+    /* 滑鼠提示動畫 */
+    .scroll-down-indicator {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    }
+
+    .scroll-down-indicator span {
+    width: 8px;
+    height: 8px;
+    margin: 5px 0;
+    border-radius: 50%;
+    background-color: #fff;
+    opacity: 0.7;
+    animation: scroll-bounce 1.4s infinite;
+    }
+
+    .scroll-down-indicator span:nth-child(2) {
+    animation-delay: 0.2s;
+    }
+    .scroll-down-indicator span:nth-child(3) {
+    animation-delay: 0.4s;
+    }
+
+    @keyframes scroll-bounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.6; }
+    40% { transform: translateY(8px); opacity: 1; }
+    }
+    /* ====== 讓整體更流暢 ====== */
+    .carousel-fade .carousel-item {
+        opacity: 0;
+        transition-property: opacity, transform;
+    }
+    .carousel-fade .carousel-item.active {
+        opacity: 1;
+    }
+    /* ====== 開場動畫 ====== */
+    #splash-screen {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at center, #1a2a6c, #0e153a);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 9999;
+    overflow: hidden;
+    animation: splashFadeOut 1s ease forwards;
+    animation-delay: 3.2s; /* 3秒後淡出 */
+    }
+    
+    .splash-content {
+    text-align: center;
+    color: #fff;
+    opacity: 0;
+    animation: fadeIn 1.5s ease forwards;
+    }
+
+    .splash-title {
+    font-size: 4rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    background: linear-gradient(90deg, #fff, #a4c6ff, #fff);
+    background-size: 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: lightSweep 3s ease infinite;
+    }
+
+    .splash-subtitle {
+    font-size: 1.5rem;
+    color: #cfd9ff;
+    margin-top: 1rem;
+    opacity: 0;
+    animation: fadeUp 1s ease forwards;
+    animation-delay: 1.2s;
+    }
+
+    /* 光線掃過字體 */
+    @keyframes lightSweep {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+    }
+
+    /* 文字淡入 */
+    @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 副標淡入上移 */
+    @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 結尾淡出 */
+    @keyframes splashFadeOut {
+    to {
+        opacity: 0;
+        visibility: hidden;
+    }
+    }
+
+    .fade-up-left {
+        opacity: 0;
+        transform: translate(-40px, 60px);
+        transition: opacity 1.6s ease, transform 1.6s cubic-bezier(0.19, 1, 0.22, 1);
+        /* 後面那個 cubic-bezier 是柔滑曲線 */
+        }
+
+    .fade-up-left.show {
+        opacity: 1;
+        transform: translate(0, 0);
+        }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- 画廊 -->
-<div id="gallery" class="carousel slide gallery" data-bs-ride="carousel">
-    <div class="carousel-inner">
-        <div class="carousel-item active">
-            <img src="/static/imgs/dog3.jpg" class="d-block w-100" alt="ChainSure 保險平台">
-        </div>
-        <div class="carousel-item">
-            <img src="/static/imgs/dog1.jpg" class="d-block w-100" alt="區塊鏈保險服務">
-        </div>
-    </div>
-    <div class="carousel-indicators">
-        <button type="button" data-bs-target="#gallery" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-        <button type="button" data-bs-target="#gallery" data-bs-slide-to="1" aria-label="Slide 2"></button>
-    </div>
-    <button class="carousel-control-prev" type="button" data-bs-target="#gallery" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Previous</span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#gallery" data-bs-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Next</span>
-    </button>
+<!-- 開場動畫區 -->
+<div id="splash-screen">
+  <div class="splash-content">
+    <h1 class="splash-title">ChainSure</h1>
+    <p class="splash-subtitle">智慧保險管理</p>
+  </div>
 </div>
 
+<section id="hero">
+  <div id="gallery" class="carousel slide carousel-fade" data-bs-ride="carousel">
+    <!-- 輪播指示器 -->
+    <div class="carousel-indicators">
+      <button type="button" data-bs-target="#gallery" data-bs-slide-to="0" class="active"></button>
+      <button type="button" data-bs-target="#gallery" data-bs-slide-to="1"></button>
+    </div>
+
+    <!-- 輪播內容 -->
+    <div class="carousel-inner">
+      <div class="carousel-item active" style="background-image: url('/static/imgs/ChainSure_Cat.png');">
+        <div class="carousel-caption">
+          <h1 class="slide-title">ChainSure 智慧保險管理</h1>
+          <p class="slide-text">安全、透明、智能化的保險管理體驗</p>
+        </div>
+      </div>
+      <div class="carousel-item" style="background-image: url('/static/imgs/64F15AAC-B524-4AED-9753-A497AC603F8E.jpg');">
+        <div class="carousel-caption">
+          <h1 class="slide-title">區塊鏈保險服務</h1>
+          <p class="slide-text">結合智能合約，自動化理賠與數據透明化</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 輪播控制按鈕 -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#gallery" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#gallery" data-bs-slide="next">
+      <span class="carousel-control-next-icon"></span>
+    </button>
+
+    <!-- 滑鼠提示動畫 -->
+    <div class="scroll-down-indicator">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+</section>
+
+<!-- 為什麼使用我們的服務 + 我們的優勢 -->
+<section class="why-section">
+  <!-- 上半部 -->
+  <div class="why-top fade-up-left">
+    <div class="why-bg"></div>
+    <div class="why-overlay"></div>
+    <div class="why-content">
+      <h2>為什麼選擇我們的服務？</h2>
+      <p>我們以區塊鏈技術結合保險，讓信任與保障變得透明與自動化。</p>
+    </div>
+  </div>
+
+  <!-- 下半部 -->
+  <div class="why-bottom fade-up-left">
+    <div class="advantages">
+      <h3>我們的優勢</h3>
+      <div class="adv-grid">
+        <div class="adv-item">
+          <i class="fas fa-lock"></i>
+          <h4>安全透明</h4>
+          <p>所有資料皆儲存在鏈上，杜絕造假與竄改。</p>
+        </div>
+        <div class="adv-item">
+          <i class="fas fa-bolt"></i>
+          <h4>自動理賠</h4>
+          <p>智能合約即時執行，節省人力與時間成本。</p>
+        </div>
+        <div class="adv-item">
+          <i class="fas fa-users"></i>
+          <h4>DAO 治理</h4>
+          <p>讓所有成員共同決策，打造真正去中心化的保險社群。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 <!-- 主要功能區塊 - 四個一排放置 -->
 <section class="main-features">
     <div class="features-grid">
@@ -422,15 +1232,60 @@
     </div>
 </section>
 
-<!-- 介紹框 -->
-<div class="intro-box">
-    <h1>ChainSure - 智慧保險管理</h1>
-    <p>
-        在現代社會，保險資訊透明化至關重要。ChainSure利用區塊鏈技術和智能合約，改變保險數據存儲與管理模式，提供更加安全、便捷、透明的保險服務。
-    </p>
-    <a href="/dao" class="btn">探索 DAO 保險</a>
-</div>
 
+<section class="services-section fade-up-left">
+    <h3 class="section-title">我們的服務</h3>
+    <div id="servicesCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner d-flex">
+            <div class="carousel-item active">
+                <div class="service-card">
+                    <div class="service-card-inner">
+                        <div class="service-card-front">
+                            <img src="/static/imgs/dog4.jpg" alt="服務 1">
+                            <h4>保險諮詢</h4>
+                        </div>
+                        <div class="service-card-back">
+                            <p>專業顧問提供客製化保險方案，保障您的需求。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="service-card">
+                    <div class="service-card-inner">
+                        <div class="service-card-front">
+                            <img src="/static/imgs/dog3.jpg" alt="服務 2">
+                            <h4>線上理賠</h4>
+                        </div>
+                        <div class="service-card-back">
+                            <p>提交理賠申請快速自動審核，透明化理賠流程。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="service-card">
+                    <div class="service-card-inner">
+                        <div class="service-card-front">
+                            <img src="/static/imgs/dog6.jpg" alt="服務 3">
+                            <h4>會員社群</h4>
+                        </div>
+                        <div class="service-card-back">
+                            <p>與其他會員交流經驗，共享保險案例與知識。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button class="carousel-control-prev" type="button" data-bs-target="#servicesCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#servicesCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+        </button>
+    </div>
+</section>
 <!-- 次要功能區塊 -->
 <section class="secondary-features">
     <div class="secondary-grid">
@@ -465,12 +1320,168 @@
     </div>
 </section>
 
+
+
 <!-- 意見反饋按鈕 -->
 <div class="feedback-button">
     留下您的意見
 </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/static/js/index.js"></script>
+<script>
+    const galleryCarousel = new bootstrap.Carousel('#gallery', {
+        interval: 5000,
+        ride: 'carousel'
+        });
+    // 捲動進場動畫
+    document.addEventListener('DOMContentLoaded', function() {
+        const faders = document.querySelectorAll('.fade-up-left');
+
+        const appearOptions = {
+            threshold: 0,
+            rootMargin: "0px 0px -100px 0px"
+        };
+
+        const appearOnScroll = new IntersectionObserver(function(entries, appearOnScroll) {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) {
+                    return;
+                } else {
+                    entry.target.classList.add('show');
+                    appearOnScroll.unobserve(entry.target);
+                }
+            });
+        }, appearOptions);
+
+        faders.forEach(fader => {
+            appearOnScroll.observe(fader);
+        });
+    });
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+            entry.target.classList.add('show');
+            observer.unobserve(entry.target);
+            }
+        });
+        });
+
+        document.querySelectorAll('.fade-up-left').forEach(el => observer.observe(el));
+        // 成功理賠案例輪播自動播放設定
+document.addEventListener('DOMContentLoaded', function() {
+    const claimsCarousel = document.querySelector('#claimsCarousel');
+    if(claimsCarousel) {
+        const carousel = new bootstrap.Carousel(claimsCarousel, {
+            interval: 4000, // 4 秒切換
+            ride: 'carousel',
+            pause: 'hover',
+            wrap: true
+        });
+    }
+
+    // CTA & 滾動動畫效果
+    const faders = document.querySelectorAll('.fade-up-left');
+    const appearOptions = {
+        threshold: 0,
+        rootMargin: "0px 0px -100px 0px"
+    };
+
+    const appearOnScroll = new IntersectionObserver(function(entries, appearOnScroll) {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add('show');
+            appearOnScroll.unobserve(entry.target);
+        });
+    }, appearOptions);
+
+    faders.forEach(fader => {
+        appearOnScroll.observe(fader);
+    });
+
+    // CTA 按鈕浮動效果
+    const ctaBtn = document.querySelector('.cta-section .btn');
+    if(ctaBtn) {
+        ctaBtn.addEventListener('mouseenter', () => {
+            ctaBtn.style.transform = 'scale(1.1)';
+        });
+        ctaBtn.addEventListener('mouseleave', () => {
+            ctaBtn.style.transform = 'scale(1)';
+        });
+    }
+});
+    const servicesCarousel = document.querySelector('#servicesCarousel');
+    if(servicesCarousel){
+        new bootstrap.Carousel(servicesCarousel, {
+            interval: 4000,
+            ride: 'carousel',
+            pause: 'hover',
+            wrap: true
+        });
+    }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    const splash = document.getElementById("splash-screen");
+    if (!splash) return;
+
+    // 檢查 sessionStorage 或首次載入
+    if (!sessionStorage.getItem("splashShown")) {
+        splash.classList.add("show-splash"); // 顯示動畫
+
+        setTimeout(() => {
+            splash.classList.remove("show-splash");
+            splash.style.display = "none"; // 隱藏動畫
+            sessionStorage.setItem("splashShown", "true"); // 標記已顯示過
+        }, 4200);
+    } else {
+        splash.style.display = "none"; // 已顯示過就隱藏
+    }
+});
+    var gallery = document.querySelector('#gallery');
+    gallery.addEventListener('slid.bs.carousel', function () {
+        const captions = gallery.querySelectorAll('.carousel-caption');
+        captions.forEach(caption => {
+            caption.style.animation = 'none';
+            caption.offsetHeight; // 觸發重繪
+            caption.style.animation = 'fadeInUp 1s ease forwards';
+        });
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+    const scrollIndicator = document.querySelector('.scroll-down-indicator');
+
+    scrollIndicator.addEventListener('click', function() {
+        // 隱藏 Hero
+        const hero = document.getElementById('hero');
+        if (hero) hero.style.display = 'none';
+
+        // 顯示 navbar
+        const navbar = document.getElementById('mainNavbar') || document.querySelector('.navbar.fixed-top');
+        if (navbar) navbar.style.display = 'flex';
+
+        // 顯示主內容
+        const mainContent = document.getElementById('mainContent');
+        if (mainContent) mainContent.style.display = 'block';
+    });
+});
+document.addEventListener("DOMContentLoaded", function() {
+    const cards = document.querySelectorAll('.features-grid .feature-card');
+
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if(entry.isIntersecting){
+                const index = Array.from(cards).indexOf(entry.target);
+                setTimeout(() => {
+                    entry.target.classList.add('show');
+                }, index * 200); // 每個卡片延遲 0.2 秒
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    cards.forEach(card => observer.observe(card));
+});
+    </script>
 {% endblock %}

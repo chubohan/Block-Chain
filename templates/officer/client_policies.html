@@ -1,0 +1,486 @@
+{% extends "base.html" %}
+
+{% block title %}客戶保單列表 - ChainSure{% endblock %}
+
+{% block extra_css %}
+<style>
+    .officer-container {
+        /* 保持原有的設定 */
+        margin-top: 120px;
+        width: 90%;
+        max-width: 1200px;
+        z-index: 10;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        /* 新增：將左右外邊距設為 auto，實現水平置中 */
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .officer-header {
+        text-align: center;
+        margin-bottom: 40px;
+        position: relative;
+    }
+
+    .officer-header h1 {
+        color: #4a6ee0;
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 10px;
+        background: linear-gradient(135deg, #4a6ee0, #64c1ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .client-info {
+        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+        padding: 25px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        border: 1px solid rgba(74, 110, 224, 0.1);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+    }
+
+    .client-info h3 {
+        color: #4a6ee0;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .client-info h3::before {
+        content: '👤';
+        font-size: 1.2rem;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+    }
+
+    .info-value {
+        font-weight: 700;
+        color: #333;
+        font-size: 1.1rem;
+    }
+
+    .section-card {
+        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        border: 1px solid rgba(74, 110, 224, 0.1);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .section-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #4a6ee0, #64c1ff);
+        border-radius: 15px 15px 0 0;
+    }
+
+    .section-card h3 {
+        color: #4a6ee0;
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .section-card h3::before {
+        content: '📋';
+        font-size: 1.5rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #8ac6ff, #64c1ff);
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 20px rgba(100, 193, 255, 0.3);
+        font-size: 1rem;
+        text-decoration: none;
+        display: inline-block;
+        margin-bottom: 20px;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #64c1ff, #4a6ee0);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(74, 110, 224, 0.4);
+        color: white;
+    }
+
+    .btn-back {
+        background: linear-gradient(135deg, #a8e6cf, #88d4ab);
+        color: white;
+        padding: 10px 25px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(136, 212, 171, 0.3);
+        text-decoration: none;
+        display: inline-block;
+        margin-right: 15px;
+    }
+
+    .btn-back:hover {
+        background: linear-gradient(135deg, #88d4ab, #6bc49c);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(107, 196, 156, 0.4);
+        color: white;
+    }
+
+    .btn-action {
+        background: linear-gradient(135deg, #ffd28b, #ffb347);
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 10px rgba(255, 179, 71, 0.3);
+        font-size: 0.9rem;
+        margin-right: 8px;
+        margin-bottom: 5px;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-action:hover {
+        background: linear-gradient(135deg, #ffb347, #ff9a00);
+        transform: translateY(-1px);
+        box-shadow: 0 5px 15px rgba(255, 154, 0, 0.4);
+        color: white;
+    }
+
+    .btn-edit {
+        background: linear-gradient(135deg, #a8e6cf, #88d4ab);
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 10px rgba(136, 212, 171, 0.3);
+        font-size: 0.9rem;
+        margin-right: 8px;
+        margin-bottom: 5px;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-edit:hover {
+        background: linear-gradient(135deg, #88d4ab, #6bc49c);
+        transform: translateY(-1px);
+        box-shadow: 0 5px 15px rgba(107, 196, 156, 0.4);
+        color: white;
+    }
+
+    .btn-disabled {
+        background: linear-gradient(135deg, #e0e0e0, #c0c0c0);
+        color: #888;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-right: 8px;
+        margin-bottom: 5px;
+        text-decoration: none;
+        display: inline-block;
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
+    .policies-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .policies-table th {
+        background: linear-gradient(135deg, #4a6ee0, #64c1ff);
+        color: white;
+        padding: 16px 20px;
+        text-align: left;
+        font-weight: 700;
+        font-size: 1rem;
+        border: none;
+    }
+
+    .policies-table td {
+        padding: 16px 20px;
+        border-bottom: 1px solid rgba(74, 110, 224, 0.1);
+        color: #555;
+        font-weight: 500;
+        background: rgba(255, 255, 255, 0.8);
+    }
+
+    .policies-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .policies-table tr:hover {
+        background: linear-gradient(135deg, #f8faff, #eef4ff);
+        transform: scale(1.01);
+        transition: all 0.2s ease;
+    }
+
+    .policies-table tr:hover td {
+        background: transparent;
+    }
+
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-align: center;
+        display: inline-block;
+    }
+
+    .status-draft {
+        background: linear-gradient(135deg, #ffd28b, #ffb347);
+        color: white;
+    }
+
+    .status-final {
+        background: linear-gradient(135deg, #a8e6cf, #88d4ab);
+        color: white;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #888;
+        font-style: italic;
+        background: rgba(255, 255, 255, 0.5);
+    }
+
+    .empty-state::before {
+        content: '📄';
+        font-size: 3rem;
+        display: block;
+        margin-bottom: 15px;
+        opacity: 0.5;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    /* 改善表格輸入區域的可視性 */
+    .form-control, .form-select {
+        background: rgba(255, 255, 255, 0.9);
+        border: 2px solid rgba(74, 110, 224, 0.2);
+        border-radius: 8px;
+        padding: 10px 15px;
+        font-size: 1rem;
+        color: #333;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+        background: rgba(255, 255, 255, 0.95);
+        border-color: #4a6ee0;
+        box-shadow: 0 0 0 3px rgba(74, 110, 224, 0.1);
+        color: #333;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #4a6ee0;
+        margin-bottom: 8px;
+    }
+
+    /* 響應式設計 */
+    @media (max-width: 768px) {
+        .officer-container {
+            margin-top: 100px;
+            width: 95%;
+            padding: 25px 20px;
+        }
+
+        .officer-header h1 {
+            font-size: 2rem;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .policies-table {
+            font-size: 0.9rem;
+        }
+
+        .policies-table th,
+        .policies-table td {
+            padding: 12px 15px;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .btn-action, .btn-edit, .btn-disabled {
+            width: 100%;
+            margin-right: 0;
+            text-align: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .officer-header h1 {
+            font-size: 1.6rem;
+        }
+
+        .section-card {
+            padding: 20px 15px;
+        }
+
+        .policies-table {
+            display: block;
+            overflow-x: auto;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="officer-container">
+    <!-- 頁面標頭 -->
+    <div class="officer-header">
+        <h1>客戶保單管理</h1>
+    </div>
+
+    <!-- 客戶信息 -->
+    <div class="client-info">
+        <h3>客戶資訊</h3>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">姓名</span>
+                <span class="info-value">{{ client.username or '未提供' }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Gmail</span>
+                <span class="info-value">{{ client.gmail }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">年齡</span>
+                <span class="info-value">{{ client.age or '未提供' }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">性別</span>
+                <span class="info-value">{{ client.gender or '未提供' }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 操作按鈕 -->
+    <div>
+        <a href="/officer/client-page" class="btn-back">⬅️ 返回客戶列表</a>
+        <a href="/officer/upload-policy-page?client_gmail={{ client.gmail }}" class="btn-primary">📄 新增保單</a>
+    </div>
+
+    <!-- 保單列表 -->
+    <div class="section-card">
+        <h3>保單列表</h3>
+        
+        <table class="policies-table">
+            <thead>
+                <tr>
+                    <th>保單號碼</th>
+                    <th>保險公司</th>
+                    <th>要保人</th>
+                    <th>被保險人</th>
+                    <th>保險金額</th>
+                    <th>狀態</th>
+                    <th>建立日期</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for policy in policies %}
+                <tr>
+                    <td>{{ policy.policy_number or '未提供' }}</td>
+                    <td>{{ policy.insurance_company or '未提供' }}</td>
+                    <td>{{ policy.policy_holder or '未提供' }}</td>
+                    <td>{{ policy.insured_person or '未提供' }}</td>
+                    <td>{{ "${:,.0f}".format(policy.insurance_amount) if policy.insurance_amount else '未提供' }}</td>
+                    <td>
+                        {% if policy.status == 0 %}
+                        <span class="status-badge status-draft">草稿</span>
+                        {% else %}
+                        <span class="status-badge status-final">已完成</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ policy.created_at.strftime('%Y-%m-%d') if policy.created_at else '未提供' }}</td>
+                    <td>
+                        <div class="action-buttons">
+                            {% if policy.status == 0 %}
+                            <a href="/officer/upload-policy-page?policy_id={{ policy.id }}" class="btn-edit">✏️ 編輯</a>
+                            {% else %}
+                            <span class="btn-disabled">🔒 已鎖定</span>
+                            {% endif %}
+                            <a href="/officer/view-policy?policy_id={{ policy.id }}" class="btn-action">👁️ 查看</a>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="empty-state">此客戶目前沒有任何保單</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

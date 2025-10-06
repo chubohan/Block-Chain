@@ -1604,13 +1604,14 @@
             
             await tx.wait();
             
-            alert("成功加入 DAO！");
+            
             
             // 刷新狀態
             await checkMembershipStatus();
             await loadDAOInfo();
-            
             hidePremiumPayment();
+            
+            alert("成功加入 DAO！");
             
         } catch (err) {
             console.error("支付保費失敗:", err);

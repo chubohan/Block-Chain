@@ -141,81 +141,80 @@ from utils.ipfs import upload_to_pinata
 @officer_bp.route('/upload-policy', methods=['POST'])
 @login_required
 def upload_policy():
+    conn = None
+
     if not getattr(current_user, 'insurance_officer', False):
-        return jsonify({'success': False, 'message': '無權限訪問'})
-    
+        return jsonify({'success': False, 'message': '無權限操作'}), 403
+
     try:
-        # 獲取表單數據
-        client_gmail = request.form.get('client_gmail')
-        policy_number = request.form.get('policy_number')
-        insurance_company = request.form.get('insurance_company')
-        policy_holder = request.form.get('policy_holder')
-        insured_person = request.form.get('insured_person')
-        insurance_amount = request.form.get('insurance_amount')
-        premium_period = request.form.get('premium_period')
-        premium_amount = request.form.get('premium_amount')
-        start_date = request.form.get('start_date')
+        # 取得表單資料
+        client_gmail = request.form.get('clientGmail')
+        policy_number = request.form.get('policyNumber')
+        insurance_company = request.form.get('insuranceCompany')
+        policy_holder = request.form.get('policyHolder')
+        insured_person = request.form.get('insuredPerson')
+        insurance_amount = request.form.get('insuranceAmount')
+        premium_period = request.form.get('premiumPeriod')
+        premium_amount = request.form.get('premiumAmount')
+        start_date = request.form.get('startDate')
         beneficiary = request.form.get('beneficiary')
-        growth_rate = request.form.get('growth_rate')
-        declared_interest_rate = request.form.get('declared_interest_rate')
+        growth_rate = request.form.get('growthRate')
+        declared_interest_rate = request.form.get('declaredInterestRate')
+        pdf_file = request.files.get('pdfUpload')
+        ipfs_hash = request.form.get('ipfsHash')
+
+        # 檢查必填字段（排除 pdf_file，因為可能為 None）
+        required_fields = [
+            client_gmail, policy_number, insurance_company, policy_holder,
+            insured_person, insurance_amount, premium_period, premium_amount,
+            start_date, beneficiary, growth_rate, declared_interest_rate, ipfs_hash
+        ]
         
-        # 驗證必填字段
-        if not all([client_gmail, policy_number, insurance_company]):
-            return jsonify({'success': False, 'message': '請填寫所有必填字段'})
+        if not all(required_fields):
+            return jsonify({'success': False, 'message': '所有欄位皆為必填'}), 400
+
+        # 檢查文件是否存在
+        if not pdf_file or pdf_file.filename == '':
+            return jsonify({'success': False, 'message': '請選擇 PDF 文件'}), 400
+
+        # 檢查文件類型
+        if not pdf_file.filename.lower().endswith('.pdf'):
+            return jsonify({'success': False, 'message': '只允許上傳 PDF 文件'}), 400
+
+        # 儲存到暫存路徑
+        filename = secure_filename(f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{pdf_file.filename}")
+        upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+        pdf_file.save(upload_path)
+
+        print("儲存的檔名為：", filename)
+        print("IPFS Hash：", ipfs_hash)
         
-        # 處理文件上傳 - 安全地檢查文件
-        pdf_filename = None
-        pdf_file = request.files.get('pdf_file')
-        
-        # 安全地檢查文件是否存在且有文件名
-        if pdf_file and hasattr(pdf_file, 'filename') and pdf_file.filename:
-            filename = secure_filename(pdf_file.filename)
-            # 確保上傳目錄存在
-            upload_dir = os.path.join('uploads', 'policies')
-            os.makedirs(upload_dir, exist_ok=True)
-            
-            pdf_path = os.path.join(upload_dir, filename)
-            pdf_file.save(pdf_path)
-            pdf_filename = filename
-            print(f"文件已保存: {pdf_path}")
-        else:
-            print("沒有上傳文件或文件為空")
-        
-        # 連接數據庫並插入數據
+        # 寫入 policy_draft
         conn = db.get_connection()
         with conn.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO policy_draft (
-                    client_gmail, policy_number, insurance_company, policy_holder,
-                    insured_person, insurance_amount, premium_period, premium_amount,
-                    start_date, beneficiary, growth_rate, declared_interest_rate,
-                    pdf_filename, officer_gmail, status, created_at
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
+                    client_gmail, policy_number, insurance_company, policy_holder, insured_person,
+                    insurance_amount, premium_period, premium_amount, start_date,
+                    beneficiary, growth_rate, declared_interest_rate,
+                    pdf_filename, pdf_hash, officer_gmail
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
-                client_gmail, policy_number, insurance_company, policy_holder,
-                insured_person, int(insurance_amount) if insurance_amount else 0,
-                int(premium_period) if premium_period else 0,
-                int(premium_amount) if premium_amount else 0,
-                start_date, beneficiary, 
-                float(growth_rate) if growth_rate else 0.0,
-                float(declared_interest_rate) if declared_interest_rate else 0.0,
-                pdf_filename, current_user.id, 0  # status = 0 表示草稿
+                client_gmail, policy_number, insurance_company, policy_holder, insured_person,
+                insurance_amount, premium_period, premium_amount, start_date,
+                beneficiary, growth_rate, declared_interest_rate,
+                filename, ipfs_hash, current_user.id
             ))
-            
             conn.commit()
-            
-        return jsonify({
-            'success': True, 
-            'message': '保單新增成功',
-            'policy_id': cursor.lastrowid
-        })
-        
-    except Exception as e:
-        print(f"上傳保單錯誤: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        return jsonify({'success': False, 'message': f'上傳失敗：{str(e)}'})
 
+        return jsonify({'success': True, 'ipfs_hash': ipfs_hash})
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        if conn:
+            conn.close()
 @officer_bp.route('/upload-policy-page', methods=['GET'])
 @login_required
 def upload_policy_page():

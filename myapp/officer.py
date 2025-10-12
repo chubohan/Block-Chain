@@ -103,6 +103,35 @@ def get_clients():
         conn.close()
 
     return jsonify({'success': True, 'clients': clients})
+#刪除客戶
+@officer_bp.route('/delete-client', methods=['POST'])
+@login_required
+def delete_client():
+    if not getattr(current_user, 'insurance_officer', False):
+        return jsonify({'success': False, 'message': '無權限操作'}), 403
+
+    data = request.get_json()
+    client_gmail = data.get('client_gmail')
+
+    if not client_gmail:
+        return jsonify({'success': False, 'message': '缺少客戶Gmail'}), 400
+
+    try:
+        conn = db.get_connection()
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                DELETE FROM insurance_officer_clients 
+                WHERE officer_gmail = %s AND client_gmail = %s
+            """, (current_user.id, client_gmail))
+            conn.commit()
+            return jsonify({'success': True})
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        if conn:
+            conn.close()
 @officer_bp.route('/delete_policy/<policy_number>', methods=['POST'])
 @login_required
 def delete_policy(policy_number):  # 參數名稱改為 policy_number

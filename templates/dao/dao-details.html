@@ -1898,116 +1898,164 @@ const daoABI = [
     }
 
     // 🆕 檢查會員狀態並顯示自動扣款信息
-    async function checkMembershipStatus() {
-        try {
-            isMember = await daoContract.isMember(walletAddress);
-            const monthlyPremium = await daoContract.getMonthlyPremium();
-            
-            if (isMember) {
-                // 🆕 檢查自動扣款狀態
-                const needsPayment = await daoContract.needsAutoPayment(walletAddress);
-                const nextPaymentTime = await daoContract.getNextPaymentTime(walletAddress);
-                const isInGracePeriod = await daoContract.isInGracePeriod(walletAddress);
-                
-                document.getElementById("memberStatus").innerHTML = '<span class="status-approved">✅ 您已經是會員</span>';
-                document.getElementById("joinDaoBtn").style.display = "none";
-                document.getElementById("leaveDaoBtn").style.display = "block";
-                document.getElementById("premiumInfo").style.display = "none";
-                document.getElementById("nonMemberMessage").style.display = "none";
-                
-                // 🆕 顯示付款狀態
-                await displayPaymentStatus(needsPayment, nextPaymentTime, isInGracePeriod);
-                
-                // 🆕 設置理賠金額
-                await setupClaimAmount();
-                
-                // 顯示會員專屬功能
-                document.getElementById("claimFormSection").style.display = "block";
-                document.getElementById("myClaimsSection").style.display = "block";
-                document.getElementById("claimsListSection").style.display = "block";
-                
-            } else {
-                document.getElementById("memberStatus").innerHTML = '<span class="status-rejected">❌ 您還不是會員</span>';
-                document.getElementById("joinDaoBtn").style.display = "block";
-                document.getElementById("leaveDaoBtn").style.display = "none";
-                document.getElementById("requiredPremium").textContent = ethers.utils.formatEther(monthlyPremium);
-                document.getElementById("nonMemberMessage").style.display = "block";
-                
-                // 隱藏會員專屬功能
-                document.getElementById("claimFormSection").style.display = "none";
-                document.getElementById("myClaimsSection").style.display = "none";
-                document.getElementById("claimsListSection").style.display = "none";
-            }
-            
-        } catch (err) {
-            console.error("檢查會員狀態失敗:", err);
-            document.getElementById("memberStatus").textContent = "檢查失敗";
-        }
-    }
-
-    // 🆕 顯示付款狀態
-    async function displayPaymentStatus(needsPayment, nextPaymentTime, isInGracePeriod) {
-        const membershipCard = document.querySelector('.membership-card');
+    // 🆕 檢查會員狀態並顯示自動扣款信息
+async function checkMembershipStatus() {
+    try {
+        isMember = await daoContract.isMember(walletAddress);
+        const monthlyPremium = await daoContract.getMonthlyPremium();
         
-        // 移除現有的付款狀態顯示
-        const existingStatus = document.getElementById('paymentStatus');
-        if (existingStatus) {
-            existingStatus.remove();
-        }
-        
-        const paymentStatusDiv = document.createElement('div');
-        paymentStatusDiv.id = 'paymentStatus';
-        paymentStatusDiv.style.marginTop = '15px';
-        paymentStatusDiv.style.padding = '15px';
-        paymentStatusDiv.style.borderRadius = '10px';
-        paymentStatusDiv.style.background = 'rgba(255, 255, 255, 0.8)';
-        
-        if (needsPayment) {
-            if (isInGracePeriod) {
-                paymentStatusDiv.innerHTML = `
-                    <div style="color: #856404; background: rgba(255, 243, 205, 0.8); padding: 10px; border-radius: 5px; border: 1px solid #ffeaa7;">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <strong>寬限期</strong>
-                        <p style="margin: 5px 0 0 0; font-size: 0.9em;">請在 ${formatTimeRemaining(nextPaymentTime + (7 * 24 * 60 * 60))} 內完成付款</p>
-                        <button id="autoPayBtn" class="btn-warning" style="margin-top: 10px; width: 100%;">
-                            <i class="fas fa-credit-card"></i> 立即支付本月保費
-                        </button>
-                    </div>
-                `;
-            } else {
-                paymentStatusDiv.innerHTML = `
-                    <div style="color: #721c24; background: rgba(248, 215, 218, 0.8); padding: 10px; border-radius: 5px; border: 1px solid #f5c6cb;">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <strong>需要付款</strong>
-                        <p style="margin: 5px 0 0 0; font-size: 0.9em;">請完成本月付款以保持會員資格</p>
-                        <button id="autoPayBtn" class="btn-success" style="margin-top: 10px; width: 100%;">
-                            <i class="fas fa-credit-card"></i> 支付本月保費
-                        </button>
-                    </div>
-                `;
-            }
+        if (isMember) {
+            // 🆕 檢查自動扣款狀態
+            const needsPayment = await daoContract.needsAutoPayment(walletAddress);
+            const nextPaymentTime = await daoContract.getNextPaymentTime(walletAddress);
+            const isInGracePeriod = await daoContract.isInGracePeriod(walletAddress);
             
-            // 添加自動付款事件監聽器
-            setTimeout(() => {
-                const autoPayBtn = document.getElementById('autoPayBtn');
-                if (autoPayBtn) {
-                    autoPayBtn.addEventListener('click', processAutoPayment);
-                }
-            }, 100);
+            document.getElementById("memberStatus").innerHTML = '<span class="status-approved">✅ 您已經是會員</span>';
+            document.getElementById("joinDaoBtn").style.display = "none";
+            document.getElementById("leaveDaoBtn").style.display = "block";
+            document.getElementById("premiumInfo").style.display = "none";
+            document.getElementById("nonMemberMessage").style.display = "none";
+            
+            // 🆕 顯示付款狀態
+            await displayPaymentStatus(needsPayment, nextPaymentTime, isInGracePeriod);
+            
+            // 🆕 設置理賠金額
+            await setupClaimAmount();
+            
+            // 顯示會員專屬功能
+            document.getElementById("claimFormSection").style.display = "block";
+            document.getElementById("myClaimsSection").style.display = "block";
+            document.getElementById("claimsListSection").style.display = "block";
             
         } else {
-            const nextPayTime = await daoContract.getNextPaymentTime(walletAddress);
+            document.getElementById("memberStatus").innerHTML = '<span class="status-rejected">❌ 您還不是會員</span>';
+            document.getElementById("joinDaoBtn").style.display = "block";
+            document.getElementById("leaveDaoBtn").style.display = "none";
+            document.getElementById("requiredPremium").textContent = ethers.utils.formatEther(monthlyPremium);
+            document.getElementById("nonMemberMessage").style.display = "block";
+            
+            // 🆕 確保移除付款狀態
+            removePaymentStatus();
+            
+            // 隱藏會員專屬功能
+            document.getElementById("claimFormSection").style.display = "none";
+            document.getElementById("myClaimsSection").style.display = "none";
+            document.getElementById("claimsListSection").style.display = "none";
+        }
+        
+    } catch (err) {
+        console.error("檢查會員狀態失敗:", err);
+        document.getElementById("memberStatus").textContent = "檢查失敗";
+        
+        // 🆕 錯誤時也確保清理狀態
+        removePaymentStatus();
+    }
+}
+    // 🆕 顯示付款狀態
+    // 🆕 修正的顯示付款狀態函數
+async function displayPaymentStatus(needsPayment, nextPaymentTime, isInGracePeriod) {
+    const membershipCard = document.querySelector('.membership-card');
+    
+    // 移除現有的付款狀態顯示
+    const existingStatus = document.getElementById('paymentStatus');
+    if (existingStatus) {
+        existingStatus.remove();
+    }
+    
+    const paymentStatusDiv = document.createElement('div');
+    paymentStatusDiv.id = 'paymentStatus';
+    paymentStatusDiv.style.marginTop = '15px';
+    paymentStatusDiv.style.padding = '15px';
+    paymentStatusDiv.style.borderRadius = '10px';
+    paymentStatusDiv.style.background = 'rgba(255, 255, 255, 0.8)';
+    
+    if (needsPayment) {
+        if (isInGracePeriod) {
+            // 🆕 修正寬限期時間計算
+            const gracePeriodEnd = await calculateGracePeriodEnd(walletAddress);
             paymentStatusDiv.innerHTML = `
-                <div style="color: #155724; background: rgba(212, 237, 218, 0.8); padding: 10px; border-radius: 5px; border: 1px solid #c3e6cb;">
-                    <i class="fas fa-check-circle"></i>
-                    <strong>付款狀態正常</strong>
-                    <p style="margin: 5px 0 0 0; font-size: 0.9em;">下次付款時間: ${new Date(nextPayTime * 1000).toLocaleDateString()}</p>
+                <div style="color: #856404; background: rgba(255, 243, 205, 0.8); padding: 10px; border-radius: 5px; border: 1px solid #ffeaa7;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>寬限期</strong>
+                    <p style="margin: 5px 0 0 0; font-size: 0.9em;">請在 ${formatTimeRemaining(gracePeriodEnd)} 內完成付款</p>
+                    <button id="autoPayBtn" class="btn-warning" style="margin-top: 10px; width: 100%;">
+                        <i class="fas fa-credit-card"></i> 立即支付本月保費
+                    </button>
+                </div>
+            `;
+        } else {
+            paymentStatusDiv.innerHTML = `
+                <div style="color: #721c24; background: rgba(248, 215, 218, 0.8); padding: 10px; border-radius: 5px; border: 1px solid #f5c6cb;">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <strong>需要付款</strong>
+                    <p style="margin: 5px 0 0 0; font-size: 0.9em;">請完成本月付款以保持會員資格</p>
+                    <button id="autoPayBtn" class="btn-success" style="margin-top: 10px; width: 100%;">
+                        <i class="fas fa-credit-card"></i> 支付本月保費
+                    </button>
                 </div>
             `;
         }
         
-        membershipCard.appendChild(paymentStatusDiv);
+        // 添加自動付款事件監聽器
+        setTimeout(() => {
+            const autoPayBtn = document.getElementById('autoPayBtn');
+            if (autoPayBtn) {
+                autoPayBtn.addEventListener('click', processAutoPayment);
+            }
+        }, 100);
+        
+    } else {
+        const nextPayTime = await daoContract.getNextPaymentTime(walletAddress);
+        paymentStatusDiv.innerHTML = `
+            <div style="color: #155724; background: rgba(212, 237, 218, 0.8); padding: 10px; border-radius: 5px; border: 1px solid #c3e6cb;">
+                <i class="fas fa-check-circle"></i>
+                <strong>付款狀態正常</strong>
+                <p style="margin: 5px 0 0 0; font-size: 0.9em;">下次付款時間: ${formatNextPaymentTime(nextPayTime)}</p>
+            </div>
+        `;
     }
+    
+    membershipCard.appendChild(paymentStatusDiv);
+}
+
+// 🆕 新增：計算寬限期結束時間
+async function calculateGracePeriodEnd(memberAddress) {
+    try {
+        const memberInfo = await daoContract.getMemberInfo(memberAddress);
+        const lastPaymentTime = memberInfo[1]; // lastPaymentTime 是索引 1
+        
+        // 從合約獲取付款間隔和寬限期
+        const PAYMENT_INTERVAL = await daoContract.PAYMENT_INTERVAL();
+        const GRACE_PERIOD = await daoContract.GRACE_PERIOD();
+        
+        // 寬限期結束時間 = 最後付款時間 + 付款間隔 + 寬限期
+        const gracePeriodEnd = Number(lastPaymentTime) + Number(PAYMENT_INTERVAL) + Number(GRACE_PERIOD);
+        
+        console.log("寬限期計算:", {
+            lastPaymentTime: Number(lastPaymentTime),
+            PAYMENT_INTERVAL: Number(PAYMENT_INTERVAL),
+            GRACE_PERIOD: Number(GRACE_PERIOD),
+            gracePeriodEnd: gracePeriodEnd
+        });
+        
+        return gracePeriodEnd;
+    } catch (err) {
+        console.error("計算寬限期失敗:", err);
+        return 0;
+    }
+}
+
+// 🆕 新增：格式化下次付款時間
+function formatNextPaymentTime(timestamp) {
+    // 處理異常時間戳
+    let actualTimestamp = timestamp;
+    if (timestamp > 1000000000000) {
+        actualTimestamp = Math.floor(timestamp / 1000);
+    }
+    
+    const date = new Date(actualTimestamp * 1000);
+    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+}
 
     // 🆕 處理自動付款
     async function processAutoPayment() {
@@ -2043,21 +2091,33 @@ const daoABI = [
     }
 
     // 🆕 格式化剩餘時間
-    function formatTimeRemaining(timestamp) {
-        const now = Math.floor(Date.now() / 1000);
-        const diff = timestamp - now;
-        
-        if (diff <= 0) return "已過期";
-        
-        const days = Math.floor(diff / (24 * 60 * 60));
-        const hours = Math.floor((diff % (24 * 60 * 60)) / (60 * 60));
-        
-        if (days > 0) {
-            return `${days}天${hours}小時`;
-        } else {
-            return `${hours}小時`;
-        }
+    // 🆕 修正的格式化剩餘時間函數
+function formatTimeRemaining(timestamp) {
+    const now = Math.floor(Date.now() / 1000);
+    const diff = timestamp - now;
+    
+    console.log("時間戳:", timestamp, "現在時間:", now, "時間差:", diff);
+    
+    if (diff <= 0) return "已過期";
+    
+    // 確保時間差是合理的（不大於1年）
+    if (diff > 365 * 24 * 60 * 60) {
+        console.error("時間差異常:", diff, "可能時間戳有問題");
+        return "時間計算錯誤";
     }
+    
+    const days = Math.floor(diff / (24 * 60 * 60));
+    const hours = Math.floor((diff % (24 * 60 * 60)) / (60 * 60));
+    const minutes = Math.floor((diff % (60 * 60)) / 60);
+    
+    if (days > 0) {
+        return `${days}天 ${hours}小時 ${minutes}分鐘`;
+    } else if (hours > 0) {
+        return `${hours}小時 ${minutes}分鐘`;
+    } else {
+        return `${minutes}分鐘`;
+    }
+}
 
     // 🆕 定期檢查付款狀態
     function startPaymentStatusChecker() {
@@ -2519,47 +2579,70 @@ const daoABI = [
     }
 
     // 🆕 簡單的退出功能
-    async function leaveDAO() {
-        try {
-            if (!confirm("確定要退出此提案嗎？\n\n退出後您將失去會員資格，但已支付的保費將不會退還。")) {
-                return;
-            }
-            
-            const leaveBtn = document.getElementById("leaveDaoBtn");
-            leaveBtn.disabled = true;
-            leaveBtn.textContent = "處理中...";
-            
-            console.log("開始執行退出 DAO...");
-            const tx = await daoContract.connect(signer).leaveDAO();
-            console.log("交易已發送:", tx.hash);
-            
-            leaveBtn.textContent = "確認中...";
-            await tx.wait();
-            console.log("交易已確認");
-            
-            alert("成功退出此提案！");
-            
-            // 刷新狀態
+    // 🆕 修正的退出功能 - 移除付款狀態
+async function leaveDAO() {
+    try {
+        if (!confirm("確定要退出此提案嗎？\n\n退出後您將失去會員資格，但已支付的保費將不會退還。")) {
+            return;
+        }
+        
+        const leaveBtn = document.getElementById("leaveDaoBtn");
+        leaveBtn.disabled = true;
+        leaveBtn.textContent = "處理中...";
+        
+        console.log("開始執行退出 DAO...");
+        const tx = await daoContract.connect(signer).leaveDAO();
+        console.log("交易已發送:", tx.hash);
+        
+        leaveBtn.textContent = "確認中...";
+        await tx.wait();
+        console.log("交易已確認");
+        
+        alert("成功退出此提案！");
+        
+        // 🆕 移除付款狀態顯示
+        removePaymentStatus();
+        
+        // 刷新狀態
+        await checkMembershipStatus();
+        await loadDAOInfo();
+        
+    } catch (err) {
+        console.error("退出 DAO 失敗:", err);
+        
+        const leaveBtn = document.getElementById("leaveDaoBtn");
+        leaveBtn.disabled = false;
+        leaveBtn.textContent = "退出 DAO";
+        
+        if (err.code === 4001) {
+            alert("您取消了交易");
+        } else if (err.message && err.message.includes("Not a member")) {
+            alert("您已經不是會員");
+            // 🆕 如果已經不是會員，也移除付款狀態
+            removePaymentStatus();
             await checkMembershipStatus();
-            await loadDAOInfo();
-            
-        } catch (err) {
-            console.error("退出 DAO 失敗:", err);
-            
-            const leaveBtn = document.getElementById("leaveDaoBtn");
-            leaveBtn.disabled = false;
-            leaveBtn.textContent = "退出 DAO";
-            
-            if (err.code === 4001) {
-                alert("您取消了交易");
-            } else if (err.message && err.message.includes("Not a member")) {
-                alert("您已經不是會員");
-                await checkMembershipStatus();
-            } else {
-                alert("退出失敗: " + (err.message || "未知錯誤"));
-            }
+        } else {
+            alert("退出失敗: " + (err.message || "未知錯誤"));
         }
     }
+}
+
+// 🆕 新增：移除付款狀態顯示的函數
+function removePaymentStatus() {
+    const existingStatus = document.getElementById('paymentStatus');
+    if (existingStatus) {
+        existingStatus.remove();
+        console.log("已移除付款狀態顯示");
+    }
+    
+    // 🆕 同時隱藏會員專屬功能
+    document.getElementById("claimFormSection").style.display = "none";
+    document.getElementById("myClaimsSection").style.display = "none";
+    document.getElementById("claimsListSection").style.display = "none";
+    
+    // 🆕 顯示非會員提示
+    document.getElementById("nonMemberMessage").style.display = "block";
+}
 
     // 啟動定期刷新獎金庫
     async function startTreasuryRefresh() {
@@ -2650,4 +2733,3 @@ const daoABI = [
 </script>
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 {% endblock %}
-  

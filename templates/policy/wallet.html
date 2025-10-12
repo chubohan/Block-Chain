@@ -416,24 +416,11 @@
             }
         });
         
-        // 模擬錢包連接功能（實際功能在 wallet.js 中）
-        window.connectWallet = function() {
-            // 這裡只是模擬，實際功能在您的 wallet.js 中
-            document.getElementById('walletAddress').textContent = '0x1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1';
-            document.getElementById('connectBtn').innerHTML = '<i class="fas fa-check"></i> 已連接';
-            document.getElementById('connectBtn').style.background = 'linear-gradient(135deg, #28a745, #20c997)';
-            document.getElementById('connectBtn').style.color = 'white';
-            
-            // 更新狀態指示器
-            document.querySelectorAll('.status-step')[1].querySelector('.step-circle').classList.add('active');
-            document.querySelectorAll('.status-step')[1].querySelector('.step-text').classList.add('active');
-            
-            // 如果已經勾選同意，啟用確認按鈕
+        
+        // 如果已經勾選同意，啟用確認按鈕
             if (document.getElementById('agreeCheckbox').checked) {
                 document.getElementById('confirmButton').disabled = false;
             }
-        };
-        
         window.confirmConnection = function() {
             if (document.getElementById('agreeCheckbox').checked) {
                 alert('連接成功！您現在可以開始使用 ChainSure 智慧保險管理平台。');

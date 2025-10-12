@@ -458,6 +458,8 @@
                     <td>
                         {% if policy.status == 0 %}
                         <span class="status-badge status-draft">草稿</span>
+                        {% elif policy.status == 2 %}
+                        <span class="status-badge status-draft">客戶已刪除</span>
                         {% else %}
                         <span class="status-badge status-final">已完成</span>
                         {% endif %}
@@ -467,6 +469,8 @@
                         <div class="action-buttons">
                             {% if policy.status == 0 %}
                             <a href="/officer/upload-policy-page?policy_id={{ policy.id }}" class="btn-edit">✏️ 編輯</a>
+                            {% elif policy.status == 2 %}
+                            <a href="/officer/view-policy?policy_id={{ policy.id }}" class="btn-edit">已刪除</a>
                             {% else %}
                             <span class="btn-disabled">🔒 已鎖定</span>
                             {% endif %}

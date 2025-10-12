@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}理賠投票{% endblock %}
+{% block title %}提案投票{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -405,7 +405,7 @@
 <div class="container">
     <!-- Header -->
     <div class="header">
-        <h1><i class="fas fa-vote-yea"></i> 理賠投票</h1>
+        <h1><i class="fas fa-vote-yea"></i>提案投票</h1>
         <p>去中心化保險治理 - 共同管理理賠決策</p>
     </div>
 
@@ -429,7 +429,7 @@
 
     <!-- Create DAO Section -->
     <div class="form-section">
-        <h2><i class="fas fa-plus-circle"></i> 新增理賠計畫</h2>
+        <h2><i class="fas fa-plus-circle"></i> 新增保險計畫</h2>
         <div class="form-grid">
             <div class="form-group">
                 <label class="form-label">
@@ -649,7 +649,7 @@
             const pdfHash = await uploadPDFtoIPFS(pdfFile);
             if (!pdfHash) {
                 alert("PDF 上傳 IPFS 失敗");
-                createBtn.innerHTML = '<i class="fas fa-rocket"></i> 創建 DAO';
+                createBtn.innerHTML = '<i class="fas fa-rocket"></i> 創建提案';
                 createBtn.disabled = false;
                 return;
             }
@@ -676,8 +676,8 @@
 
         } catch (err) {
             console.error(err);
-            alert("創建 DAO 失敗：" + err.message);
-            document.getElementById('createDaoBtn').innerHTML = '<i class="fas fa-rocket"></i> 創建 DAO';
+            alert("創建提案失敗：" + err.message);
+            document.getElementById('createDaoBtn').innerHTML = '<i class="fas fa-rocket"></i> 創建提案';
             document.getElementById('createDaoBtn').disabled = false;
         }
     }

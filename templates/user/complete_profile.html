@@ -77,6 +77,13 @@
         box-shadow: 0 6px 20px rgba(74, 110, 224, 0.4);
     }
 
+    .submit-btn:disabled {
+        background: #cccccc;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
     .instructions {
         color: #666;
         font-size: 14px;
@@ -100,6 +107,84 @@
         line-height: 1.5;
     }
 
+    .wallet-section {
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 25px;
+        background: #f9f9f9;
+        transition: all 0.3s ease;
+    }
+
+    .wallet-section.active {
+        border-color: #64c1ff;
+        background: rgba(100, 193, 255, 0.05);
+    }
+
+    .wallet-address {
+        font-family: monospace;
+        background: #f0f0f0;
+        padding: 10px;
+        border-radius: 4px;
+        margin-top: 10px;
+        word-break: break-all;
+        font-size: 14px;
+        color: #333;
+    }
+
+    .wallet-btn {
+        background: linear-gradient(135deg, #f0b90b, #f8d33a);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .wallet-btn:hover {
+        background: linear-gradient(135deg, #e5a50a, #f0b90b);
+        transform: translateY(-2px);
+    }
+
+    .wallet-btn:disabled {
+        background: #cccccc;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .wallet-connected {
+        background: linear-gradient(135deg, #a8e6cf, #88d4ab);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .required-field::after {
+        content: " *";
+        color: #ff6b6b;
+    }
+
+    .wallet-required {
+        color: #ff6b6b;
+        font-size: 14px;
+        margin-top: 5px;
+        font-weight: bold;
+    }
+
+    .role-description {
+        font-size: 14px;
+        color: #666;
+        margin-top: 5px;
+        font-style: italic;
+    }
+
     /* 響應式設計 */
     @media (max-width: 768px) {
         .profile-form-container {
@@ -116,108 +201,279 @@
     
     <div class="form-note">
         <p>為了提供更好的服務體驗，請填寫以下基本資料</p>
+        <p><strong>注意：所有用戶都需要連接錢包地址</strong></p>
     </div>
 
     <form id="profileForm">
         <div class="form-group">
-            <label for="age">年齡：</label>
+            <label for="age" class="required-field">年齡：</label>
             <input type="number" id="age" name="age" min="18" max="120" required placeholder="請輸入您的年齡">
             <div class="instructions">請輸入18-120歲之間的數字</div>
         </div>
         
         <div class="form-group">
-            <label for="gender">性別：</label>
+            <label for="gender" class="required-field">性別：</label>
             <select id="gender" name="gender" required>
                 <option value="">請選擇性別</option>
                 <option value="male">男性</option>
                 <option value="female">女性</option>
             </select>
         </div>
+
+        <div class="form-group">
+            <label for="insurance_officer" class="required-field">選擇身份：</label>
+            <select id="insurance_officer" name="insurance_officer" required>
+                <option value="">請選擇身份</option>
+                <option value="0">一般用戶</option>
+                <option value="1">保險管理員</option>
+            </select>
+            <div class="role-description" id="roleDescription">
+                <!-- 身份描述將在這裡動態顯示 -->
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="required-field">連接錢包：</label>
+            <div class="wallet-required">所有用戶都必須連接錢包</div>
+            <div class="wallet-section" id="walletSection">
+                <button type="button" class="wallet-btn" id="connectWalletBtn">
+                    連接 MetaMask 錢包
+                </button>
+                <div id="walletInfo" style="display: none;">
+                    <div class="wallet-connected">
+                        ✅ 錢包已連接
+                    </div>
+                    <div class="wallet-address" id="walletAddress"></div>
+                </div>
+            </div>
+            <div class="instructions">所有用戶都需要連接錢包以進行區塊鏈相關操作</div>
+            <input type="hidden" id="wallet" name="wallet">
+        </div>
         
-        <button type="submit" class="submit-btn">提交資料</button>
+        <button type="submit" class="submit-btn" id="submitBtn" disabled>提交資料</button>
     </form>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    document.getElementById('profileForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const formData = {
-            age: e.target.age.value,
-            gender: e.target.gender.value
-        };
+    // 檢查 MetaMask 是否安裝
+    function checkMetaMask() {
+        return typeof window.ethereum !== 'undefined';
+    }
 
-        // 表單驗證
-        if (!formData.age || !formData.gender) {
-            alert('請填寫所有必填欄位');
-            return;
-        }
-
-        if (formData.age < 18 || formData.age > 120) {
-            alert('請輸入有效的年齡（18-120歲）');
-            return;
+    // 連接 MetaMask 錢包
+    async function connectMetaMask() {
+        if (!checkMetaMask()) {
+            alert('請安裝 MetaMask 錢包擴展程式');
+            window.open('https://metamask.io/download.html', '_blank');
+            return null;
         }
 
         try {
-            const response = await fetch('/user/complete-profile', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify(formData)
+            // 請求帳戶訪問
+            const accounts = await window.ethereum.request({
+                method: 'eth_requestAccounts'
             });
-
-            const result = await response.json();
-            if (result.success) {
-                // 顯示成功訊息
-                const submitBtn = document.querySelector('.submit-btn');
-                submitBtn.textContent = '提交成功！';
-                submitBtn.style.background = 'linear-gradient(135deg, #a8e6cf, #88d4ab)';
-                
-                // 延遲跳轉
-                setTimeout(() => {
-                    if (result.redirect) {
-                        window.location.href = result.redirect;
-                    } else {
-                        window.location.href = '/';
-                    }
-                }, 1500);
-            } else {
-                alert('錯誤: ' + (result.error || '提交失敗，請重試'));
+            
+            if (accounts.length > 0) {
+                const walletAddress = accounts[0];
+                return walletAddress;
             }
+            return null;
         } catch (error) {
-            console.error('Error:', error);
-            alert('提交失敗，請檢查網路連線後重試');
+            console.error('錢包連接錯誤:', error);
+            if (error.code === 4001) {
+                alert('用戶拒絕連接錢包');
+            } else {
+                alert('錢包連接失敗，請重試');
+            }
+            return null;
         }
-    });
+    }
 
-    // 自動聚焦到年齡輸入框
+    // 更新身份描述
+    function updateRoleDescription(roleValue) {
+        const descriptionElement = document.getElementById('roleDescription');
+        let description = '';
+        
+        switch(roleValue) {
+            case '0':
+                description = '使用平台基本服務，購買保險產品';
+                break;
+            case '1':
+                description = '管理保險產品，處理理賠申請';
+                break;
+            default:
+                description = '請選擇您的身份';
+        }
+        
+        descriptionElement.textContent = description;
+    }
+
+    // 初始化頁面
     document.addEventListener('DOMContentLoaded', function() {
         const ageInput = document.getElementById('age');
+        const genderSelect = document.getElementById('gender');
+        const roleSelect = document.getElementById('insurance_officer');
+        const connectWalletBtn = document.getElementById('connectWalletBtn');
+        const walletInfo = document.getElementById('walletInfo');
+        const walletAddress = document.getElementById('walletAddress');
+        const walletInput = document.getElementById('wallet');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // 自動聚焦到年齡輸入框
         if (ageInput) {
             ageInput.focus();
         }
-    });
 
-    // 即時驗證
-    document.getElementById('age').addEventListener('input', function() {
-        const age = parseInt(this.value);
-        if (age < 18 || age > 120) {
-            this.style.borderColor = '#ff6b6b';
-        } else {
-            this.style.borderColor = '#88d4ab';
-        }
-    });
+        // 身份選擇變化事件
+        roleSelect.addEventListener('change', function() {
+            updateRoleDescription(this.value);
+            updateSubmitButton();
+        });
 
-    document.getElementById('gender').addEventListener('change', function() {
-        if (this.value) {
-            this.style.borderColor = '#88d4ab';
-        } else {
-            this.style.borderColor = '#e0e0e0';
+        // 初始更新身份描述
+        updateRoleDescription(roleSelect.value);
+
+        // 連接錢包按鈕點擊事件
+        connectWalletBtn.addEventListener('click', async function() {
+            connectWalletBtn.disabled = true;
+            connectWalletBtn.textContent = '連接中...';
+            
+            const address = await connectMetaMask();
+            
+            if (address) {
+                // 顯示錢包信息
+                connectWalletBtn.style.display = 'none';
+                walletInfo.style.display = 'block';
+                walletAddress.textContent = address;
+                walletInput.value = address;
+                
+                // 更新錢包區域樣式
+                document.getElementById('walletSection').classList.add('active');
+                
+                // 啟用提交按鈕
+                updateSubmitButton();
+            } else {
+                connectWalletBtn.disabled = false;
+                connectWalletBtn.textContent = '連接 MetaMask 錢包';
+            }
+        });
+
+        // 更新提交按鈕狀態
+        function updateSubmitButton() {
+            const hasAge = ageInput.value.trim() !== '';
+            const hasGender = genderSelect.value !== '';
+            const hasRole = roleSelect.value !== '';
+            const hasWallet = walletInput.value.trim() !== '';
+            
+            if (hasAge && hasGender && hasRole && hasWallet) {
+                submitBtn.disabled = false;
+                submitBtn.title = '';
+            } else {
+                submitBtn.disabled = true;
+                if (!hasWallet) {
+                    submitBtn.title = '請先連接錢包';
+                } else {
+                    submitBtn.title = '請填寫所有必填欄位';
+                }
+            }
         }
+
+        // 表單提交處理
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                age: e.target.age.value,
+                gender: e.target.gender.value,
+                insurance_officer: e.target.insurance_officer.value,
+                wallet: walletInput.value
+            };
+
+            // 表單驗證
+            if (!formData.age || !formData.gender || !formData.insurance_officer || !formData.wallet) {
+                alert('請填寫所有必填欄位');
+                return;
+            }
+
+            if (formData.age < 18 || formData.age > 120) {
+                alert('請輸入有效的年齡（18-120歲）');
+                return;
+            }
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.textContent = '提交中...';
+
+                const response = await fetch('/user/complete-profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    // 顯示成功訊息
+                    submitBtn.textContent = '提交成功！';
+                    submitBtn.style.background = 'linear-gradient(135deg, #a8e6cf, #88d4ab)';
+                    
+                    // 延遲跳轉
+                    setTimeout(() => {
+                        if (result.redirect) {
+                            window.location.href = result.redirect;
+                        } else {
+                            window.location.href = '/';
+                        }
+                    }, 1500);
+                } else {
+                    alert('錯誤: ' + (result.error || '提交失敗，請重試'));
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '提交資料';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('提交失敗，請檢查網路連線後重試');
+                submitBtn.disabled = false;
+                submitBtn.textContent = '提交資料';
+            }
+        });
+
+        // 即時驗證和更新提交按鈕狀態
+        ageInput.addEventListener('input', function() {
+            const age = parseInt(this.value);
+            if (age < 18 || age > 120) {
+                this.style.borderColor = '#ff6b6b';
+            } else {
+                this.style.borderColor = '#88d4ab';
+            }
+            updateSubmitButton();
+        });
+
+        genderSelect.addEventListener('change', function() {
+            if (this.value) {
+                this.style.borderColor = '#88d4ab';
+            } else {
+                this.style.borderColor = '#e0e0e0';
+            }
+            updateSubmitButton();
+        });
+
+        roleSelect.addEventListener('change', function() {
+            if (this.value) {
+                this.style.borderColor = '#88d4ab';
+            } else {
+                this.style.borderColor = '#e0e0e0';
+            }
+            updateSubmitButton();
+        });
+
+        // 初始更新提交按鈕狀態
+        updateSubmitButton();
     });
 </script>
 {% endblock %}

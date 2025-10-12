@@ -1113,6 +1113,56 @@ def vote_claim(dao_address):
         })
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+
+
+# app.py 或 routes.py
+# app.py 或 routes.py
+# app.py 或 routes.py
+@app.route('/claims/success-cases')
+def claims_success_cases():
+    # 模擬成功理賠案例數據 - 使用 ETH 計價，調整為較小的數字
+    success_cases = [
+        {
+            'id': 1,
+            'title': '車禍意外理賠',
+            'category': '汽車保險',
+            'amount': '0.32',  # ETH - 調整為較小數字
+            'time': '2024-01-15',
+            'description': '客戶遭遇車禍事故，提交相關證明文件後，3個工作日內完成理賠審核。',
+            'status': '已理賠',
+            'user_name': '張先生',
+            'age': 35,
+            'location': '台北市'
+        },
+        {
+            'id': 2,
+            'title': '醫療住院理賠',
+            'category': '健康保險',
+            'amount': '0.18',  # ETH - 調整為較小數字
+            'time': '2024-01-10',
+            'description': '客戶因急性闌尾炎住院治療，提供醫療單據後快速完成理賠。',
+            'status': '已理賠',
+            'user_name': '李小姐',
+            'age': 28,
+            'location': '新北市'
+        },
+        # ... 其他案例也相應調整金額
+    ]
+    
+    # 統計數據 - 使用 ETH，調整為較小數字
+    stats = {
+        'total_cases': 8,  # 調整為較小數字
+        'total_amount_eth': 1.85,  # 總 ETH 金額 - 調整為較小數字
+        'avg_processing_time': 1.5,  # 調整為較小數字
+        'success_rate': 96.7  # 調整為較小數字
+    }
+    
+    return render_template('claims/success_cases.html', 
+                         cases=success_cases, 
+                         stats=stats)
+
 #-----------------------
 # 啟動網站
 #-----------------------

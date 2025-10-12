@@ -435,7 +435,7 @@ def auth_google():
 @login_required
 def complete_profile_form():
     if not session.get('needs_profile'):
-        return redirect(url_for('main.index'))
+        return redirect(url_for('/'))
     return render_template('user/complete_profile.html')
 
 # 修改后的补全资料提交处理
@@ -453,7 +453,7 @@ def complete_profile():
         wallet = data.get('wallet', '').strip()
         
         # 字段存在性检查
-        if age is None or gender is None or insurance_officer is None:
+        if age is None or gender is None or insurance_officer is None or not wallet:
             return jsonify({'success': False, 'error': '所有資料必填'}), 400
 
         # 年龄转换与验证
@@ -477,14 +477,9 @@ def complete_profile():
         except ValueError:
             return jsonify({'success': False, 'error': '身份需為有效數字'}), 400
 
-        # 如果選擇管理員身份，需要錢包地址
-        if insurance_officer == 1 and not wallet:
-            return jsonify({'success': False, 'error': '管理員身份需要連接錢包'}), 400
-
-        # 驗證錢包地址格式（如果提供）
-        if wallet:
-            if not wallet.startswith('0x') or len(wallet) != 42:
-                return jsonify({'success': False, 'error': '無效的錢包地址格式'}), 400
+        # 驗證錢包地址格式（所有用戶都需要）
+        if not wallet.startswith('0x') or len(wallet) != 42:
+            return jsonify({'success': False, 'error': '無效的錢包地址格式'}), 400
 
         # 获取数据库连接
         conn = db.get_connection()
@@ -500,20 +495,19 @@ def complete_profile():
                 conn.close()
                 return jsonify({'success': False, 'error': '用戶不存在'}), 404
 
-            # 檢查錢包地址是否已被其他用戶使用（如果提供了錢包地址）
-            if wallet:
-                cursor.execute("SELECT gmail FROM `user` WHERE wallet = %s AND gmail != %s", 
-                             (wallet, current_user.id))
-                if cursor.fetchone():
-                    conn.close()
-                    return jsonify({'success': False, 'error': '該錢包地址已被其他用戶使用'}), 400
+            # 檢查錢包地址是否已被其他用戶使用
+            cursor.execute("SELECT gmail FROM `user` WHERE wallet = %s AND gmail != %s", 
+                         (wallet, current_user.id))
+            if cursor.fetchone():
+                conn.close()
+                return jsonify({'success': False, 'error': '該錢包地址已被其他用戶使用'}), 400
 
             # 执行更新
             cursor.execute("""
                 UPDATE `user` 
                 SET age = %s, gender = %s, insurance_officer = %s, wallet = %s
                 WHERE gmail = %s
-            """, (age, gender, insurance_officer, wallet if wallet else None, current_user.id))
+            """, (age, gender, insurance_officer, wallet, current_user.id))
             
             # 提交事务
             conn.commit()

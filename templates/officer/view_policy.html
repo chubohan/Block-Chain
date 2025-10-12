@@ -55,6 +55,11 @@
         color: white;
     }
 
+    .status-deleted {
+        background: linear-gradient(135deg, #ff6b6b, #ff5252);
+        color: white;
+    }
+
     .section-card {
         background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
         padding: 30px;
@@ -176,6 +181,29 @@
         box-shadow: 0 10px 25px rgba(107, 196, 156, 0.4);
     }
 
+    .btn-delete {
+        background: linear-gradient(135deg, #ff6b6b, #ff5252);
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 20px rgba(255, 107, 107, 0.3);
+        font-size: 1rem;
+        text-decoration: none;
+        display: inline-block;
+        margin-right: 15px;
+        margin-bottom: 10px;
+    }
+
+    .btn-delete:hover {
+        background: linear-gradient(135deg, #ff5252, #ff0000);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(255, 0, 0, 0.4);
+    }
+
     .btn-back {
         background: linear-gradient(135deg, #ffd28b, #ffb347);
         color: white;
@@ -282,7 +310,7 @@
             flex-direction: column;
         }
 
-        .btn-primary, .btn-edit, .btn-back, .btn-disabled {
+        .btn-primary, .btn-edit, .btn-delete, .btn-back, .btn-disabled {
             width: 100%;
             margin-right: 0;
             text-align: center;
@@ -310,19 +338,30 @@
     <!-- 頁面標頭 -->
     <div class="officer-header">
         <h1>保單詳情</h1>
-        <div class="policy-status {% if policy.status == 0 %}status-draft{% else %}status-final{% endif %}">
-            {% if policy.status == 0 %}草稿{% else %}已完成{% endif %}
+        <div class="policy-status {% if policy.status == 0 %}status-draft{% elif policy.status == 1 %}status-final{% else %}status-deleted{% endif %}">
+            {% if policy.status == 0 %}草稿
+            {% elif policy.status == 1 %}已完成
+            {% else %}客戶已刪除鏈上資料
+            {% endif %}
         </div>
     </div>
 
     <!-- 操作按鈕 -->
     <div class="action-buttons">
         <a href="/officer/client-policies?client_gmail={{ policy.client_gmail }}" class="btn-back">⬅️ 返回保單列表</a>
+        
+        <!-- 根據保單狀態顯示不同按鈕 -->
         {% if policy.status == 0 %}
         <a href="/officer/upload-policy-page?policy_id={{ policy.id }}" class="btn-edit">✏️ 編輯保單</a>
+        {% elif policy.status == 2 %}
+        <!-- status=2 時顯示刪除按鈕，直接刪除該保單 -->
+        <button id="deletePolicyBtn" class="btn-delete" data-policy-id="{{ policy.id }}">
+            🗑️ 確認刪除保單
+        </button>
         {% else %}
         <span class="btn-disabled">🔒 已鎖定（無法編輯）</span>
         {% endif %}
+        
         <a href="/officer/client-page" class="btn-primary">👥 客戶列表</a>
     </div>
 
@@ -455,7 +494,7 @@
         <div class="pdf-section">
             <span class="pdf-icon">📄</span>
             <div class="pdf-filename">{{ policy.pdf_filename }}</div>
-            <a href="/officer/download-policy/{{ policy.id }}" class="btn-download">⬇️ 下載 PDF</a>
+            <a href="http://127.0.0.1:8080/ipfs/{{ policy.pdf_hash }}" class="btn-download">查看PDF</a>
         </div>
     </div>
     {% endif %}
@@ -473,10 +512,60 @@
             <div class="info-item">
                 <span class="info-label">保單狀態</span>
                 <span class="info-value">
-                    {% if policy.status == 0 %}草稿（可編輯）{% else %}已完成（已鎖定）{% endif %}
+                    {% if policy.status == 0 %}草稿（可編輯）
+                    {% elif policy.status == 2 %}客戶已刪除鏈上資料，請確認後刪除
+                    {% else %}已完成（已鎖定）
+                    {% endif %}
                 </span>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteBtn = document.getElementById('deletePolicyBtn');
+    
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', function() {
+            const policyId = this.getAttribute('data-policy-id');
+            const policyNumber = '{{ policy.policy_number }}';
+            
+            if (confirm(`確定要刪除保單「${policyNumber}」嗎？此操作無法復原！`)) {
+                // 顯示載入狀態
+                deleteBtn.innerHTML = '⏳ 刪除中...';
+                deleteBtn.disabled = true;
+                
+                // 發送刪除請求
+                fetch(`/officer/delete-policy-draft/${policyId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        // 刪除成功後跳轉到客戶保單列表
+                        window.location.href = `/officer/client-policies?client_gmail={{ policy.client_gmail }}`;
+                    } else {
+                        alert('刪除失敗: ' + data.message);
+                        // 恢復按鈕狀態
+                        deleteBtn.innerHTML = '🗑️ 確認刪除保單';
+                        deleteBtn.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('刪除過程中發生錯誤');
+                    // 恢復按鈕狀態
+                    deleteBtn.innerHTML = '🗑️ 確認刪除保單';
+                    deleteBtn.disabled = false;
+                });
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

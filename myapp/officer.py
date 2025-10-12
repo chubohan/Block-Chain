@@ -103,31 +103,72 @@ def get_clients():
         conn.close()
 
     return jsonify({'success': True, 'clients': clients})
-@officer_bp.route('/delete-client', methods=['POST'])
+@officer_bp.route('/delete_policy/<policy_number>', methods=['POST'])
 @login_required
-def delete_client():
-    if not getattr(current_user, 'insurance_officer', False):
-        return jsonify({'success': False, 'message': '無權限操作'}), 403
-
-    data = request.get_json()
-    client_gmail = data.get('client_gmail')
-
-    if not client_gmail:
-        return jsonify({'success': False, 'message': '缺少客戶Gmail'}), 400
-
+def delete_policy(policy_number):  # 參數名稱改為 policy_number
+    user_email = current_user.id
+    
+    conn = None
     try:
         conn = db.get_connection()
-        with conn.cursor() as cursor:
-            cursor.execute("""
-                DELETE FROM insurance_officer_clients 
-                WHERE officer_gmail = %s AND client_gmail = %s
-            """, (current_user.id, client_gmail))
-            conn.commit()
-            return jsonify({'success': True})
+        cursor = conn.cursor()
+
+        print(f"開始處理保單: {policy_number}, 用戶: {user_email}")
+
+        # 檢查保單是否存在且屬於當前用戶
+        cursor.execute("""
+            SELECT policy_id, client_gmail 
+            FROM policy 
+            WHERE policy_id = %s AND client_gmail = %s
+        """, (policy_number, user_email))
+        
+        policy = cursor.fetchone()
+        
+        if not policy:
+            return jsonify({'success': False, 'message': '保單不存在或您沒有權限刪除'})
+
+        # 在同一個 transaction 中處理三個資料表的記錄
+        # 先刪除 authorization 表中的相關授權記錄
+        cursor.execute("""
+            DELETE FROM authorization 
+            WHERE policy_number = %s
+        """, (policy_number,))
+        auth_deleted = cursor.rowcount
+
+        # 修改：將 policy_draft 的 status 更新為 2 而不是刪除
+        cursor.execute("""
+            UPDATE policy_draft 
+            SET status = 2 
+            WHERE client_gmail = %s AND policy_number = %s
+        """, (user_email, policy_number))
+        draft_updated = cursor.rowcount
+
+        # 刪除 policy
+        cursor.execute("""
+            DELETE FROM policy 
+            WHERE client_gmail = %s AND policy_id = %s
+        """, (user_email, policy_number))
+        policy_deleted = cursor.rowcount
+
+        conn.commit()
+        
+        print(f"處理結果 - 授權表: {auth_deleted} 條, 草稿表: {draft_updated} 條更新, 政策表: {policy_deleted} 條")
+        
+        return jsonify({
+            'success': True, 
+            'message': f'保單及相關授權處理成功！',
+            'details': {
+                'auth_deleted': auth_deleted,
+                'draft_updated': draft_updated,
+                'policy_deleted': policy_deleted
+            }
+        })
+                
     except Exception as e:
         if conn:
             conn.rollback()
-        return jsonify({'success': False, 'message': str(e)}), 500
+        print(f"處理保單錯誤: {str(e)}")
+        return jsonify({'success': False, 'message': f'處理過程中發生錯誤: {str(e)}'})
     finally:
         if conn:
             conn.close()
@@ -513,3 +554,56 @@ def update_policy():
         return jsonify({'success': False, 'message': f'更新失敗：{str(e)}'})
     finally:
         conn.close()
+
+#保險員確認刪除保單
+@officer_bp.route('/delete-policy-draft/<int:policy_id>', methods=['POST'])
+@login_required
+def delete_policy_draft(policy_id):
+    """刪除指定的保單草稿"""
+    if not getattr(current_user, 'insurance_officer', False):
+        return jsonify({'success': False, 'message': '無權限訪問'})
+    
+    conn = None
+    try:
+        conn = db.get_connection()
+        cursor = conn.cursor()
+
+        # 檢查保單是否存在且屬於當前保險員
+        cursor.execute("""
+            SELECT id, policy_number, status, client_gmail 
+            FROM policy_draft 
+            WHERE id = %s AND officer_gmail = %s
+        """, (policy_id, current_user.id))
+        
+        policy = cursor.fetchone()
+        
+        if not policy:
+            return jsonify({'success': False, 'message': '保單不存在或您沒有權限刪除'})
+
+        # 刪除保單草稿
+        cursor.execute("""
+            DELETE FROM policy_draft 
+            WHERE id = %s AND officer_gmail = %s
+        """, (policy_id, current_user.id))
+        
+        deleted_count = cursor.rowcount
+        conn.commit()
+
+        return jsonify({
+            'success': True, 
+            'message': f'成功刪除保單: {policy["policy_number"]}',
+            'deleted_policy': {
+                'id': policy_id,
+                'policy_number': policy['policy_number'],
+                'client_gmail': policy['client_gmail']
+            }
+        })
+                
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        print(f"刪除保單草稿錯誤: {str(e)}")
+        return jsonify({'success': False, 'message': f'刪除過程中發生錯誤: {str(e)}'})
+    finally:
+        if conn:
+            conn.close()

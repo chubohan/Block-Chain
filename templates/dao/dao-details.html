@@ -641,7 +641,7 @@
         </button>
 
         <!-- 中間標題 -->
-        <h1 class="dao-title" id="daoTitle" style="margin: 0 auto;">DAO 詳細資訊</h1>
+        <h1 class="dao-title" id="daoTitle" style="margin: 0 auto;"> 詳細資訊</h1>
     </div>
 
     <!-- 獎金庫顯示區塊 -->
@@ -714,10 +714,10 @@
             </div>
             <div id="membershipActions" style="margin-top: 20px;">
                 <button id="joinDaoBtn" class="btn-primary" style="display: none;">
-                    <i class="fas fa-sign-in-alt"></i> 加入計畫
+                    <i class="fas fa-sign-in-alt"></i> 加入保險計畫
                 </button>
                 <button id="leaveDaoBtn" class="btn-danger" style="display: none;">
-                    <i class="fas fa-sign-out-alt"></i> 退出計畫
+                    <i class="fas fa-sign-out-alt"></i> 退出保險計畫
                 </button>
                 <div id="premiumInfo" style="margin-top: 15px; display: none;">
                     <div class="info-item">
@@ -811,7 +811,7 @@
     
     // 如果沒有地址參數，返回首頁
     if (!daoAddress) {
-        alert("未指定 DAO 地址");
+        alert("未指定 提案投票 地址");
         window.location.href = "index.html";
     }
     
@@ -821,7 +821,7 @@
     let daoContract;
     let isMember = false;
     
-    const daoABI =[
+const daoABI = [
 	{
 		"inputs": [
 			{
@@ -847,6 +847,31 @@
 		],
 		"stateMutability": "nonpayable",
 		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "member",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "timestamp",
+				"type": "uint256"
+			}
+		],
+		"name": "AutoPayment",
+		"type": "event"
 	},
 	{
 		"anonymous": false,
@@ -912,6 +937,25 @@
 				"internalType": "address",
 				"name": "member",
 				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "reason",
+				"type": "string"
+			}
+		],
+		"name": "MemberAutoRemoved",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "member",
+				"type": "address"
 			}
 		],
 		"name": "MemberLeft",
@@ -966,6 +1010,58 @@
 		],
 		"name": "Voted",
 		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "GRACE_PERIOD",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "PAYMENT_INTERVAL",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "member",
+				"type": "address"
+			}
+		],
+		"name": "autoLeaveAfterClaim",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address[]",
+				"name": "memberList",
+				"type": "address[]"
+			}
+		],
+		"name": "batchRemoveDelinquentMembers",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
 	},
 	{
 		"inputs": [
@@ -1266,6 +1362,40 @@
 				"type": "address"
 			}
 		],
+		"name": "getMemberInfo",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "member",
+				"type": "address"
+			}
+		],
 		"name": "getMemberPaidTotal",
 		"outputs": [
 			{
@@ -1280,6 +1410,25 @@
 	{
 		"inputs": [],
 		"name": "getMonthlyPremium",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "member",
+				"type": "address"
+			}
+		],
+		"name": "getNextPaymentTime",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -1368,6 +1517,25 @@
 		"inputs": [
 			{
 				"internalType": "address",
+				"name": "member",
+				"type": "address"
+			}
+		],
+		"name": "isInGracePeriod",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
 				"name": "user",
 				"type": "address"
 			}
@@ -1411,7 +1579,35 @@
 				"type": "address"
 			}
 		],
-		"name": "memberPaidTotal",
+		"name": "members",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "isMember",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "lastPaymentTime",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "paidTotal",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "joinTime",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "monthlyPremium",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -1426,29 +1622,16 @@
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "",
+				"name": "member",
 				"type": "address"
 			}
 		],
-		"name": "members",
+		"name": "needsAutoPayment",
 		"outputs": [
 			{
 				"internalType": "bool",
 				"name": "",
 				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "monthlyPremium",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -1478,6 +1661,45 @@
 		"name": "payPremium",
 		"outputs": [],
 		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "processAutoPayment",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "member",
+				"type": "address"
+			}
+		],
+		"name": "removeDelinquentMember",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "member",
+				"type": "address"
+			}
+		],
+		"name": "shouldRemoveForNonPayment",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -1523,59 +1745,114 @@
 
     // 加载DAO信息
     async function loadDAOInfo() {
-    console.log("載入 DAO 資訊中...", daoAddress, daoContract);
-    try {
-        const daoName = await daoContract.getDAOName();
-        console.log("daoName:", daoName);
+        console.log("載入 DAO 資訊中...", daoAddress, daoContract);
+        try {
+            const daoName = await daoContract.getDAOName();
+            console.log("daoName:", daoName);
 
-        const monthlyPremium = await daoContract.getMonthlyPremium();
-        console.log("monthlyPremium:", monthlyPremium.toString());
+            const monthlyPremium = await daoContract.getMonthlyPremium();
+            console.log("monthlyPremium:", monthlyPremium.toString());
 
-        const memberCount = await daoContract.getMemberCount();
-        console.log("memberCount:", memberCount.toString());
+            const memberCount = await daoContract.getMemberCount();
+            console.log("memberCount:", memberCount.toString());
 
-        const totalClaims = await daoContract.getTotalClaims();
-        console.log("totalClaims:", totalClaims.toString());
+            const totalClaims = await daoContract.getTotalClaims();
+            console.log("totalClaims:", totalClaims.toString());
 
-        const treasuryBalance = await daoContract.getTreasuryBalance();
-        console.log("treasuryBalance:", treasuryBalance.toString());
+            const treasuryBalance = await daoContract.getTreasuryBalance();
+            console.log("treasuryBalance:", treasuryBalance.toString());
 
-        const claimDescription = await daoContract.claimDescription();
-        console.log("claimDescription:", claimDescription);
+            const claimDescription = await daoContract.claimDescription();
+            console.log("claimDescription:", claimDescription);
 
-        const claimPDFHash = await daoContract.claimPDFHash();
-        console.log("claimPDFHash:", claimPDFHash);
+            const claimPDFHash = await daoContract.claimPDFHash();
+            console.log("claimPDFHash:", claimPDFHash);
 
-        // 設置頁面標題和顯示名稱
-        document.title = `${daoName} - DAO 詳細資訊`;
-        document.getElementById("daoTitle").textContent = daoName;
-        
-        document.getElementById("monthlyPremium").textContent = ethers.utils.formatEther(monthlyPremium);
-        document.getElementById("memberCount").textContent = memberCount.toString();
-        document.getElementById("totalClaims").textContent = totalClaims.toString();
-        document.getElementById("treasuryBalance").textContent = ethers.utils.formatEther(treasuryBalance) + " ETH";
-        document.getElementById("lastUpdated").textContent = new Date().toLocaleString();
-        
-        // 顯示理賠內容
-        document.getElementById("claimDescriptionText").textContent = claimDescription || "無說明內容";
-        
-        // 顯示 PDF 連結
-        const pdfLink = document.getElementById("pdfLink");
-        const pdfSection = document.getElementById("pdfSection");
-        if (claimPDFHash && claimPDFHash !== "") {
-            pdfLink.href = `https://ipfs.io/ipfs/${claimPDFHash}`;
-            pdfLink.textContent = "查看 PDF 申請表 (IPFS)";
-            pdfLink.style.display = "inline";
-        } else {
-            if (pdfLink) pdfLink.style.display = "none";
-            if (pdfSection) pdfSection.innerHTML = "<span style='color: #666;'>無 PDF 申請表</span>";
+            // 設置頁面標題和顯示名稱
+            document.title = `${daoName} -詳細資訊`;
+            document.getElementById("daoTitle").textContent = daoName;
+            
+            document.getElementById("monthlyPremium").textContent = ethers.utils.formatEther(monthlyPremium);
+            document.getElementById("memberCount").textContent = memberCount.toString();
+            document.getElementById("totalClaims").textContent = totalClaims.toString();
+            document.getElementById("treasuryBalance").textContent = ethers.utils.formatEther(treasuryBalance) + " ETH";
+            document.getElementById("lastUpdated").textContent = new Date().toLocaleString();
+            
+            // 顯示理賠內容
+            document.getElementById("claimDescriptionText").textContent = claimDescription || "無說明內容";
+            
+            // 顯示 PDF 連結
+            const pdfLink = document.getElementById("pdfLink");
+            const pdfSection = document.getElementById("pdfSection");
+            if (claimPDFHash && claimPDFHash !== "") {
+                pdfLink.href = `https://ipfs.io/ipfs/${claimPDFHash}`;
+                pdfLink.textContent = "查看 PDF 申請表 (IPFS)";
+                pdfLink.style.display = "inline";
+            } else {
+                if (pdfLink) pdfLink.style.display = "none";
+                if (pdfSection) pdfSection.innerHTML = "<span style='color: #666;'>無 PDF 申請表</span>";
+            }
+            
+        } catch (err) {
+            console.error("載入DAO資訊失敗:", err);
         }
-        
-    } catch (err) {
-        console.error("載入DAO資訊失敗:", err);
     }
-}
 
+    // 🆕 計算平均理賠金額
+    async function calculateAverageClaimAmount() {
+        try {
+            const treasuryBalance = await daoContract.getTreasuryBalance();
+            const memberCount = await daoContract.getMemberCount();
+            
+            if (memberCount.eq(0)) {
+                return ethers.utils.parseEther("0");
+            }
+            
+            // 平均金額 = 獎金池總額 / 會員數
+            const averageAmount = treasuryBalance.div(memberCount);
+            
+            console.log("獎金池總額:", ethers.utils.formatEther(treasuryBalance), "ETH");
+            console.log("會員數:", memberCount.toString());
+            console.log("平均理賠金額:", ethers.utils.formatEther(averageAmount), "ETH");
+            
+            return averageAmount;
+        } catch (err) {
+            console.error("計算平均金額失敗:", err);
+            return ethers.utils.parseEther("0");
+        }
+    }
+
+    // 🆕 設置理賠金額為平均金額
+    async function setupClaimAmount() {
+        try {
+            const claimAmountInput = document.getElementById("claimAmount");
+            const averageAmount = await calculateAverageClaimAmount();
+            
+            if (averageAmount.gt(0)) {
+                const formattedAmount = ethers.utils.formatEther(averageAmount);
+                claimAmountInput.value = formattedAmount;
+                claimAmountInput.disabled = true;
+                claimAmountInput.title = "理賠金額已自動設定為獎金池平均金額";
+                
+                // 添加提示信息
+                const existingHint = document.getElementById("averageAmountHint");
+                if (!existingHint) {
+                    const hintElement = document.createElement("div");
+                    hintElement.id = "averageAmountHint";
+                    hintElement.style.marginTop = "5px";
+                    hintElement.style.fontSize = "12px";
+                    hintElement.style.color = "#28a745";
+                    hintElement.innerHTML = `<i class="fas fa-info-circle"></i> 理賠金額已自動設定為獎金池平均金額: ${formattedAmount} ETH`;
+                    claimAmountInput.parentNode.appendChild(hintElement);
+                }
+            } else {
+                claimAmountInput.placeholder = "無法計算平均金額";
+                claimAmountInput.disabled = true;
+            }
+        } catch (err) {
+            console.error("設置理賠金額失敗:", err);
+        }
+    }
 
     // 顯示支付保費界面
     function showPremiumPayment() {
@@ -1604,14 +1881,12 @@
             
             await tx.wait();
             
-            
-            
             // 刷新狀態
             await checkMembershipStatus();
-            await loadDAOInfo();
             hidePremiumPayment();
-            
-            alert("成功加入 DAO！");
+            await loadDAOInfo();
+           
+            alert("成功加入提案投票！");
             
         } catch (err) {
             console.error("支付保費失敗:", err);
@@ -1620,6 +1895,177 @@
             document.getElementById("payPremiumBtn").disabled = false;
             document.getElementById("payPremiumBtn").textContent = "支付保費加入";
         }
+    }
+
+    // 🆕 檢查會員狀態並顯示自動扣款信息
+    async function checkMembershipStatus() {
+        try {
+            isMember = await daoContract.isMember(walletAddress);
+            const monthlyPremium = await daoContract.getMonthlyPremium();
+            
+            if (isMember) {
+                // 🆕 檢查自動扣款狀態
+                const needsPayment = await daoContract.needsAutoPayment(walletAddress);
+                const nextPaymentTime = await daoContract.getNextPaymentTime(walletAddress);
+                const isInGracePeriod = await daoContract.isInGracePeriod(walletAddress);
+                
+                document.getElementById("memberStatus").innerHTML = '<span class="status-approved">✅ 您已經是會員</span>';
+                document.getElementById("joinDaoBtn").style.display = "none";
+                document.getElementById("leaveDaoBtn").style.display = "block";
+                document.getElementById("premiumInfo").style.display = "none";
+                document.getElementById("nonMemberMessage").style.display = "none";
+                
+                // 🆕 顯示付款狀態
+                await displayPaymentStatus(needsPayment, nextPaymentTime, isInGracePeriod);
+                
+                // 🆕 設置理賠金額
+                await setupClaimAmount();
+                
+                // 顯示會員專屬功能
+                document.getElementById("claimFormSection").style.display = "block";
+                document.getElementById("myClaimsSection").style.display = "block";
+                document.getElementById("claimsListSection").style.display = "block";
+                
+            } else {
+                document.getElementById("memberStatus").innerHTML = '<span class="status-rejected">❌ 您還不是會員</span>';
+                document.getElementById("joinDaoBtn").style.display = "block";
+                document.getElementById("leaveDaoBtn").style.display = "none";
+                document.getElementById("requiredPremium").textContent = ethers.utils.formatEther(monthlyPremium);
+                document.getElementById("nonMemberMessage").style.display = "block";
+                
+                // 隱藏會員專屬功能
+                document.getElementById("claimFormSection").style.display = "none";
+                document.getElementById("myClaimsSection").style.display = "none";
+                document.getElementById("claimsListSection").style.display = "none";
+            }
+            
+        } catch (err) {
+            console.error("檢查會員狀態失敗:", err);
+            document.getElementById("memberStatus").textContent = "檢查失敗";
+        }
+    }
+
+    // 🆕 顯示付款狀態
+    async function displayPaymentStatus(needsPayment, nextPaymentTime, isInGracePeriod) {
+        const membershipCard = document.querySelector('.membership-card');
+        
+        // 移除現有的付款狀態顯示
+        const existingStatus = document.getElementById('paymentStatus');
+        if (existingStatus) {
+            existingStatus.remove();
+        }
+        
+        const paymentStatusDiv = document.createElement('div');
+        paymentStatusDiv.id = 'paymentStatus';
+        paymentStatusDiv.style.marginTop = '15px';
+        paymentStatusDiv.style.padding = '15px';
+        paymentStatusDiv.style.borderRadius = '10px';
+        paymentStatusDiv.style.background = 'rgba(255, 255, 255, 0.8)';
+        
+        if (needsPayment) {
+            if (isInGracePeriod) {
+                paymentStatusDiv.innerHTML = `
+                    <div style="color: #856404; background: rgba(255, 243, 205, 0.8); padding: 10px; border-radius: 5px; border: 1px solid #ffeaa7;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>寬限期</strong>
+                        <p style="margin: 5px 0 0 0; font-size: 0.9em;">請在 ${formatTimeRemaining(nextPaymentTime + (7 * 24 * 60 * 60))} 內完成付款</p>
+                        <button id="autoPayBtn" class="btn-warning" style="margin-top: 10px; width: 100%;">
+                            <i class="fas fa-credit-card"></i> 立即支付本月保費
+                        </button>
+                    </div>
+                `;
+            } else {
+                paymentStatusDiv.innerHTML = `
+                    <div style="color: #721c24; background: rgba(248, 215, 218, 0.8); padding: 10px; border-radius: 5px; border: 1px solid #f5c6cb;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <strong>需要付款</strong>
+                        <p style="margin: 5px 0 0 0; font-size: 0.9em;">請完成本月付款以保持會員資格</p>
+                        <button id="autoPayBtn" class="btn-success" style="margin-top: 10px; width: 100%;">
+                            <i class="fas fa-credit-card"></i> 支付本月保費
+                        </button>
+                    </div>
+                `;
+            }
+            
+            // 添加自動付款事件監聽器
+            setTimeout(() => {
+                const autoPayBtn = document.getElementById('autoPayBtn');
+                if (autoPayBtn) {
+                    autoPayBtn.addEventListener('click', processAutoPayment);
+                }
+            }, 100);
+            
+        } else {
+            const nextPayTime = await daoContract.getNextPaymentTime(walletAddress);
+            paymentStatusDiv.innerHTML = `
+                <div style="color: #155724; background: rgba(212, 237, 218, 0.8); padding: 10px; border-radius: 5px; border: 1px solid #c3e6cb;">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>付款狀態正常</strong>
+                    <p style="margin: 5px 0 0 0; font-size: 0.9em;">下次付款時間: ${new Date(nextPayTime * 1000).toLocaleDateString()}</p>
+                </div>
+            `;
+        }
+        
+        membershipCard.appendChild(paymentStatusDiv);
+    }
+
+    // 🆕 處理自動付款
+    async function processAutoPayment() {
+        try {
+            const monthlyPremium = await daoContract.getMonthlyPremium();
+            const autoPayBtn = document.getElementById('autoPayBtn');
+            
+            autoPayBtn.disabled = true;
+            autoPayBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 處理中...';
+            
+            const tx = await daoContract.connect(signer).processAutoPayment({
+                value: monthlyPremium
+            });
+            
+            await tx.wait();
+            
+            autoPayBtn.innerHTML = '<i class="fas fa-check"></i> 付款成功';
+            autoPayBtn.style.background = '#28a745';
+            
+            // 刷新狀態
+            setTimeout(async () => {
+                await checkMembershipStatus();
+                await loadDAOInfo();
+            }, 2000);
+            
+        } catch (err) {
+            console.error("自動付款失敗:", err);
+            const autoPayBtn = document.getElementById('autoPayBtn');
+            autoPayBtn.disabled = false;
+            autoPayBtn.innerHTML = '<i class="fas fa-credit-card"></i> 重新嘗試付款';
+            alert("付款失敗: " + (err.message || "未知錯誤"));
+        }
+    }
+
+    // 🆕 格式化剩餘時間
+    function formatTimeRemaining(timestamp) {
+        const now = Math.floor(Date.now() / 1000);
+        const diff = timestamp - now;
+        
+        if (diff <= 0) return "已過期";
+        
+        const days = Math.floor(diff / (24 * 60 * 60));
+        const hours = Math.floor((diff % (24 * 60 * 60)) / (60 * 60));
+        
+        if (days > 0) {
+            return `${days}天${hours}小時`;
+        } else {
+            return `${hours}小時`;
+        }
+    }
+
+    // 🆕 定期檢查付款狀態
+    function startPaymentStatusChecker() {
+        setInterval(async () => {
+            if (isMember) {
+                await checkMembershipStatus();
+            }
+        }, 60000); // 每分鐘檢查一次
     }
 
     // 加載當前理賠
@@ -1765,142 +2211,138 @@
     }
 
     // 啟動倒計時
-    // 啟動倒計時 - 確保事件綁定正確
-function startCountdown(claimId, executeAfter, isMyClaim) {
-    const containerId = isMyClaim ? "myClaimsContainer" : "claimsContainer";
-    const timerElement = document.querySelector(`#${containerId} [data-claim-id="${claimId}"] .status-pending`);
-    
-    if (!timerElement) return;
+    function startCountdown(claimId, executeAfter, isMyClaim) {
+        const containerId = isMyClaim ? "myClaimsContainer" : "claimsContainer";
+        const timerElement = document.querySelector(`#${containerId} [data-claim-id="${claimId}"] .status-pending`);
+        
+        if (!timerElement) return;
 
-    const updateTimer = () => {
-        const remaining = executeAfter - Math.floor(Date.now()/1000);
-        if (remaining <= 0) {
-            timerElement.innerHTML = '<span class="status-ready">✅ 可執行</span>';
-            
-            // 移除投票按鈕
-            const claimItem = timerElement.closest(".claim-item");
-            const voteButtons = claimItem.querySelectorAll(".vote-btn, .voted-text");
-            voteButtons.forEach(button => button.remove());
-            
-            // 如果是我的理賠，顯示執行按鈕
-            if (isMyClaim) {
-                const actionButtons = claimItem.querySelector(".action-buttons");
+        const updateTimer = () => {
+            const remaining = executeAfter - Math.floor(Date.now()/1000);
+            if (remaining <= 0) {
+                timerElement.innerHTML = '<span class="status-ready">✅ 可執行</span>';
                 
-                // 檢查是否已經有一個執行按鈕（避免重複創建）
-                let executeBtn = actionButtons.querySelector(".execute-btn");
-                if (!executeBtn) {
-                    executeBtn = document.createElement("button");
-                    executeBtn.className = "execute-btn btn-success";
-                    executeBtn.setAttribute("data-claim-id", claimId);
-                    executeBtn.textContent = "執行理賠";
-                    actionButtons.appendChild(executeBtn);
+                // 移除投票按鈕
+                const claimItem = timerElement.closest(".claim-item");
+                const voteButtons = claimItem.querySelectorAll(".vote-btn, .voted-text");
+                voteButtons.forEach(button => button.remove());
+                
+                // 如果是我的理賠，顯示執行按鈕
+                if (isMyClaim) {
+                    const actionButtons = claimItem.querySelector(".action-buttons");
                     
-                    // 🆕 確保新創建的按鈕有正確的事件處理
-                    console.log("創建執行按鈕 for claim #" + claimId);
+                    // 檢查是否已經有一個執行按鈕（避免重複創建）
+                    let executeBtn = actionButtons.querySelector(".execute-btn");
+                    if (!executeBtn) {
+                        executeBtn = document.createElement("button");
+                        executeBtn.className = "execute-btn btn-success";
+                        executeBtn.setAttribute("data-claim-id", claimId);
+                        executeBtn.textContent = "執行理賠";
+                        actionButtons.appendChild(executeBtn);
+                        
+                        console.log("創建執行按鈕 for claim #" + claimId);
+                    }
                 }
+                
+                return;
             }
-            
-            return;
-        }
-        timerElement.textContent = `⌛ 剩餘時間: ${formatDuration(remaining)}`;
-        setTimeout(updateTimer, 1000);
-    };
-    updateTimer();
-}
+            timerElement.textContent = `⌛ 剩餘時間: ${formatDuration(remaining)}`;
+            setTimeout(updateTimer, 1000);
+        };
+        updateTimer();
+    }
 
     // 執行理賠
-    // 执行理赔 - 優化執行流程
-async function autoExecuteClaim(claimId) {
-    // 檢查是否正在執行中
-    if (window.executingClaim && window.executingClaim === claimId) {
-        alert("理賠正在執行中，請稍候...");
-        return;
-    }
-    
-    try {
-        // 標記正在執行
-        window.executingClaim = claimId;
-        
-        
-        
-        // 检查合约余额是否足够
-        const claim = await daoContract.getClaim(claimId);
-        const treasuryBalance = await daoContract.getTreasuryBalance();
-        
-        if (treasuryBalance.lt(claim.amount)) {
-            alert("合約餘額不足，無法執行理賠");
-            window.executingClaim = null;
+    async function autoExecuteClaim(claimId) {
+        // 檢查是否正在執行中
+        if (window.executingClaim && window.executingClaim === claimId) {
+            alert("理賠正在執行中，請稍候...");
             return;
         }
         
-        console.log("開始執行理賠 #" + claimId);
-        
-        // 發送交易 - 添加 gas limit 避免估算問題
-        const tx = await daoContract.connect(signer).executeClaim(claimId, {
-            gasLimit: 100000 // 設置適當的 gas limit
-        });
-        
-        console.log("交易已發送:", tx.hash);
-        
-        // 顯示交易確認中狀態
-        updateExecuteButtonStatus(claimId, "確認中...", true);
-        
-        // 等待交易確認
-        const receipt = await tx.wait();
-        console.log("交易已確認:", receipt);
-        
-        // 检查交易状态
-        if (receipt.status === 1) {
-            alert("理賠執行成功!");
-            // 刷新頁面
-            await loadCurrentClaims();
-            await loadMyClaims();
-            await loadDAOInfo();
-        } else {
-            alert("交易失敗，請查看詳情");
-            updateExecuteButtonStatus(claimId, "執行失敗", false);
+        try {
+            // 標記正在執行
+            window.executingClaim = claimId;
+            
+            // 检查合约余额是否足够
+            const claim = await daoContract.getClaim(claimId);
+            const treasuryBalance = await daoContract.getTreasuryBalance();
+            
+            if (treasuryBalance.lt(claim.amount)) {
+                alert("合約餘額不足，無法執行理賠");
+                window.executingClaim = null;
+                return;
+            }
+            
+            console.log("開始執行理賠 #" + claimId);
+            
+            // 發送交易 - 添加 gas limit 避免估算問題
+            const tx = await daoContract.connect(signer).executeClaim(claimId, {
+                gasLimit: 100000 // 設置適當的 gas limit
+            });
+            
+            console.log("交易已發送:", tx.hash);
+            
+            // 顯示交易確認中狀態
+            updateExecuteButtonStatus(claimId, "確認中...", true);
+            
+            // 等待交易確認
+            const receipt = await tx.wait();
+            console.log("交易已確認:", receipt);
+            
+            // 检查交易状态
+            if (receipt.status === 1) {
+                alert("理賠執行成功!");
+                // 刷新頁面
+                await loadCurrentClaims();
+                await loadMyClaims();
+                await loadDAOInfo();
+                await checkMembershipStatus(); // 🆕 刷新會員狀態
+            } else {
+                alert("交易失敗，請查看詳情");
+                updateExecuteButtonStatus(claimId, "執行失敗", false);
+            }
+        } catch (err) {
+            console.error("執行失敗:", err);
+            
+            // 恢復按鈕狀態
+            updateExecuteButtonStatus(claimId, "執行理賠", false);
+            
+            // 更詳細的錯誤信息處理
+            if (err.code === -32603) {
+                alert("執行失敗: 內部錯誤，可能是合約條件不滿足或gas不足");
+            } else if (err.code === 4001) {
+                alert("您取消了交易");
+            } else if (err.reason) {
+                alert(`執行失敗: ${err.reason}`);
+            } else if (err.message) {
+                // 提取更具體的錯誤信息
+                const errorMsg = err.message.includes("revert") 
+                    ? "合約執行失敗，請確認條件是否滿足" 
+                    : err.message;
+                alert(`執行失敗: ${errorMsg}`);
+            } else {
+                alert("執行失敗: 未知錯誤");
+            }
+        } finally {
+            // 清除執行標記
+            window.executingClaim = null;
         }
-    } catch (err) {
-        console.error("執行失敗:", err);
-        
-        // 恢復按鈕狀態
-        updateExecuteButtonStatus(claimId, "執行理賠", false);
-        
-        // 更詳細的錯誤信息處理
-        if (err.code === -32603) {
-            alert("執行失敗: 內部錯誤，可能是合約條件不滿足或gas不足");
-        } else if (err.code === 4001) {
-            alert("您取消了交易");
-        } else if (err.reason) {
-            alert(`執行失敗: ${err.reason}`);
-        } else if (err.message) {
-            // 提取更具體的錯誤信息
-            const errorMsg = err.message.includes("revert") 
-                ? "合約執行失敗，請確認條件是否滿足" 
-                : err.message;
-            alert(`執行失敗: ${errorMsg}`);
-        } else {
-            alert("執行失敗: 未知錯誤");
-        }
-    } finally {
-        // 清除執行標記
-        window.executingClaim = null;
     }
-}
 
-// 更新執行按鈕狀態的輔助函數
-function updateExecuteButtonStatus(claimId, text, disabled) {
-    const executeButtons = document.querySelectorAll(`.execute-btn[data-claim-id="${claimId}"]`);
-    executeButtons.forEach(btn => {
-        btn.disabled = disabled;
-        btn.textContent = text;
-        if (disabled) {
-            btn.style.opacity = "0.6";
-        } else {
-            btn.style.opacity = "1";
-        }
-    });
-}
+    // 更新執行按鈕狀態的輔助函數
+    function updateExecuteButtonStatus(claimId, text, disabled) {
+        const executeButtons = document.querySelectorAll(`.execute-btn[data-claim-id="${claimId}"]`);
+        executeButtons.forEach(btn => {
+            btn.disabled = disabled;
+            btn.textContent = text;
+            if (disabled) {
+                btn.style.opacity = "0.6";
+            } else {
+                btn.style.opacity = "1";
+            }
+        });
+    }
 
     // PDF 上傳函數
     async function uploadPDFtoIPFS(file) {
@@ -1920,60 +2362,6 @@ function updateExecuteButtonStatus(claimId, text, disabled) {
             console.error("PDF 上傳失敗:", err);
             return null;
         }
-    }
-
-    // 更新餘額提示
-    async function checkAndUpdateBalanceHint() {
-        const amountInput = document.getElementById("claimAmount");
-        const balanceHint = document.getElementById("balanceHint");
-        
-        if (!balanceHint || !daoContract) return;
-        
-        try {
-            const treasuryBalance = await daoContract.getTreasuryBalance();
-            const availableBalance = ethers.utils.formatEther(treasuryBalance);
-            
-            balanceHint.textContent = `可用餘額: ${availableBalance} ETH`;
-            
-            // 如果用戶輸入了金額，檢查是否超過餘額
-            if (amountInput.value) {
-                try {
-                    const inputAmountWei = ethers.utils.parseEther(amountInput.value);
-                    if (inputAmountWei.gt(treasuryBalance)) {
-                        balanceHint.style.color = "red";
-                        balanceHint.textContent += " ❌ 金額超過可用餘額";
-                    } else {
-                        balanceHint.style.color = "green";
-                        balanceHint.textContent += " ✅ 金額在可用範圍內";
-                    }
-                } catch (e) {
-                    // 輸入格式錯誤
-                    balanceHint.style.color = "orange";
-                    balanceHint.textContent += " ⚠️ 請輸入有效金額";
-                }
-            }
-        } catch (err) {
-            balanceHint.textContent = "無法獲取餘額資訊";
-            balanceHint.style.color = "red";
-        }
-    }
-
-    // 設置餘額提示
-    function updateBalanceHint() {
-        const amountInput = document.getElementById("claimAmount");
-        const balanceHint = document.getElementById("balanceHint");
-        
-        if (!balanceHint) {
-            const hintElement = document.createElement("div");
-            hintElement.id = "balanceHint";
-            hintElement.style.marginTop = "5px";
-            hintElement.style.fontSize = "12px";
-            hintElement.style.color = "#666";
-            amountInput.parentNode.appendChild(hintElement);
-        }
-        
-        // 實時檢查餘額
-        checkAndUpdateBalanceHint();
     }
 
     // 處理提交理賠
@@ -2016,7 +2404,7 @@ function updateExecuteButtonStatus(claimId, text, disabled) {
             
             if (amountWei.gt(treasuryBalance)) {
                 const availableBalance = ethers.utils.formatEther(treasuryBalance);
-                alert(`理賠金額超過 DAO 餘額！\n申請金額: ${amount} ETH\nDAO 可用餘額: ${availableBalance} ETH`);
+                alert(`理賠金額超過提案投票餘額！\n申請金額: ${amount} ETH\n提案可用餘額: ${availableBalance} ETH`);
                 return;
             }
             
@@ -2048,6 +2436,9 @@ function updateExecuteButtonStatus(claimId, text, disabled) {
             document.getElementById("claimPdfFile").value = "";
             pdfStatus.textContent = "";
             
+            // 🆕 重新設置理賠金額
+            await setupClaimAmount();
+            
             // 恢復按鈕狀態
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
@@ -2064,7 +2455,7 @@ function updateExecuteButtonStatus(claimId, text, disabled) {
             if (err.code === -32603 || err.message?.includes('Claim exceeds DAO balance')) {
                 const treasuryBalance = await daoContract.getTreasuryBalance();
                 const availableBalance = ethers.utils.formatEther(treasuryBalance);
-                alert(`理賠失敗：金額超過 DAO 餘額\n\nDAO 當前餘額: ${availableBalance} ETH\n請減少理賠金額後重試。`);
+                alert(`理賠失敗：金額超過此提案餘額\n\n提案當前餘額: ${availableBalance} ETH\n請減少理賠金額後重試。`);
             } else if (err.code === 'INSUFFICIENT_FUNDS') {
                 alert("您的錢包餘額不足，無法支付交易手續費");
             } else if (err.code === 4001) {
@@ -2079,7 +2470,7 @@ function updateExecuteButtonStatus(claimId, text, disabled) {
     async function handleVote(e) {
         if (e.target.classList.contains("vote-btn")) {
             if (!isMember) {
-                alert("請先加入 DAO 才能投票");
+                alert("請先加入提案才能投票");
                 return;
             }
 
@@ -2101,33 +2492,74 @@ function updateExecuteButtonStatus(claimId, text, disabled) {
         }
     }
 
-    // 處理執行理賠按鈕點擊 - 優化錯誤處理
-async function handleExecuteClaim(e) {
-    if (e.target.classList.contains("execute-btn")) {
-        const claimId = e.target.getAttribute("data-claim-id");
-        
-        // 防止重複點擊
-        if (e.target.disabled) return;
-        
-        console.log("點擊執行理賠 #" + claimId);
-        
-        // 立即更新按鈕狀態
-        updateExecuteButtonStatus(claimId, "準備中...", true);
-        
-        // 短暫延遲讓用戶看到狀態變化
-        setTimeout(async () => {
-            try {
-                await autoExecuteClaim(claimId);
-            } catch (err) {
-                console.error("執行過程出錯:", err);
-                // 發生錯誤時重新啟用按鈕
-                updateExecuteButtonStatus(claimId, "執行理賠", false);
-            }
-        }, 100);
+    // 處理執行理賠按鈕點擊
+    async function handleExecuteClaim(e) {
+        if (e.target.classList.contains("execute-btn")) {
+            const claimId = e.target.getAttribute("data-claim-id");
+            
+            // 防止重複點擊
+            if (e.target.disabled) return;
+            
+            console.log("點擊執行理賠 #" + claimId);
+            
+            // 立即更新按鈕狀態
+            updateExecuteButtonStatus(claimId, "準備中...", true);
+            
+            // 短暫延遲讓用戶看到狀態變化
+            setTimeout(async () => {
+                try {
+                    await autoExecuteClaim(claimId);
+                } catch (err) {
+                    console.error("執行過程出錯:", err);
+                    // 發生錯誤時重新啟用按鈕
+                    updateExecuteButtonStatus(claimId, "執行理賠", false);
+                }
+            }, 100);
+        }
     }
-}
 
-    
+    // 🆕 簡單的退出功能
+    async function leaveDAO() {
+        try {
+            if (!confirm("確定要退出此提案嗎？\n\n退出後您將失去會員資格，但已支付的保費將不會退還。")) {
+                return;
+            }
+            
+            const leaveBtn = document.getElementById("leaveDaoBtn");
+            leaveBtn.disabled = true;
+            leaveBtn.textContent = "處理中...";
+            
+            console.log("開始執行退出 DAO...");
+            const tx = await daoContract.connect(signer).leaveDAO();
+            console.log("交易已發送:", tx.hash);
+            
+            leaveBtn.textContent = "確認中...";
+            await tx.wait();
+            console.log("交易已確認");
+            
+            alert("成功退出此提案！");
+            
+            // 刷新狀態
+            await checkMembershipStatus();
+            await loadDAOInfo();
+            
+        } catch (err) {
+            console.error("退出 DAO 失敗:", err);
+            
+            const leaveBtn = document.getElementById("leaveDaoBtn");
+            leaveBtn.disabled = false;
+            leaveBtn.textContent = "退出 DAO";
+            
+            if (err.code === 4001) {
+                alert("您取消了交易");
+            } else if (err.message && err.message.includes("Not a member")) {
+                alert("您已經不是會員");
+                await checkMembershipStatus();
+            } else {
+                alert("退出失敗: " + (err.message || "未知錯誤"));
+            }
+        }
+    }
 
     // 啟動定期刷新獎金庫
     async function startTreasuryRefresh() {
@@ -2142,11 +2574,58 @@ async function handleExecuteClaim(e) {
             document.getElementById("treasuryBalance").textContent = ethers.utils.formatEther(balance) + " ETH";
             document.getElementById("lastUpdated").textContent = new Date().toLocaleString();
             
-            // 同時更新餘額提示
-            await checkAndUpdateBalanceHint();
         } catch (err) {
             console.error("刷新獎金庫失敗:", err);
         }
+    }
+
+    // 完整的設置事件監聽器函數
+    function setupEventListeners() {
+        // 返回按鈕
+        document.getElementById("backButton").addEventListener("click", () => {
+            window.location.href = "/dao/";
+        });
+
+        // 加入 DAO 按鈕
+        document.getElementById("joinDaoBtn").addEventListener("click", showPremiumPayment);
+        
+        // 從提示訊息加入
+        document.getElementById("joinFromMessageBtn").addEventListener("click", showPremiumPayment);
+        
+        // 支付保費按鈕
+        document.getElementById("payPremiumBtn").addEventListener("click", payPremiumAndJoin);
+        
+        // 取消支付按鈕
+        document.getElementById("cancelPaymentBtn").addEventListener("click", hidePremiumPayment);
+
+        // 🆕 退出事件
+        document.getElementById("leaveDaoBtn").addEventListener("click", leaveDAO);
+
+        // 刷新按鈕
+        document.getElementById("refreshClaim").addEventListener("click", async () => {
+            await loadDAOInfo();
+            await checkMembershipStatus();
+            if (isMember) {
+                await loadCurrentClaims();
+                await loadMyClaims();
+            }
+        });
+
+        // 🆕 提交理賠按鈕
+        document.getElementById("submitClaim").addEventListener("click", handleSubmitClaim);
+
+        // 使用事件委託處理投票和執行按鈕
+        document.getElementById("claimsContainer").addEventListener("click", handleVote);
+        document.getElementById("myClaimsContainer").addEventListener("click", handleExecuteClaim);
+
+        // 查看歷史記錄按鈕
+        document.getElementById('viewHistoryButton').addEventListener('click', function() {
+            if (daoAddress) {
+                window.location.href = `/dao/${daoAddress}/claims`;
+            } else {
+                alert("無法獲取DAO地址");
+            }
+        });
     }
 
     // 初始化應用
@@ -2163,141 +2642,10 @@ async function handleExecuteClaim(e) {
         }
         setupEventListeners();
         startTreasuryRefresh();
-        
-        // 添加餘額提示
-        updateBalanceHint();
+        startPaymentStatusChecker(); // 🆕 啟動付款狀態檢查
     }
-// 🆕 簡單的退出功能
-async function leaveDAO() {
-    try {
-        if (!confirm("確定要退出 DAO 嗎？\n\n退出後您將失去會員資格，但已支付的保費將不會退還。")) {
-            return;
-        }
-        
-        const leaveBtn = document.getElementById("leaveDaoBtn");
-        leaveBtn.disabled = true;
-        leaveBtn.textContent = "處理中...";
-        
-        console.log("開始執行退出 DAO...");
-        const tx = await daoContract.connect(signer).leaveDAO();
-        console.log("交易已發送:", tx.hash);
-        
-        leaveBtn.textContent = "確認中...";
-        await tx.wait();
-        console.log("交易已確認");
-        
-        alert("成功退出 DAO！");
-        
-        // 刷新狀態
-        await checkMembershipStatus();
-        await loadDAOInfo();
-        
-    } catch (err) {
-        console.error("退出 DAO 失敗:", err);
-        
-        const leaveBtn = document.getElementById("leaveDaoBtn");
-        leaveBtn.disabled = false;
-        leaveBtn.textContent = "退出 DAO";
-        
-        if (err.code === 4001) {
-            alert("您取消了交易");
-        } else if (err.message && err.message.includes("Not a member")) {
-            alert("您已經不是會員");
-            await checkMembershipStatus();
-        } else {
-            alert("退出失敗: " + (err.message || "未知錯誤"));
-        }
-    }
-}
 
-// 🆕 更新會員狀態檢查 - 保留這個版本，刪除前面的舊版本
-async function checkMembershipStatus() {
-    try {
-        isMember = await daoContract.isMember(walletAddress);
-        const monthlyPremium = await daoContract.getMonthlyPremium();
-        
-        if (isMember) {
-            document.getElementById("memberStatus").innerHTML = '<span class="status-approved">✅ 您已經是會員</span>';
-            document.getElementById("joinDaoBtn").style.display = "none";
-            document.getElementById("leaveDaoBtn").style.display = "block";
-            document.getElementById("premiumInfo").style.display = "none";
-            document.getElementById("nonMemberMessage").style.display = "none";
-            
-            // 顯示會員專屬功能
-            document.getElementById("claimFormSection").style.display = "block";
-            document.getElementById("myClaimsSection").style.display = "block";
-            document.getElementById("claimsListSection").style.display = "block";
-            
-        } else {
-            document.getElementById("memberStatus").innerHTML = '<span class="status-rejected">❌ 您還不是會員</span>';
-            document.getElementById("joinDaoBtn").style.display = "block";
-            document.getElementById("leaveDaoBtn").style.display = "none";
-            document.getElementById("requiredPremium").textContent = ethers.utils.formatEther(monthlyPremium);
-            document.getElementById("nonMemberMessage").style.display = "block";
-            
-            // 隱藏會員專屬功能
-            document.getElementById("claimFormSection").style.display = "none";
-            document.getElementById("myClaimsSection").style.display = "none";
-            document.getElementById("claimsListSection").style.display = "none";
-        }
-        
-    } catch (err) {
-        console.error("檢查會員狀態失敗:", err);
-        document.getElementById("memberStatus").textContent = "檢查失敗";
-    }
-}
-
-// 🆕 完整的設置事件監聽器函數
-function setupEventListeners() {
-    // 返回按鈕
-    document.getElementById("backButton").addEventListener("click", () => {
-        window.location.href = "/dao/";
-    });
-
-    // 加入 DAO 按鈕
-    document.getElementById("joinDaoBtn").addEventListener("click", showPremiumPayment);
-    
-    // 從提示訊息加入
-    document.getElementById("joinFromMessageBtn").addEventListener("click", showPremiumPayment);
-    
-    // 支付保費按鈕
-    document.getElementById("payPremiumBtn").addEventListener("click", payPremiumAndJoin);
-    
-    // 取消支付按鈕
-    document.getElementById("cancelPaymentBtn").addEventListener("click", hidePremiumPayment);
-
-    // 🆕 退出事件
-    document.getElementById("leaveDaoBtn").addEventListener("click", leaveDAO);
-
-    // 刷新按鈕
-    document.getElementById("refreshClaim").addEventListener("click", async () => {
-        await loadDAOInfo();
-        await checkMembershipStatus();
-        if (isMember) {
-            await loadCurrentClaims();
-            await loadMyClaims();
-        }
-    });
-
-    // 🆕 提交理賠按鈕 - 確保這個監聽器存在
-    document.getElementById("submitClaim").addEventListener("click", handleSubmitClaim);
-
-    // 使用事件委託處理投票和執行按鈕
-    document.getElementById("claimsContainer").addEventListener("click", handleVote);
-    document.getElementById("myClaimsContainer").addEventListener("click", handleExecuteClaim);
-
-    // 查看歷史記錄按鈕
-    document.getElementById('viewHistoryButton').addEventListener('click', function() {
-        if (daoAddress) {
-            window.location.href = `/dao/${daoAddress}/claims`;
-        } else {
-            alert("無法獲取DAO地址");
-        }
-    });
-    
-    // 監聽金額輸入變化
-    document.getElementById("claimAmount").addEventListener("input", checkAndUpdateBalanceHint);
-}   // 啟動應用
+    // 啟動應用
     document.addEventListener("DOMContentLoaded", initApp);
 </script>
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>

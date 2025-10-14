@@ -1,0 +1,430 @@
+{% extends "base.html" %}
+
+{% block title %}所有提案列表{% endblock %}
+
+{% block extra_css %}
+<style>
+    .header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding: 40px 20px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+    }
+
+    .header h1 {
+        color: #2d4fc6;
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        font-weight: 700;
+    }
+
+    .header p {
+        color: #666;
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .back-btn {
+        background: linear-gradient(135deg, #6c757d, #5a6268);
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .back-btn:hover {
+        background: linear-gradient(135deg, #5a6268, #495057);
+        transform: translateY(-2px);
+    }
+
+    /* DAO List Styles */
+    .dao-section {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .section-header h2 {
+        color: #2d4fc6;
+        font-size: 2rem;
+        margin: 0;
+    }
+
+    .refresh-btn {
+        background: linear-gradient(135deg, #4a6ee0, #64c1ff);
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .refresh-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(74, 110, 224, 0.3);
+    }
+
+    .dao-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 25px;
+    }
+
+    .dao-card {
+        background: white;
+        border: 1px solid rgba(74, 110, 224, 0.1);
+        border-radius: 15px;
+        padding: 25px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dao-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, #4a6ee0, #64c1ff);
+    }
+
+    .dao-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .dao-card h3 {
+        color: #2d4fc6;
+        margin-bottom: 15px;
+        font-size: 1.4rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .dao-address {
+        font-family: 'Courier New', monospace;
+        color: #666;
+        font-size: 0.9rem;
+        word-break: break-all;
+        margin-bottom: 20px;
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 8px;
+    }
+
+    .dao-details {
+        margin-bottom: 20px;
+    }
+
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .detail-value {
+        color: #666;
+    }
+
+    .dao-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .btn-details {
+        background: linear-gradient(135deg, #4a6ee0, #64c1ff);
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-details:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(74, 110, 224, 0.3);
+    }
+
+    .btn-vote {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-vote:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+
+    /* Status Messages */
+    .status-message {
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+        text-align: center;
+        font-weight: 600;
+    }
+
+    .status-loading {
+        background: rgba(74, 110, 224, 0.1);
+        color: #4a6ee0;
+        border: 1px solid #4a6ee0;
+    }
+
+    .status-success {
+        background: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+        border: 1px solid #28a745;
+    }
+
+    .status-error {
+        background: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+        border: 1px solid #dc3545;
+    }
+
+    .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #4a6ee0;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+        .dao-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .section-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .section-header h2 {
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Back Button -->
+    <a href="{{ url_for('index') }}" class="back-btn">
+        <i class="fas fa-arrow-left"></i> 返回首頁
+    </a>
+
+    <!-- Header -->
+    <div class="header">
+        <h1><i class="fas fa-list"></i> 所有提案列表</h1>
+        <p>瀏覽現有的保險提案，參與投票決策</p>
+    </div>
+
+    <!-- DAO List Section -->
+    <div class="dao-section">
+        <div class="section-header">
+            <h2><i class="fas fa-users"></i> 保險計畫列表</h2>
+            <button class="refresh-btn" onclick="loadDAOs()">
+                <i class="fas fa-redo"></i> 重新載入
+            </button>
+        </div>
+
+        <div id="daoList">
+            <div class="status-message status-loading">
+                <div class="loading"></div> 載入中...
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<script>
+    let provider;
+    let factoryContract;
+
+    const factoryAbi = [
+        "function getDAOAddresses() public view returns(address[])",
+        "function daoAddresses(uint256) public view returns(address)"
+    ];
+    const factoryAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+
+    const daoAbi = [
+        "function getDAOName() public view returns(string)",
+        "function monthlyPremium() public view returns(uint256)",
+        "function claimDescription() public view returns(string)",
+        "function pdfHash() public view returns(string)"
+    ];
+
+    // 頁面載入時初始化
+    document.addEventListener('DOMContentLoaded', function() {
+        initWeb3AndLoadDAOs();
+    });
+
+    // 初始化 Web3 並載入 DAOs
+    async function initWeb3AndLoadDAOs() {
+        try {
+            if (window.ethereum) {
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                factoryContract = new ethers.Contract(factoryAddress, factoryAbi, provider);
+                await loadDAOs();
+            } else {
+                showMessage('請安裝 MetaMask 錢包擴展', 'error');
+            }
+        } catch (error) {
+            console.error('初始化失敗:', error);
+            showMessage('初始化失敗: ' + error.message, 'error');
+        }
+    }
+
+    // 顯示訊息
+    function showMessage(message, type) {
+        const daoList = document.getElementById("daoList");
+        daoList.innerHTML = `<div class="status-message status-${type}">${message}</div>`;
+    }
+
+    // 載入所有 DAOs
+    async function loadDAOs() {
+        const daoList = document.getElementById("daoList");
+        daoList.innerHTML = '<div class="status-message status-loading"><div class="loading"></div> 載入中...</div>';
+        
+        try {
+            if (!factoryContract) {
+                throw new Error('合約未初始化');
+            }
+
+            const daos = await factoryContract.getDAOAddresses();
+            
+            if (daos.length === 0) {
+                daoList.innerHTML = `
+                    <div class="status-message status-success">
+                        <i class="fas fa-info-circle"></i> 尚未創建任何保險計畫
+                    </div>
+                `;
+                return;
+            }
+
+            let daoCardsHTML = '<div class="dao-grid">';
+            
+            for (let addr of daos) {
+                try {
+                    const daoContract = new ethers.Contract(addr, daoAbi, provider);
+                    
+                    const [daoName, monthlyPremium, claimDescription, pdfHash] = await Promise.all([
+                        daoContract.getDAOName().catch(() => "未知計畫"),
+                        daoContract.monthlyPremium().catch(() => 0),
+                        daoContract.claimDescription().catch(() => "無描述"),
+                        daoContract.pdfHash().catch(() => "")
+                    ]);
+
+                    const premiumEth = ethers.utils.formatEther(monthlyPremium);
+                    const shortDescription = claimDescription.length > 100 
+                        ? claimDescription.substring(0, 100) + '...' 
+                        : claimDescription;
+
+                    daoCardsHTML += `
+                        <div class="dao-card">
+                            <h3><i class="fas fa-project-diagram"></i> ${daoName}</h3>
+                            <div class="dao-address">
+                                <strong>合約地址:</strong><br>${addr}
+                            </div>
+                            <div class="dao-details">
+                                <div class="detail-item">
+                                    <span class="detail-label">月保費:</span>
+                                    <span class="detail-value">${premiumEth} ETH</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">理賠描述:</span>
+                                    <span class="detail-value">${shortDescription}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">PDF 文件:</span>
+                                    <span class="detail-value">${pdfHash ? '已上傳' : '未上傳'}</span>
+                                </div>
+                            </div>
+                            <div class="dao-actions">
+                                <a href="dao-details.html?address=${addr}" class="btn-details">
+                                    <i class="fas fa-eye"></i> 查看詳細資料
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                } catch (err) {
+                    console.error(`載入 DAO ${addr} 失敗:`, err);
+                    // 即使單個 DAO 載入失敗，也繼續載入其他 DAO
+                }
+            }
+            
+            daoCardsHTML += '</div>';
+            daoList.innerHTML = daoCardsHTML;
+
+        } catch (err) {
+            console.error("讀取 DAO 列表失敗", err);
+            showMessage('載入 DAO 列表失敗: ' + err.message, 'error');
+        }
+    }
+
+    // 查看 DAO 詳細資料
+    function viewDAODetails(daoAddress) {
+        window.location.href = `dao-details.html?address=${daoAddress}`;
+    }
+</script>
+{% endblock %}

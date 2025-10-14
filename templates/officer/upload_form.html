@@ -654,26 +654,7 @@
         await processPolicyForm('/officer/update-policy', '更新');
     }
 
-    // 生成 PDF 檔案的 IPFS Hash
-    async function generateIPFSHash(file) {
-        try {
-            showStatus('正在生成檔案雜湊值...', 'info');
-            
-            // 使用本地 IPFS 節點
-            const ipfs = window.IpfsHttpClient.create({ 
-                url: "http://127.0.0.1:5001/api/v0" 
-            });
 
-            // 添加到 IPFS
-            const result = await ipfs.add(file);
-            console.log('IPFS Hash 生成成功:', result.path);
-            
-            return result.path;
-        } catch (error) {
-            console.error('IPFS Hash 生成失敗:', error);
-            throw new Error('無法生成檔案雜湊值，請確保本地 IPFS 節點正在運行');
-        }
-    }
 
 async function processPolicyForm(url, actionType) {
     if (!validateForm()) {

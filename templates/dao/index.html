@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}提案投票{% endblock %}
+{% block title %}提案投票首頁{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -8,7 +8,7 @@
     .header {
         text-align: center;
         margin-bottom: 40px;
-        padding: 40px 20px;
+        padding: 60px 20px;
         background: rgba(255, 255, 255, 0.95);
         border-radius: 20px;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
@@ -17,16 +17,16 @@
 
     .header h1 {
         color: #2d4fc6;
-        font-size: 3rem;
-        margin-bottom: 10px;
+        font-size: 3.5rem;
+        margin-bottom: 20px;
         font-weight: 700;
     }
 
     .header p {
         color: #666;
-        font-size: 1.2rem;
+        font-size: 1.3rem;
         max-width: 600px;
-        margin: 0 auto;
+        margin: 0 auto 30px;
     }
 
     /* Wallet Section */
@@ -35,7 +35,7 @@
         padding: 30px;
         border-radius: 15px;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        margin-bottom: 30px;
+        margin-bottom: 40px;
     }
 
     .wallet-info {
@@ -123,18 +123,75 @@
         border-radius: 8px;
     }
 
+    /* Navigation Cards */
+    .nav-section {
+        margin: 50px 0;
+    }
+
+    .nav-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-top: 30px;
+    }
+
+    .nav-card {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 40px 30px;
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(74, 110, 224, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .nav-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, #4a6ee0, #64c1ff);
+    }
+
+    .nav-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .nav-icon {
+        font-size: 3rem;
+        color: #4a6ee0;
+        margin-bottom: 20px;
+    }
+
+    .nav-card h3 {
+        color: #2d4fc6;
+        margin-bottom: 15px;
+        font-size: 1.5rem;
+    }
+
+    .nav-card p {
+        color: #666;
+        margin-bottom: 25px;
+        line-height: 1.6;
+    }
+
     /* Button Styles */
     .btn {
-        padding: 12px 24px;
+        padding: 12px 30px;
         border: none;
         border-radius: 10px;
-        font-size: 1rem;
+        font-size: 1.1rem;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
         display: inline-flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
         text-decoration: none;
     }
 
@@ -149,171 +206,63 @@
     }
 
     .btn-view {
-        background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+        background: linear-gradient(135deg, #4a6ee0, #64c1ff);
         color: white;
     }
 
     .btn-view:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        box-shadow: 0 6px 20px rgba(74, 110, 224, 0.4);
     }
 
-    /* Form Styles */
-    .form-section {
+    /* Features Section */
+    .features-section {
         background: rgba(255, 255, 255, 0.95);
-        padding: 40px;
+        padding: 50px 40px;
         border-radius: 20px;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        margin-top: 50px;
+    }
+
+    .features-section h2 {
+        text-align: center;
+        color: #2d4fc6;
         margin-bottom: 40px;
-    }
-
-    .form-section h2 {
-        color: #2d4fc6;
-        margin-bottom: 30px;
-        text-align: center;
         font-size: 2.2rem;
     }
 
-    .form-grid {
+    .features-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 25px;
-        margin-bottom: 25px;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
     }
 
-    .form-group {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .form-group.full-width {
-        grid-column: 1 / -1;
-    }
-
-    .form-label {
-        font-weight: 600;
-        margin-bottom: 8px;
-        color: #000000;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .form-input, .form-textarea, .form-file {
-        padding: 12px 16px;
-        border: 2px solid #e1e5e9;
-        border-radius: 10px;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        background: white;
-        color: #000000;
-    }
-
-    .form-input:focus, .form-textarea:focus, .form-file:focus {
-        outline: none;
-        border-color: #4a6ee0;
-        box-shadow: 0 0 0 3px rgba(74, 110, 224, 0.1);
-    }
-
-    .form-textarea {
-        resize: vertical;
-        min-height: 120px;
-        font-family: inherit;
-    }
-
-    .form-file {
-        padding: 10px;
-    }
-
-    .create-btn-container {
+    .feature-item {
         text-align: center;
-        margin-top: 20px;
+        padding: 20px;
     }
 
-    /* DAO List Styles */
-    .dao-section {
-        background: rgba(255, 255, 255, 0.95);
-        padding: 40px;
-        border-radius: 20px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    }
-
-    .dao-section h2 {
-        color: #2d4fc6;
-        margin-bottom: 30px;
-        text-align: center;
-        font-size: 2.2rem;
-    }
-
-    .dao-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-        gap: 25px;
-    }
-
-    .dao-card {
-        background: white;
-        border: 1px solid rgba(74, 110, 224, 0.1);
-        border-radius: 15px;
-        padding: 25px;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .dao-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(135deg, #4a6ee0, #64c1ff);
-    }
-
-    .dao-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    }
-
-    .dao-card h3 {
-        color: #2d4fc6;
+    .feature-icon {
+        font-size: 2.5rem;
+        color: #4a6ee0;
         margin-bottom: 15px;
-        font-size: 1.4rem;
     }
 
-    .dao-address {
-        font-family: 'Courier New', monospace;
+    .feature-item h4 {
+        color: #2d4fc6;
+        margin-bottom: 10px;
+        font-size: 1.2rem;
+    }
+
+    .feature-item p {
         color: #666;
-        font-size: 0.9rem;
-        word-break: break-all;
-        margin-bottom: 20px;
-        background: #f8f9fa;
-        padding: 10px;
-        border-radius: 8px;
-    }
-
-    .dao-actions {
-        display: flex;
-        gap: 10px;
-    }
-
-    .btn-details {
-        background: linear-gradient(135deg, #6c757d, #868e96);
-        color: white;
-        padding: 8px 16px;
-        font-size: 0.9rem;
+        line-height: 1.5;
     }
 
     /* Responsive Design */
     @media (max-width: 768px) {
-        .form-grid {
-            grid-template-columns: 1fr;
-        }
-        
         .header h1 {
-            font-size: 2.2rem;
+            font-size: 2.5rem;
         }
         
         .wallet-info {
@@ -326,7 +275,11 @@
             width: 100%;
         }
         
-        .dao-grid {
+        .nav-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .features-grid {
             grid-template-columns: 1fr;
         }
     }
@@ -346,58 +299,6 @@
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
-
-    /* Status Messages */
-    .status-message {
-        padding: 15px;
-        border-radius: 10px;
-        margin: 10px 0;
-        text-align: center;
-        font-weight: 600;
-        color: #000000;
-    }
-
-    .status-success {
-        background: rgba(40, 167, 69, 0.1);
-        color: #28a745;
-        border: 1px solid #28a745;
-    }
-
-    .status-error {
-        background: rgba(220, 53, 69, 0.1);
-        color: #dc3545;
-        border: 1px solid #dc3545;
-    }
-
-    /* File Upload Styling */
-    .file-upload-container {
-        position: relative;
-        display: inline-block;
-        width: 100%;
-    }
-
-    .file-upload-label {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 12px 16px;
-        background: white;
-        border: 2px dashed #4a6ee0;
-        border-radius: 10px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        color: #4a6ee0;
-        font-weight: 600;
-    }
-
-    .file-upload-label:hover {
-        background: rgba(74, 110, 224, 0.05);
-    }
-
-    .file-upload-input {
-        position: absolute;
-        left: -9999px;
-    }
 </style>
 {% endblock %}
 
@@ -405,8 +306,16 @@
 <div class="container">
     <!-- Header -->
     <div class="header">
-        <h1><i class="fas fa-vote-yea"></i>提案投票</h1>
+        <h1><i class="fas fa-vote-yea"></i> 提案投票平台</h1>
         <p>去中心化保險治理 - 共同管理理賠決策</p>
+        <div style="margin-top: 30px;">
+            <a href="{{ url_for('create_dao') }}" class="btn btn-create" style="margin-right: 15px;">
+                <i class="fas fa-plus-circle"></i> 新增保險計畫
+            </a>
+            <a href="{{ url_for('view_daos') }}" class="btn btn-view">
+                <i class="fas fa-list"></i> 查看所有提案
+            </a>
+        </div>
     </div>
 
     <!-- Wallet Section -->
@@ -427,57 +336,68 @@
         </div>
     </div>
 
-    <!-- Create DAO Section -->
-    <div class="form-section">
-        <h2><i class="fas fa-plus-circle"></i> 新增保險計畫</h2>
-        <div class="form-grid">
-            <div class="form-group">
-                <label class="form-label">
-                    <i class="fas fa-signature"></i> 提案名稱
-                </label>
-                <input type="text" id="daoName" class="form-input" placeholder="例如：汽車保險">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">
-                    <i class="fas fa-coins"></i> 月保費 (ETH)
-                </label>
-                <input type="text" id="monthlyPremium" class="form-input" placeholder="例如：0.01">
-            </div>
-
-            <div class="form-group full-width">
-                <label class="form-label">
-                    <i class="fas fa-file-alt"></i> 理賠內容
-                </label>
-                <textarea id="claimDescription" class="form-textarea" placeholder="請詳細描述理賠內容、條件和規則..."></textarea>
-            </div>
-
-            <div class="form-group full-width">
-                <label class="form-label">
-                    <i class="fas fa-file-pdf"></i> 上傳 PDF 申請表
-                </label>
-                <div class="file-upload-container">
-                    <label for="pdfFile" class="file-upload-label">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <span id="fileLabel">選擇 PDF 檔案</span>
-                    </label>
-                    <input type="file" id="pdfFile" class="file-upload-input" accept="application/pdf">
+    <!-- Navigation Section -->
+    <div class="nav-section">
+        <h2 style="text-align: center; color: #2d4fc6; margin-bottom: 30px; font-size: 2.2rem;">
+            <i class="fas fa-compass"></i> 平台功能
+        </h2>
+        <div class="nav-grid">
+            <div class="nav-card">
+                <div class="nav-icon">
+                    <i class="fas fa-plus-circle"></i>
                 </div>
+                <h3>新增保險計畫</h3>
+                <p>創建新的保險提案，設定保費、理賠條件，並上傳相關文件。開始您的去中心化保險治理之旅。</p>
+                <a href="{{ url_for('create_dao') }}" class="btn btn-create">
+                    <i class="fas fa-rocket"></i> 開始創建
+                </a>
             </div>
-        </div>
-
-        <div class="create-btn-container">
-            <button id="createDaoBtn" class="btn btn-create">
-                <i class="fas fa-rocket"></i> 發起提案
-            </button>
+            
+            <div class="nav-card">
+                <div class="nav-icon">
+                    <i class="fas fa-list"></i>
+                </div>
+                <h3>查看所有提案</h3>
+                <p>瀏覽現有的保險提案，了解詳細資訊，參與投票決策，共同管理保險理賠流程。</p>
+                <a href="{{ url_for('view_daos') }}" class="btn btn-view">
+                    <i class="fas fa-eye"></i> 瀏覽提案
+                </a>
+            </div>
         </div>
     </div>
 
-    <!-- DAO List Section -->
-    <div class="dao-section">
-        <h2><i class="fas fa-list"></i> 所有提案列表</h2>
-        <div id="daoList" class="dao-grid">
-            <!-- DAO cards will be dynamically inserted here -->
+    <!-- Features Section -->
+    <div class="features-section">
+        <h2><i class="fas fa-star"></i> 平台特色</h2>
+        <div class="features-grid">
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h4>安全透明</h4>
+                <p>基於區塊鏈技術，所有交易和投票記錄公開透明，不可篡改</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h4>社區治理</h4>
+                <p>由社區成員共同參與決策，實現真正的去中心化管理</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h4>快速理賠</h4>
+                <p>智能合約自動執行，大幅縮短理賠處理時間</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-file-contract"></i>
+                </div>
+                <h4>智能合約</h4>
+                <p>自動化執行保險條款，減少人為干預和錯誤</p>
+            </div>
         </div>
     </div>
 </div>
@@ -486,17 +406,7 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 <script>
-    let provider;
-    let signer;
-    let factoryContract;
     let userWalletAddress = null;
-
-    const factoryAbi = [
-        "function createDAO(string memory daoName, uint256 monthlyPremium, string memory claimDesc, string memory pdfHash) public",
-        "function getDAOAddresses() public view returns(address[])",
-        "function daoAddresses(uint256) public view returns(address)"
-    ];
-    const factoryAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
 
     // 格式化錢包地址顯示 (前6位...後4位)
     function formatWalletAddress(address) {
@@ -507,7 +417,6 @@
 
     // 頁面載入時自動獲取錢包地址
     document.addEventListener('DOMContentLoaded', function() {
-        // 延遲載入錢包地址，確保頁面完全載入
         setTimeout(() => {
             loadWalletAddress();
         }, 500);
@@ -522,7 +431,6 @@
             document.getElementById('userWalletAddress').textContent = '載入中...';
             document.getElementById('userWalletStatus').textContent = '載入中';
 
-            // 使用保單系統的路由 - 保持原有後端邏輯
             const response = await fetch('/policy/get_wallet_addresses');
             
             if (!response.ok) {
@@ -538,10 +446,6 @@
                 document.getElementById('userWalletStatus').textContent = '已連接';
                 document.getElementById('userWalletStatus').className = 'wallet-status status-connected';
                 console.log('用戶錢包地址載入成功:', data.user_wallet);
-                
-                // 自動初始化 Web3 和載入 DAO
-                await initWeb3AndContract();
-                await loadDAOs();
             } else {
                 throw new Error(data.error || '用戶錢包地址未設定');
             }
@@ -562,186 +466,9 @@
         }
     }
 
-    // 初始化 Web3 和合約
-    async function initWeb3AndContract() {
-        if (!userWalletAddress) {
-            throw new Error('用戶錢包地址未設定，請先載入錢包地址或聯繫管理員');
-        }
-
-        try {
-            if (window.ethereum) {
-                provider = new ethers.providers.Web3Provider(window.ethereum);
-                
-                // 檢查當前連接的帳戶是否與資料庫中的一致
-                const accounts = await window.ethereum.request({ 
-                    method: "eth_requestAccounts" 
-                });
-                
-                const currentAccount = accounts[0];
-                if (currentAccount.toLowerCase() !== userWalletAddress.toLowerCase()) {
-                    throw new Error(`當前連接的錢包地址 (${formatWalletAddress(currentAccount)}) 與資料庫中的地址 (${formatWalletAddress(userWalletAddress)}) 不一致，請切換到正確的錢包`);
-                }
-                
-                signer = provider.getSigner();
-                factoryContract = new ethers.Contract(factoryAddress, factoryAbi, signer);
-                console.log('Web3 和合約初始化成功');
-                return true;
-            } else {
-                throw new Error('請安裝 MetaMask 錢包擴展');
-            }
-        } catch (error) {
-            console.error('初始化 Web3 失敗:', error);
-            throw error;
-        }
-    }
-
-    // File upload handling
-    document.getElementById('pdfFile').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        const fileLabel = document.getElementById('fileLabel');
-        if (file) {
-            fileLabel.textContent = file.name;
-        } else {
-            fileLabel.textContent = '選擇 PDF 檔案';
-        }
-    });
-
-    async function uploadPDFtoIPFS(file) {
-        const formData = new FormData();
-        formData.append("file", file);
-
-        try {
-            const res = await fetch("http://127.0.0.1:5001/api/v0/add", {
-                method: "POST",
-                body: formData
-            });
-
-            const text = await res.text();
-            const match = text.match(/"Hash":"([^"]+)"/);
-            return match ? match[1] : null;
-        } catch (error) {
-            console.error('IPFS upload error:', error);
-            return null;
-        }
-    }
-
-    async function createDAO() {
-        const daoName = document.getElementById("daoName").value;
-        const premiumInput = document.getElementById("monthlyPremium").value;
-        const claimDesc = document.getElementById("claimDescription").value;
-        const pdfFile = document.getElementById("pdfFile").files[0];
-
-        if (!daoName || !premiumInput || !claimDesc || !pdfFile) {
-            alert("請完整填寫所有欄位並上傳 PDF");
-            return;
-        }
-
-        try {
-            // 檢查錢包狀態
-            if (!userWalletAddress) {
-                throw new Error('請先載入錢包地址');
-            }
-
-            const createBtn = document.getElementById('createDaoBtn');
-            createBtn.innerHTML = '<div class="loading"></div> 創建中...';
-            createBtn.disabled = true;
-
-            const pdfHash = await uploadPDFtoIPFS(pdfFile);
-            if (!pdfHash) {
-                alert("PDF 上傳 IPFS 失敗");
-                createBtn.innerHTML = '<i class="fas fa-rocket"></i> 創建提案';
-                createBtn.disabled = false;
-                return;
-            }
-
-            const premiumWei = ethers.utils.parseEther(premiumInput);
-            
-            const tx = await factoryContract.createDAO(daoName, premiumWei, claimDesc, pdfHash);
-            await tx.wait();
-
-            createBtn.innerHTML = '<i class="fas fa-check"></i> 創建成功';
-            setTimeout(() => {
-                createBtn.innerHTML = '<i class="fas fa-rocket"></i> 創建 DAO';
-                createBtn.disabled = false;
-            }, 2000);
-
-            // Reset form
-            document.getElementById("daoName").value = '';
-            document.getElementById("monthlyPremium").value = '';
-            document.getElementById("claimDescription").value = '';
-            document.getElementById("pdfFile").value = '';
-            document.getElementById("fileLabel").textContent = '選擇 PDF 檔案';
-
-            await loadDAOs();
-
-        } catch (err) {
-            console.error(err);
-            alert("創建提案失敗：" + err.message);
-            document.getElementById('createDaoBtn').innerHTML = '<i class="fas fa-rocket"></i> 創建提案';
-            document.getElementById('createDaoBtn').disabled = false;
-        }
-    }
-
-    async function loadDAOs() {
-        const daoListDiv = document.getElementById("daoList");
-        daoListDiv.innerHTML = '<div class="status-message">載入中...</div>';
-        
-        try {
-            if (!factoryContract) {
-                throw new Error('合約未初始化，請先載入錢包地址');
-            }
-
-            const daos = await factoryContract.getDAOAddresses();
-            
-            if (daos.length === 0) {
-                daoListDiv.innerHTML = '<div class="status-message">尚未創建任何保險計畫</div>';
-                return;
-            }
-
-            daoListDiv.innerHTML = '';
-            
-            for (let addr of daos) {
-                const daoContract = new ethers.Contract(addr, [
-                    "function getDAOName() public view returns(string)"
-                ], provider);
-                
-                let daoName = "未知 DAO";
-                try {
-                    daoName = await daoContract.getDAOName();
-                } catch (err) {
-                    console.error("獲取 DAO 名稱失敗:", err);
-                }
-                
-                const div = document.createElement("div");
-                div.className = "dao-card";
-                div.innerHTML = `
-                    <h3><i class="fas fa-users"></i> ${daoName}</h3>
-                    <div class="dao-address">${addr}</div>
-                    <div class="dao-actions">
-                        <button class="btn btn-details" onclick="viewDAODetails('${addr}')">
-                            <i class="fas fa-eye"></i> 查看詳細資料
-                        </button>
-                    </div>
-                `;
-                daoListDiv.appendChild(div);
-            }
-        } catch (err) {
-            console.error("讀取 DAO 失敗", err);
-            daoListDiv.innerHTML = '<div class="status-message status-error">載入 DAO 列表失敗: ' + err.message + '</div>';
-        }
-    }
-
-    function viewDAODetails(daoAddress) {
-        window.location.href = `dao-details.html?address=${daoAddress}`;
-    }
-
-    // Event listeners
-    document.getElementById("createDaoBtn").addEventListener("click", createDAO);
-
     // 添加頁面可見性變化時的重新載入
     document.addEventListener('visibilitychange', function() {
         if (!document.hidden) {
-            // 頁面從後台切換到前台時，重新檢查錢包狀態
             console.log('頁面重新可見，檢查錢包狀態');
             loadWalletAddress();
         }

@@ -1113,9 +1113,13 @@ def vote_claim(dao_address):
         })
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+@app.route('/dao/create-dao')
+def create_dao():
+    return render_template('dao/create_dao.html')
 
-
-
+@app.route('/dao/view-daos')
+def view_daos():
+    return render_template('dao/view_daos.html')
 
 # app.py 或 routes.py
 # app.py 或 routes.py
@@ -1162,6 +1166,7 @@ def claims_success_cases():
     return render_template('claims/success_cases.html', 
                          cases=success_cases, 
                          stats=stats)
+
 
 #-----------------------
 # 啟動網站

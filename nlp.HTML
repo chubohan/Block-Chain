@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>保險詐騙風險評估</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      background-color: #1a1a2e;
+      color: #fff;
+      font-family: 'Noto Sans TC', sans-serif;
+      padding: 20px;
+    }
+    .container {
+      background: rgba(0,0,0,0.7);
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 800px;
+      margin: auto;
+    }
+    h2 {
+      color: #ffd369;
+    }
+    button {
+      background-color: #ffb347;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    fieldset {
+      margin-bottom: 20px;
+      border: 1px solid #555;
+      padding: 10px;
+      border-radius: 6px;
+    }
+    legend {
+      font-weight: bold;
+      color: #ffd369;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🛡️ 保險詐騙風險評估</h2>
+    <form id="quizForm"></form>
+    <button onclick="calculateScore()">提交評估</button>
+    <h3 id="result"></h3>
+    <canvas id="riskChart" width="400" height="300"></canvas>
+  </div>
+
+  <script>
+    const questionPool = [
+      // 每題包含構面分類 category: A~E
+      { question: "你是否曾經點擊過可疑保險連結？", category: "網安習慣", options: [
+        { text: "是", score: 10 },
+        { text: "不確定", score: 5 },
+        { text: "沒有", score: 0 }
+      ]},
+      { question: "是否使用相同密碼登入多個保險系統？", category: "網安習慣", options: [
+        { text: "常常", score: 10 },
+        { text: "偶爾", score: 5 },
+        { text: "不會", score: 0 }
+      ]},
+      { question: "是否與家人討論過保單代理安排？", category: "家庭協作", options: [
+        { text: "沒有", score: 10 },
+        { text: "提過但未定", score: 5 },
+        { text: "有明確安排", score: 0 }
+      ]},
+      { question: "你能分辨官方與詐騙來電差異嗎？", category: "資訊驗證能力", options: [
+        { text: "很難", score: 10 },
+        { text: "有時候可以", score: 5 },
+        { text: "可以", score: 0 }
+      ]},
+      { question: "你是否曾經被保險詐騙過？", category: "詐騙經驗", options: [
+        { text: "有", score: 10 },
+        { text: "差點被騙", score: 5 },
+        { text: "沒有", score: 0 }
+      ]},
+      { question: "接到電話說你中獎，請提供身份證字號，你會？", category: "警覺性", options: [
+        { text: "馬上提供", score: 10 },
+        { text: "考慮後提供", score: 5 },
+        { text: "拒絕並掛電話", score: 0 }
+      ]},
+      { question: "你是否知道如何查證保險公司客服電話真實性？", category: "資訊驗證能力", options: [
+        { text: "不知道", score: 10 },
+        { text: "查詢過一兩次", score: 5 },
+        { text: "知道如何查證", score: 0 }
+      ]},
+      { question: "收到不明簡訊說「保單即將失效」你會？", category: "警覺性", options: [
+        { text: "點連結查看", score: 10 },
+        { text: "截圖傳給朋友求證", score: 5 },
+        { text: "直接忽略或封鎖", score: 0 }
+      ]},
+      { question: "你是否會在公共 WiFi 下登入保險系統？", category: "網安習慣", options: [
+        { text: "會", score: 10 },
+        { text: "偶爾", score: 5 },
+        { text: "不會", score: 0 }
+      ]},
+      { question: "是否曾聽信陌生人轉帳處理保單？", category: "詐騙經驗", options: [
+        { text: "有", score: 10 },
+        { text: "差點信了", score: 5 },
+        { text: "從未", score: 0 }
+      ]},
+      // 你可繼續新增至 30 題
+    ];
+
+    // 亂數抽出 10 題
+    const selectedQuestions = questionPool.sort(() => 0.5 - Math.random()).slice(0, 10);
+    const form = document.getElementById("quizForm");
+
+    selectedQuestions.forEach((q, index) => {
+      const fieldset = document.createElement("fieldset");
+      const legend = document.createElement("legend");
+      legend.innerText = `${index + 1}. ${q.question}`;
+      fieldset.appendChild(legend);
+
+      q.options.forEach(opt => {
+        const label = document.createElement("label");
+        label.innerHTML = `<input type="radio" name="q${index}" value="${opt.score}" data-category="${q.category}"> ${opt.text}<br>`;
+        fieldset.appendChild(label);
+      });
+
+      form.appendChild(fieldset);
+    });
+
+    function calculateScore() {
+      const scores = {
+        '警覺性': 0,
+        '網安習慣': 0,
+        '家庭協作': 0,
+        '資訊驗證能力': 0,
+        '詐騙經驗': 0
+      };
+      let total = 0;
+
+      const selected = document.querySelectorAll("input[type='radio']:checked");
+      selected.forEach(input => {
+        const val = parseInt(input.value);
+        const cat = input.dataset.category;
+        scores[cat] += val;
+        total += val;
+      });
+
+      let level = "";
+      if (total >= 70) level = "❗ 高風險，請加強防詐警覺與查證行為。";
+      else if (total >= 40) level = "⚠️ 中風險，建議多補充資訊安全知識。";
+      else level = "✅ 低風險，請持續保持警覺與警慎。";
+
+      document.getElementById("result").innerHTML =
+        `總分：${total} / 100<br>${level}`;
+
+      // 雷達圖更新
+      const ctx = document.getElementById('riskChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels: Object.keys(scores),
+          datasets: [{
+            label: '風險構面得分',
+            data: Object.values(scores),
+            backgroundColor: 'rgba(255, 99, 132, 0.3)',
+            borderColor: '#ffb347',
+            pointBackgroundColor: '#fff'
+          }]
+        },
+        options: {
+          scales: {
+            r: {
+              suggestedMin: 0,
+              suggestedMax: 30,
+              pointLabels: {
+                color: '#fff'
+              },
+              grid: {
+                color: '#666'
+              },
+              angleLines: {
+                color: '#999'
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: {
+                color: '#fff'
+              }
+            }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
